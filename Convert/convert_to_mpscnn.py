@@ -228,7 +228,7 @@ def convert(src_path):
 	
 	    if layer.name not in concat_parent_dict.keys():
 	        layer.param_txt += '\n'.join(['MPSImageDescriptor *%s_id = [MPSImageDescriptor \
-	imageDescriptorWithChannelFormat:self.textureFormat' % show_name,
+imageDescriptorWithChannelFormat:self.textureFormat' % show_name,
 	                                      'width:%d' % layer.out_width,
 	                                      'height:%d' % layer.out_height,
 	                                      'featureChannels:%d];\n\n' % layer.out_channels])
@@ -254,7 +254,7 @@ def convert(src_path):
 	        param = layer.layer_param.convolution_param
 	
 	        layer.param_txt += '\n'.join(['SlimMPSCNNConvolution *%s_kernel = [[SlimMPSCNNConvolution alloc] \
-	initWithKernelWidth:%d' % (show_name, param.kernel_size[0]),
+initWithKernelWidth:%d' % (show_name, param.kernel_size[0]),
 	                                      'kernelHeight:%d' % param.kernel_size[0],
 	                                      'inputFeatureChannels:%d' % layer.in_channels,
 	                                      'outputFeatureChannels:%d' % layer.out_channels,
@@ -277,7 +277,7 @@ def convert(src_path):
 	                kernel_height = previous_layer.out_height
 	
 	        layer.param_txt += '\n'.join(['SlimMPSCNNFullyConnected *%s_kernel = [[SlimMPSCNNFullyConnected alloc] \
-	initWithKernelWidth:%d' % (show_name, kernel_width),
+initWithKernelWidth:%d' % (show_name, kernel_width),
 	                                      'kernelHeight:%d' % kernel_height,
 	                                      'inputFeatureChannels:%d' % layer.in_channels,
 	                                      'outputFeatureChannels:%d' % layer.out_channels,
@@ -291,7 +291,7 @@ def convert(src_path):
 	        param = layer.layer_param.pooling_param
 	
 	        layer.param_txt += '\n'.join(['SlimMPSCNNPoolingMax *%s_kernel = \
-	[[SlimMPSCNNPoolingMax alloc] initWithDevice:self.device' % show_name,
+[[SlimMPSCNNPoolingMax alloc] initWithDevice:self.device' % show_name,
 	                                      'kernelWidth:%d\nkernelHeight:%d'
 	                                      % ((param.kernel_size,) * 2),
 	                                      'strideInPixelsX:%d\nstrideInPixelsY:%d'
@@ -311,13 +311,13 @@ def convert(src_path):
 	                    break
 	
 	            layer.param_txt += '\n'.join(['SlimMPSCNNPoolingGlobalAverage *%s_kernel = \
-	[[SlimMPSCNNPoolingGlobalAverage alloc] initWithDevice:self.device' % show_name,
+[[SlimMPSCNNPoolingGlobalAverage alloc] initWithDevice:self.device' % show_name,
 	                                          'kernelWidth:%d' % (in_width % 2 and in_width or in_width+1),
 	                                          'kernelHeight:%d];\n\n' % (in_height % 2 and in_height or in_height + 1)])
 	
 	        else:
 	            layer.param_txt += '\n'.join(['MPSCNNPoolingAverage *%s_kernel = \
-	[[MPSCNNPoolingAverage alloc] initWithDevice:self.device' % show_name,
+[[MPSCNNPoolingAverage alloc] initWithDevice:self.device' % show_name,
 	                                          'kernelWidth:%d\nkernelHeight:%d' % ((param.kernel_size,) * 2),
 	                                          'strideInPixelsX:%d\nstrideInPixelsY:%d];\n\n'
 	                                          % ((param.stride,) * 2)])
@@ -326,7 +326,7 @@ def convert(src_path):
 	        param = layer.layer_param.lrn_param
 	
 	        layer.param_txt += '\n'.join(['SlimMPSCNNLocalResponseNormalization *%s_kernel = \
-	[[SlimMPSCNNLocalResponseNormalization alloc] initWithDevice:self.device' % show_name,
+[[SlimMPSCNNLocalResponseNormalization alloc] initWithDevice:self.device' % show_name,
 	                                      'localSize:%d' % param.local_size,
 	                                      'alpha:%f' % param.alpha,
 	                                      'beta:%f];\n\n' % param.beta])
@@ -336,7 +336,7 @@ def convert(src_path):
 	                                      % show_name,
 	                                     'imageDescriptor:%s_id];\n' % show_name,
 	                                     'MPSCNNSoftMax *%s_kernel = [[MPSCNNSoftMax alloc] \
-	initWithDevice:self.device];\n\n' % show_name])
+initWithDevice:self.device];\n\n' % show_name])
 	
 	    if layer.name in concat_parent_dict.keys():
 	        layer.param_txt += '\n'.join(['GeneralLayer *%s_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil'
@@ -361,14 +361,14 @@ def convert(src_path):
 	                as_bottom += 1
 	
 	        layer.param_txt += '\n'.join(['GeneralLayer *%s_layer = [[GeneralLayer alloc] \
-	initWithImageDescriptor:%s_id' % ((show_name,) * 2),
+initWithImageDescriptor:%s_id' % ((show_name,) * 2),
 	                                      'readCount:%d' % as_bottom,
 	                                      'outputImage:nil',
 	                                      'kernel:nil];\n\n'])
 	
 	    else:
 	        layer.param_txt += '\n'.join(['GeneralLayer *%s_layer = [[GeneralLayer alloc] \
-	initWithImageDescriptor:%s_id' % ((show_name,) * 2),
+initWithImageDescriptor:%s_id' % ((show_name,) * 2),
 	                                      'readCount:%d' % as_bottom,
 	                                      'outputImage:nil',
 	                                      'kernel:%s_kernel];\n\n' % show_name])
@@ -388,9 +388,9 @@ def convert(src_path):
 	        concat_txt += '%s_layer.concatLayer = %s_layer;\n' \
 	                      % (modify_name(layer.name), modify_name(concat_parent_dict[layer.name]))
 	
-	print concat_txt
-	print add_layer_txt
-	print encode_txt[:-1]
+	if concat_txt:print concat_txt
+	if add_layer_txt:print add_layer_txt
+	if encode_txt:print encode_txt[:-1]
 	print '}'
 	
 	
