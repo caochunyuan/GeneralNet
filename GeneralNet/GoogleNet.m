@@ -1152,19 +1152,19 @@ static const NSString *labels[] = {
                                                                                         height:112
                                                                                featureChannels:64];
     
-    SlimMPSCNNConvolution *conv1_7x7_s2_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:7
-                                                                                        kernelHeight:7
-                                                                                inputFeatureChannels:3
-                                                                               outputFeatureChannels:64
-                                                                                              neuron:relu
-                                                                                              device:self.device
-                                                                                             weights:[self weights_conv1_7x7_s2]
-                                                                                                bias:[self bias_conv1_7x7_s2]
-                                                                                             willPad:YES
-                                                                                             strideX:2
-                                                                                             strideY:2
-                                                                     destinationFeatureChannelOffset:0
-                                                                                               group:1];
+    SlimMPSCNNConvolution *conv1_7x7_s2_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:7
+                                                                                       kernelHeight:7
+                                                                               inputFeatureChannels:3
+                                                                              outputFeatureChannels:64
+                                                                                             neuron:relu
+                                                                                             device:self.device
+                                                                                            weights:[self weights_conv1_7x7_s2]
+                                                                                               bias:[self bias_conv1_7x7_s2]
+                                                                                            willPad:YES
+                                                                                            strideX:2
+                                                                                            strideY:2
+                                                                    destinationFeatureChannelOffset:0
+                                                                                              group:1];
     
     GeneralLayer *conv1_7x7_s2_layer = [[GeneralLayer alloc] initWithImageDescriptor:conv1_7x7_s2_id
                                                                            readCount:1
@@ -1195,8 +1195,8 @@ static const NSString *labels[] = {
     
     SlimMPSCNNLocalResponseNormalization *pool1_norm1_kernel = [[SlimMPSCNNLocalResponseNormalization alloc] initWithDevice:self.device
                                                                                                                   localSize:5
-                                                                                                                      alpha:0.0001
-                                                                                                                       beta:0.75];
+                                                                                                                      alpha:0.000100
+                                                                                                                       beta:0.750000];
     
     GeneralLayer *pool1_norm1_layer = [[GeneralLayer alloc] initWithImageDescriptor:pool1_norm1_id
                                                                           readCount:1
@@ -1208,19 +1208,19 @@ static const NSString *labels[] = {
                                                                                             height:56
                                                                                    featureChannels:64];
     
-    SlimMPSCNNConvolution *conv2_3x3_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:64
-                                                                                   outputFeatureChannels:64
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_conv2_3x3_reduce]
-                                                                                                    bias:[self bias_conv2_3x3_reduce]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *conv2_3x3_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                           kernelHeight:1
+                                                                                   inputFeatureChannels:64
+                                                                                  outputFeatureChannels:64
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_conv2_3x3_reduce]
+                                                                                                   bias:[self bias_conv2_3x3_reduce]
+                                                                                                willPad:NO
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:0
+                                                                                                  group:1];
     
     GeneralLayer *conv2_3x3_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:conv2_3x3_reduce_id
                                                                                readCount:1
@@ -1232,19 +1232,19 @@ static const NSString *labels[] = {
                                                                                      height:56
                                                                             featureChannels:192];
     
-    SlimMPSCNNConvolution *conv2_3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                     kernelHeight:3
-                                                                             inputFeatureChannels:64
-                                                                            outputFeatureChannels:192
-                                                                                           neuron:relu
-                                                                                           device:self.device
-                                                                                          weights:[self weights_conv2_3x3]
-                                                                                             bias:[self bias_conv2_3x3]
-                                                                                          willPad:YES
-                                                                                          strideX:1
-                                                                                          strideY:1
-                                                                  destinationFeatureChannelOffset:0
-                                                                                            group:1];
+    SlimMPSCNNConvolution *conv2_3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                    kernelHeight:3
+                                                                            inputFeatureChannels:64
+                                                                           outputFeatureChannels:192
+                                                                                          neuron:relu
+                                                                                          device:self.device
+                                                                                         weights:[self weights_conv2_3x3]
+                                                                                            bias:[self bias_conv2_3x3]
+                                                                                         willPad:YES
+                                                                                         strideX:1
+                                                                                         strideY:1
+                                                                 destinationFeatureChannelOffset:0
+                                                                                           group:1];
     
     GeneralLayer *conv2_3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:conv2_3x3_id
                                                                         readCount:1
@@ -1258,8 +1258,8 @@ static const NSString *labels[] = {
     
     SlimMPSCNNLocalResponseNormalization *conv2_norm2_kernel = [[SlimMPSCNNLocalResponseNormalization alloc] initWithDevice:self.device
                                                                                                                   localSize:5
-                                                                                                                      alpha:0.0001
-                                                                                                                       beta:0.75];
+                                                                                                                      alpha:0.000100
+                                                                                                                       beta:0.750000];
     
     GeneralLayer *conv2_norm2_layer = [[GeneralLayer alloc] initWithImageDescriptor:conv2_norm2_id
                                                                           readCount:1
@@ -1283,19 +1283,19 @@ static const NSString *labels[] = {
                                                                          outputImage:nil
                                                                               kernel:pool2_3x3_s2_kernel];
     
-    SlimMPSCNNConvolution *inception_3a_1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:192
-                                                                                   outputFeatureChannels:64
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_3a_1x1]
-                                                                                                    bias:[self bias_inception_3a_1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_3a_1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                           kernelHeight:1
+                                                                                   inputFeatureChannels:192
+                                                                                  outputFeatureChannels:64
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_3a_1x1]
+                                                                                                   bias:[self bias_inception_3a_1x1]
+                                                                                                willPad:NO
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:0
+                                                                                                  group:1];
     
     GeneralLayer *inception_3a_1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -1307,38 +1307,38 @@ static const NSString *labels[] = {
                                                                                                    height:28
                                                                                           featureChannels:96];
     
-    SlimMPSCNNConvolution *inception_3a_3x3_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:192
-                                                                                          outputFeatureChannels:96
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_3a_3x3_reduce]
-                                                                                                           bias:[self bias_inception_3a_3x3_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_3a_3x3_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:192
+                                                                                         outputFeatureChannels:96
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_3a_3x3_reduce]
+                                                                                                          bias:[self bias_inception_3a_3x3_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_3a_3x3_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_3a_3x3_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_3a_3x3_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_3a_3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                            kernelHeight:3
-                                                                                    inputFeatureChannels:96
-                                                                                   outputFeatureChannels:128
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_3a_3x3]
-                                                                                                    bias:[self bias_inception_3a_3x3]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:64
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_3a_3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                           kernelHeight:3
+                                                                                   inputFeatureChannels:96
+                                                                                  outputFeatureChannels:128
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_3a_3x3]
+                                                                                                   bias:[self bias_inception_3a_3x3]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:64
+                                                                                                  group:1];
     
     GeneralLayer *inception_3a_3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -1350,38 +1350,38 @@ static const NSString *labels[] = {
                                                                                                    height:28
                                                                                           featureChannels:16];
     
-    SlimMPSCNNConvolution *inception_3a_5x5_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:192
-                                                                                          outputFeatureChannels:16
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_3a_5x5_reduce]
-                                                                                                           bias:[self bias_inception_3a_5x5_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_3a_5x5_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:192
+                                                                                         outputFeatureChannels:16
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_3a_5x5_reduce]
+                                                                                                          bias:[self bias_inception_3a_5x5_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_3a_5x5_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_3a_5x5_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_3a_5x5_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_3a_5x5_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
-                                                                                            kernelHeight:5
-                                                                                    inputFeatureChannels:16
-                                                                                   outputFeatureChannels:32
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_3a_5x5]
-                                                                                                    bias:[self bias_inception_3a_5x5]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:192
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_3a_5x5_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
+                                                                                           kernelHeight:5
+                                                                                   inputFeatureChannels:16
+                                                                                  outputFeatureChannels:32
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_3a_5x5]
+                                                                                                   bias:[self bias_inception_3a_5x5]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:192
+                                                                                                  group:1];
     
     GeneralLayer *inception_3a_5x5_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -1405,19 +1405,19 @@ static const NSString *labels[] = {
                                                                               outputImage:nil
                                                                                    kernel:inception_3a_pool_kernel];
     
-    SlimMPSCNNConvolution *inception_3a_pool_proj_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                  kernelHeight:1
-                                                                                          inputFeatureChannels:192
-                                                                                         outputFeatureChannels:32
-                                                                                                        neuron:relu
-                                                                                                        device:self.device
-                                                                                                       weights:[self weights_inception_3a_pool_proj]
-                                                                                                          bias:[self bias_inception_3a_pool_proj]
-                                                                                                       willPad:NO
-                                                                                                       strideX:1
-                                                                                                       strideY:1
-                                                                               destinationFeatureChannelOffset:224
-                                                                                                         group:1];
+    SlimMPSCNNConvolution *inception_3a_pool_proj_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                 kernelHeight:1
+                                                                                         inputFeatureChannels:192
+                                                                                        outputFeatureChannels:32
+                                                                                                       neuron:relu
+                                                                                                       device:self.device
+                                                                                                      weights:[self weights_inception_3a_pool_proj]
+                                                                                                         bias:[self bias_inception_3a_pool_proj]
+                                                                                                      willPad:NO
+                                                                                                      strideX:1
+                                                                                                      strideY:1
+                                                                              destinationFeatureChannelOffset:224
+                                                                                                        group:1];
     
     GeneralLayer *inception_3a_pool_proj_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                      readCount:0
@@ -1434,19 +1434,19 @@ static const NSString *labels[] = {
                                                                                 outputImage:nil
                                                                                      kernel:nil];
     
-    SlimMPSCNNConvolution *inception_3b_1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:256
-                                                                                   outputFeatureChannels:128
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_3b_1x1]
-                                                                                                    bias:[self bias_inception_3b_1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_3b_1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                           kernelHeight:1
+                                                                                   inputFeatureChannels:256
+                                                                                  outputFeatureChannels:128
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_3b_1x1]
+                                                                                                   bias:[self bias_inception_3b_1x1]
+                                                                                                willPad:NO
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:0
+                                                                                                  group:1];
     
     GeneralLayer *inception_3b_1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -1458,38 +1458,38 @@ static const NSString *labels[] = {
                                                                                                    height:28
                                                                                           featureChannels:128];
     
-    SlimMPSCNNConvolution *inception_3b_3x3_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:256
-                                                                                          outputFeatureChannels:128
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_3b_3x3_reduce]
-                                                                                                           bias:[self bias_inception_3b_3x3_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_3b_3x3_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:256
+                                                                                         outputFeatureChannels:128
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_3b_3x3_reduce]
+                                                                                                          bias:[self bias_inception_3b_3x3_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_3b_3x3_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_3b_3x3_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_3b_3x3_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_3b_3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                            kernelHeight:3
-                                                                                    inputFeatureChannels:128
-                                                                                   outputFeatureChannels:192
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_3b_3x3]
-                                                                                                    bias:[self bias_inception_3b_3x3]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:128
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_3b_3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                           kernelHeight:3
+                                                                                   inputFeatureChannels:128
+                                                                                  outputFeatureChannels:192
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_3b_3x3]
+                                                                                                   bias:[self bias_inception_3b_3x3]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:128
+                                                                                                  group:1];
     
     GeneralLayer *inception_3b_3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -1501,38 +1501,38 @@ static const NSString *labels[] = {
                                                                                                    height:28
                                                                                           featureChannels:32];
     
-    SlimMPSCNNConvolution *inception_3b_5x5_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:256
-                                                                                          outputFeatureChannels:32
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_3b_5x5_reduce]
-                                                                                                           bias:[self bias_inception_3b_5x5_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_3b_5x5_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:256
+                                                                                         outputFeatureChannels:32
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_3b_5x5_reduce]
+                                                                                                          bias:[self bias_inception_3b_5x5_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_3b_5x5_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_3b_5x5_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_3b_5x5_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_3b_5x5_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
-                                                                                            kernelHeight:5
-                                                                                    inputFeatureChannels:32
-                                                                                   outputFeatureChannels:96
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_3b_5x5]
-                                                                                                    bias:[self bias_inception_3b_5x5]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:320
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_3b_5x5_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
+                                                                                           kernelHeight:5
+                                                                                   inputFeatureChannels:32
+                                                                                  outputFeatureChannels:96
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_3b_5x5]
+                                                                                                   bias:[self bias_inception_3b_5x5]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:320
+                                                                                                  group:1];
     
     GeneralLayer *inception_3b_5x5_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -1556,19 +1556,19 @@ static const NSString *labels[] = {
                                                                               outputImage:nil
                                                                                    kernel:inception_3b_pool_kernel];
     
-    SlimMPSCNNConvolution *inception_3b_pool_proj_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                  kernelHeight:1
-                                                                                          inputFeatureChannels:256
-                                                                                         outputFeatureChannels:64
-                                                                                                        neuron:relu
-                                                                                                        device:self.device
-                                                                                                       weights:[self weights_inception_3b_pool_proj]
-                                                                                                          bias:[self bias_inception_3b_pool_proj]
-                                                                                                       willPad:NO
-                                                                                                       strideX:1
-                                                                                                       strideY:1
-                                                                               destinationFeatureChannelOffset:416
-                                                                                                         group:1];
+    SlimMPSCNNConvolution *inception_3b_pool_proj_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                 kernelHeight:1
+                                                                                         inputFeatureChannels:256
+                                                                                        outputFeatureChannels:64
+                                                                                                       neuron:relu
+                                                                                                       device:self.device
+                                                                                                      weights:[self weights_inception_3b_pool_proj]
+                                                                                                         bias:[self bias_inception_3b_pool_proj]
+                                                                                                      willPad:NO
+                                                                                                      strideX:1
+                                                                                                      strideY:1
+                                                                              destinationFeatureChannelOffset:416
+                                                                                                        group:1];
     
     GeneralLayer *inception_3b_pool_proj_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                      readCount:0
@@ -1602,19 +1602,19 @@ static const NSString *labels[] = {
                                                                          outputImage:nil
                                                                               kernel:pool3_3x3_s2_kernel];
     
-    SlimMPSCNNConvolution *inception_4a_1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:480
-                                                                                   outputFeatureChannels:192
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_4a_1x1]
-                                                                                                    bias:[self bias_inception_4a_1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_4a_1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                           kernelHeight:1
+                                                                                   inputFeatureChannels:480
+                                                                                  outputFeatureChannels:192
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_4a_1x1]
+                                                                                                   bias:[self bias_inception_4a_1x1]
+                                                                                                willPad:NO
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:0
+                                                                                                  group:1];
     
     GeneralLayer *inception_4a_1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -1626,38 +1626,38 @@ static const NSString *labels[] = {
                                                                                                    height:14
                                                                                           featureChannels:96];
     
-    SlimMPSCNNConvolution *inception_4a_3x3_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:480
-                                                                                          outputFeatureChannels:96
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_4a_3x3_reduce]
-                                                                                                           bias:[self bias_inception_4a_3x3_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_4a_3x3_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:480
+                                                                                         outputFeatureChannels:96
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_4a_3x3_reduce]
+                                                                                                          bias:[self bias_inception_4a_3x3_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_4a_3x3_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_4a_3x3_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_4a_3x3_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_4a_3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                            kernelHeight:3
-                                                                                    inputFeatureChannels:96
-                                                                                   outputFeatureChannels:208
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_4a_3x3]
-                                                                                                    bias:[self bias_inception_4a_3x3]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:192
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_4a_3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                           kernelHeight:3
+                                                                                   inputFeatureChannels:96
+                                                                                  outputFeatureChannels:208
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_4a_3x3]
+                                                                                                   bias:[self bias_inception_4a_3x3]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:192
+                                                                                                  group:1];
     
     GeneralLayer *inception_4a_3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -1669,38 +1669,38 @@ static const NSString *labels[] = {
                                                                                                    height:14
                                                                                           featureChannels:16];
     
-    SlimMPSCNNConvolution *inception_4a_5x5_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:480
-                                                                                          outputFeatureChannels:16
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_4a_5x5_reduce]
-                                                                                                           bias:[self bias_inception_4a_5x5_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_4a_5x5_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:480
+                                                                                         outputFeatureChannels:16
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_4a_5x5_reduce]
+                                                                                                          bias:[self bias_inception_4a_5x5_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_4a_5x5_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_4a_5x5_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_4a_5x5_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_4a_5x5_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
-                                                                                            kernelHeight:5
-                                                                                    inputFeatureChannels:16
-                                                                                   outputFeatureChannels:48
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_4a_5x5]
-                                                                                                    bias:[self bias_inception_4a_5x5]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:400
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_4a_5x5_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
+                                                                                           kernelHeight:5
+                                                                                   inputFeatureChannels:16
+                                                                                  outputFeatureChannels:48
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_4a_5x5]
+                                                                                                   bias:[self bias_inception_4a_5x5]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:400
+                                                                                                  group:1];
     
     GeneralLayer *inception_4a_5x5_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -1724,19 +1724,19 @@ static const NSString *labels[] = {
                                                                               outputImage:nil
                                                                                    kernel:inception_4a_pool_kernel];
     
-    SlimMPSCNNConvolution *inception_4a_pool_proj_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                  kernelHeight:1
-                                                                                          inputFeatureChannels:480
-                                                                                         outputFeatureChannels:64
-                                                                                                        neuron:relu
-                                                                                                        device:self.device
-                                                                                                       weights:[self weights_inception_4a_pool_proj]
-                                                                                                          bias:[self bias_inception_4a_pool_proj]
-                                                                                                       willPad:NO
-                                                                                                       strideX:1
-                                                                                                       strideY:1
-                                                                               destinationFeatureChannelOffset:448
-                                                                                                         group:1];
+    SlimMPSCNNConvolution *inception_4a_pool_proj_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                 kernelHeight:1
+                                                                                         inputFeatureChannels:480
+                                                                                        outputFeatureChannels:64
+                                                                                                       neuron:relu
+                                                                                                       device:self.device
+                                                                                                      weights:[self weights_inception_4a_pool_proj]
+                                                                                                         bias:[self bias_inception_4a_pool_proj]
+                                                                                                      willPad:NO
+                                                                                                      strideX:1
+                                                                                                      strideY:1
+                                                                              destinationFeatureChannelOffset:448
+                                                                                                        group:1];
     
     GeneralLayer *inception_4a_pool_proj_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                      readCount:0
@@ -1753,19 +1753,19 @@ static const NSString *labels[] = {
                                                                                 outputImage:nil
                                                                                      kernel:nil];
     
-    SlimMPSCNNConvolution *inception_4b_1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:512
-                                                                                   outputFeatureChannels:160
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_4b_1x1]
-                                                                                                    bias:[self bias_inception_4b_1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_4b_1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                           kernelHeight:1
+                                                                                   inputFeatureChannels:512
+                                                                                  outputFeatureChannels:160
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_4b_1x1]
+                                                                                                   bias:[self bias_inception_4b_1x1]
+                                                                                                willPad:NO
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:0
+                                                                                                  group:1];
     
     GeneralLayer *inception_4b_1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -1777,38 +1777,38 @@ static const NSString *labels[] = {
                                                                                                    height:14
                                                                                           featureChannels:112];
     
-    SlimMPSCNNConvolution *inception_4b_3x3_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:512
-                                                                                          outputFeatureChannels:112
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_4b_3x3_reduce]
-                                                                                                           bias:[self bias_inception_4b_3x3_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_4b_3x3_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:512
+                                                                                         outputFeatureChannels:112
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_4b_3x3_reduce]
+                                                                                                          bias:[self bias_inception_4b_3x3_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_4b_3x3_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_4b_3x3_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_4b_3x3_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_4b_3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                            kernelHeight:3
-                                                                                    inputFeatureChannels:112
-                                                                                   outputFeatureChannels:224
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_4b_3x3]
-                                                                                                    bias:[self bias_inception_4b_3x3]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:160
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_4b_3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                           kernelHeight:3
+                                                                                   inputFeatureChannels:112
+                                                                                  outputFeatureChannels:224
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_4b_3x3]
+                                                                                                   bias:[self bias_inception_4b_3x3]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:160
+                                                                                                  group:1];
     
     GeneralLayer *inception_4b_3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -1820,38 +1820,38 @@ static const NSString *labels[] = {
                                                                                                    height:14
                                                                                           featureChannels:24];
     
-    SlimMPSCNNConvolution *inception_4b_5x5_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:512
-                                                                                          outputFeatureChannels:24
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_4b_5x5_reduce]
-                                                                                                           bias:[self bias_inception_4b_5x5_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_4b_5x5_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:512
+                                                                                         outputFeatureChannels:24
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_4b_5x5_reduce]
+                                                                                                          bias:[self bias_inception_4b_5x5_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_4b_5x5_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_4b_5x5_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_4b_5x5_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_4b_5x5_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
-                                                                                            kernelHeight:5
-                                                                                    inputFeatureChannels:24
-                                                                                   outputFeatureChannels:64
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_4b_5x5]
-                                                                                                    bias:[self bias_inception_4b_5x5]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:384
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_4b_5x5_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
+                                                                                           kernelHeight:5
+                                                                                   inputFeatureChannels:24
+                                                                                  outputFeatureChannels:64
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_4b_5x5]
+                                                                                                   bias:[self bias_inception_4b_5x5]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:384
+                                                                                                  group:1];
     
     GeneralLayer *inception_4b_5x5_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -1875,19 +1875,19 @@ static const NSString *labels[] = {
                                                                               outputImage:nil
                                                                                    kernel:inception_4b_pool_kernel];
     
-    SlimMPSCNNConvolution *inception_4b_pool_proj_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                  kernelHeight:1
-                                                                                          inputFeatureChannels:512
-                                                                                         outputFeatureChannels:64
-                                                                                                        neuron:relu
-                                                                                                        device:self.device
-                                                                                                       weights:[self weights_inception_4b_pool_proj]
-                                                                                                          bias:[self bias_inception_4b_pool_proj]
-                                                                                                       willPad:NO
-                                                                                                       strideX:1
-                                                                                                       strideY:1
-                                                                               destinationFeatureChannelOffset:448
-                                                                                                         group:1];
+    SlimMPSCNNConvolution *inception_4b_pool_proj_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                 kernelHeight:1
+                                                                                         inputFeatureChannels:512
+                                                                                        outputFeatureChannels:64
+                                                                                                       neuron:relu
+                                                                                                       device:self.device
+                                                                                                      weights:[self weights_inception_4b_pool_proj]
+                                                                                                         bias:[self bias_inception_4b_pool_proj]
+                                                                                                      willPad:NO
+                                                                                                      strideX:1
+                                                                                                      strideY:1
+                                                                              destinationFeatureChannelOffset:448
+                                                                                                        group:1];
     
     GeneralLayer *inception_4b_pool_proj_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                      readCount:0
@@ -1904,19 +1904,19 @@ static const NSString *labels[] = {
                                                                                 outputImage:nil
                                                                                      kernel:nil];
     
-    SlimMPSCNNConvolution *inception_4c_1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:512
-                                                                                   outputFeatureChannels:128
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_4c_1x1]
-                                                                                                    bias:[self bias_inception_4c_1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_4c_1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                           kernelHeight:1
+                                                                                   inputFeatureChannels:512
+                                                                                  outputFeatureChannels:128
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_4c_1x1]
+                                                                                                   bias:[self bias_inception_4c_1x1]
+                                                                                                willPad:NO
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:0
+                                                                                                  group:1];
     
     GeneralLayer *inception_4c_1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -1928,38 +1928,38 @@ static const NSString *labels[] = {
                                                                                                    height:14
                                                                                           featureChannels:128];
     
-    SlimMPSCNNConvolution *inception_4c_3x3_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:512
-                                                                                          outputFeatureChannels:128
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_4c_3x3_reduce]
-                                                                                                           bias:[self bias_inception_4c_3x3_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_4c_3x3_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:512
+                                                                                         outputFeatureChannels:128
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_4c_3x3_reduce]
+                                                                                                          bias:[self bias_inception_4c_3x3_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_4c_3x3_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_4c_3x3_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_4c_3x3_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_4c_3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                            kernelHeight:3
-                                                                                    inputFeatureChannels:128
-                                                                                   outputFeatureChannels:256
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_4c_3x3]
-                                                                                                    bias:[self bias_inception_4c_3x3]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:128
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_4c_3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                           kernelHeight:3
+                                                                                   inputFeatureChannels:128
+                                                                                  outputFeatureChannels:256
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_4c_3x3]
+                                                                                                   bias:[self bias_inception_4c_3x3]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:128
+                                                                                                  group:1];
     
     GeneralLayer *inception_4c_3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -1971,38 +1971,38 @@ static const NSString *labels[] = {
                                                                                                    height:14
                                                                                           featureChannels:24];
     
-    SlimMPSCNNConvolution *inception_4c_5x5_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:512
-                                                                                          outputFeatureChannels:24
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_4c_5x5_reduce]
-                                                                                                           bias:[self bias_inception_4c_5x5_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_4c_5x5_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:512
+                                                                                         outputFeatureChannels:24
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_4c_5x5_reduce]
+                                                                                                          bias:[self bias_inception_4c_5x5_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_4c_5x5_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_4c_5x5_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_4c_5x5_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_4c_5x5_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
-                                                                                            kernelHeight:5
-                                                                                    inputFeatureChannels:24
-                                                                                   outputFeatureChannels:64
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_4c_5x5]
-                                                                                                    bias:[self bias_inception_4c_5x5]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:384
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_4c_5x5_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
+                                                                                           kernelHeight:5
+                                                                                   inputFeatureChannels:24
+                                                                                  outputFeatureChannels:64
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_4c_5x5]
+                                                                                                   bias:[self bias_inception_4c_5x5]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:384
+                                                                                                  group:1];
     
     GeneralLayer *inception_4c_5x5_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -2026,19 +2026,19 @@ static const NSString *labels[] = {
                                                                               outputImage:nil
                                                                                    kernel:inception_4c_pool_kernel];
     
-    SlimMPSCNNConvolution *inception_4c_pool_proj_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                  kernelHeight:1
-                                                                                          inputFeatureChannels:512
-                                                                                         outputFeatureChannels:64
-                                                                                                        neuron:relu
-                                                                                                        device:self.device
-                                                                                                       weights:[self weights_inception_4c_pool_proj]
-                                                                                                          bias:[self bias_inception_4c_pool_proj]
-                                                                                                       willPad:NO
-                                                                                                       strideX:1
-                                                                                                       strideY:1
-                                                                               destinationFeatureChannelOffset:448
-                                                                                                         group:1];
+    SlimMPSCNNConvolution *inception_4c_pool_proj_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                 kernelHeight:1
+                                                                                         inputFeatureChannels:512
+                                                                                        outputFeatureChannels:64
+                                                                                                       neuron:relu
+                                                                                                       device:self.device
+                                                                                                      weights:[self weights_inception_4c_pool_proj]
+                                                                                                         bias:[self bias_inception_4c_pool_proj]
+                                                                                                      willPad:NO
+                                                                                                      strideX:1
+                                                                                                      strideY:1
+                                                                              destinationFeatureChannelOffset:448
+                                                                                                        group:1];
     
     GeneralLayer *inception_4c_pool_proj_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                      readCount:0
@@ -2055,19 +2055,19 @@ static const NSString *labels[] = {
                                                                                 outputImage:nil
                                                                                      kernel:nil];
     
-    SlimMPSCNNConvolution *inception_4d_1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:512
-                                                                                   outputFeatureChannels:112
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_4d_1x1]
-                                                                                                    bias:[self bias_inception_4d_1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_4d_1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                           kernelHeight:1
+                                                                                   inputFeatureChannels:512
+                                                                                  outputFeatureChannels:112
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_4d_1x1]
+                                                                                                   bias:[self bias_inception_4d_1x1]
+                                                                                                willPad:NO
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:0
+                                                                                                  group:1];
     
     GeneralLayer *inception_4d_1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -2079,38 +2079,38 @@ static const NSString *labels[] = {
                                                                                                    height:14
                                                                                           featureChannels:144];
     
-    SlimMPSCNNConvolution *inception_4d_3x3_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:512
-                                                                                          outputFeatureChannels:144
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_4d_3x3_reduce]
-                                                                                                           bias:[self bias_inception_4d_3x3_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_4d_3x3_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:512
+                                                                                         outputFeatureChannels:144
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_4d_3x3_reduce]
+                                                                                                          bias:[self bias_inception_4d_3x3_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_4d_3x3_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_4d_3x3_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_4d_3x3_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_4d_3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                            kernelHeight:3
-                                                                                    inputFeatureChannels:144
-                                                                                   outputFeatureChannels:288
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_4d_3x3]
-                                                                                                    bias:[self bias_inception_4d_3x3]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:112
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_4d_3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                           kernelHeight:3
+                                                                                   inputFeatureChannels:144
+                                                                                  outputFeatureChannels:288
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_4d_3x3]
+                                                                                                   bias:[self bias_inception_4d_3x3]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:112
+                                                                                                  group:1];
     
     GeneralLayer *inception_4d_3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -2122,38 +2122,38 @@ static const NSString *labels[] = {
                                                                                                    height:14
                                                                                           featureChannels:32];
     
-    SlimMPSCNNConvolution *inception_4d_5x5_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:512
-                                                                                          outputFeatureChannels:32
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_4d_5x5_reduce]
-                                                                                                           bias:[self bias_inception_4d_5x5_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_4d_5x5_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:512
+                                                                                         outputFeatureChannels:32
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_4d_5x5_reduce]
+                                                                                                          bias:[self bias_inception_4d_5x5_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_4d_5x5_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_4d_5x5_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_4d_5x5_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_4d_5x5_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
-                                                                                            kernelHeight:5
-                                                                                    inputFeatureChannels:32
-                                                                                   outputFeatureChannels:64
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_4d_5x5]
-                                                                                                    bias:[self bias_inception_4d_5x5]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:400
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_4d_5x5_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
+                                                                                           kernelHeight:5
+                                                                                   inputFeatureChannels:32
+                                                                                  outputFeatureChannels:64
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_4d_5x5]
+                                                                                                   bias:[self bias_inception_4d_5x5]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:400
+                                                                                                  group:1];
     
     GeneralLayer *inception_4d_5x5_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -2177,19 +2177,19 @@ static const NSString *labels[] = {
                                                                               outputImage:nil
                                                                                    kernel:inception_4d_pool_kernel];
     
-    SlimMPSCNNConvolution *inception_4d_pool_proj_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                  kernelHeight:1
-                                                                                          inputFeatureChannels:512
-                                                                                         outputFeatureChannels:64
-                                                                                                        neuron:relu
-                                                                                                        device:self.device
-                                                                                                       weights:[self weights_inception_4d_pool_proj]
-                                                                                                          bias:[self bias_inception_4d_pool_proj]
-                                                                                                       willPad:NO
-                                                                                                       strideX:1
-                                                                                                       strideY:1
-                                                                               destinationFeatureChannelOffset:464
-                                                                                                         group:1];
+    SlimMPSCNNConvolution *inception_4d_pool_proj_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                 kernelHeight:1
+                                                                                         inputFeatureChannels:512
+                                                                                        outputFeatureChannels:64
+                                                                                                       neuron:relu
+                                                                                                       device:self.device
+                                                                                                      weights:[self weights_inception_4d_pool_proj]
+                                                                                                         bias:[self bias_inception_4d_pool_proj]
+                                                                                                      willPad:NO
+                                                                                                      strideX:1
+                                                                                                      strideY:1
+                                                                              destinationFeatureChannelOffset:464
+                                                                                                        group:1];
     
     GeneralLayer *inception_4d_pool_proj_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                      readCount:0
@@ -2206,19 +2206,19 @@ static const NSString *labels[] = {
                                                                                 outputImage:nil
                                                                                      kernel:nil];
     
-    SlimMPSCNNConvolution *inception_4e_1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:528
-                                                                                   outputFeatureChannels:256
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_4e_1x1]
-                                                                                                    bias:[self bias_inception_4e_1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_4e_1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                           kernelHeight:1
+                                                                                   inputFeatureChannels:528
+                                                                                  outputFeatureChannels:256
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_4e_1x1]
+                                                                                                   bias:[self bias_inception_4e_1x1]
+                                                                                                willPad:NO
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:0
+                                                                                                  group:1];
     
     GeneralLayer *inception_4e_1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -2230,38 +2230,38 @@ static const NSString *labels[] = {
                                                                                                    height:14
                                                                                           featureChannels:160];
     
-    SlimMPSCNNConvolution *inception_4e_3x3_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:528
-                                                                                          outputFeatureChannels:160
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_4e_3x3_reduce]
-                                                                                                           bias:[self bias_inception_4e_3x3_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_4e_3x3_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:528
+                                                                                         outputFeatureChannels:160
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_4e_3x3_reduce]
+                                                                                                          bias:[self bias_inception_4e_3x3_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_4e_3x3_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_4e_3x3_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_4e_3x3_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_4e_3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                            kernelHeight:3
-                                                                                    inputFeatureChannels:160
-                                                                                   outputFeatureChannels:320
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_4e_3x3]
-                                                                                                    bias:[self bias_inception_4e_3x3]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:256
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_4e_3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                           kernelHeight:3
+                                                                                   inputFeatureChannels:160
+                                                                                  outputFeatureChannels:320
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_4e_3x3]
+                                                                                                   bias:[self bias_inception_4e_3x3]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:256
+                                                                                                  group:1];
     
     GeneralLayer *inception_4e_3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -2273,38 +2273,38 @@ static const NSString *labels[] = {
                                                                                                    height:14
                                                                                           featureChannels:32];
     
-    SlimMPSCNNConvolution *inception_4e_5x5_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:528
-                                                                                          outputFeatureChannels:32
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_4e_5x5_reduce]
-                                                                                                           bias:[self bias_inception_4e_5x5_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_4e_5x5_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:528
+                                                                                         outputFeatureChannels:32
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_4e_5x5_reduce]
+                                                                                                          bias:[self bias_inception_4e_5x5_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_4e_5x5_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_4e_5x5_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_4e_5x5_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_4e_5x5_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
-                                                                                            kernelHeight:5
-                                                                                    inputFeatureChannels:32
-                                                                                   outputFeatureChannels:128
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_4e_5x5]
-                                                                                                    bias:[self bias_inception_4e_5x5]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:576
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_4e_5x5_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
+                                                                                           kernelHeight:5
+                                                                                   inputFeatureChannels:32
+                                                                                  outputFeatureChannels:128
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_4e_5x5]
+                                                                                                   bias:[self bias_inception_4e_5x5]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:576
+                                                                                                  group:1];
     
     GeneralLayer *inception_4e_5x5_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -2328,19 +2328,19 @@ static const NSString *labels[] = {
                                                                               outputImage:nil
                                                                                    kernel:inception_4e_pool_kernel];
     
-    SlimMPSCNNConvolution *inception_4e_pool_proj_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                  kernelHeight:1
-                                                                                          inputFeatureChannels:528
-                                                                                         outputFeatureChannels:128
-                                                                                                        neuron:relu
-                                                                                                        device:self.device
-                                                                                                       weights:[self weights_inception_4e_pool_proj]
-                                                                                                          bias:[self bias_inception_4e_pool_proj]
-                                                                                                       willPad:NO
-                                                                                                       strideX:1
-                                                                                                       strideY:1
-                                                                               destinationFeatureChannelOffset:704
-                                                                                                         group:1];
+    SlimMPSCNNConvolution *inception_4e_pool_proj_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                 kernelHeight:1
+                                                                                         inputFeatureChannels:528
+                                                                                        outputFeatureChannels:128
+                                                                                                       neuron:relu
+                                                                                                       device:self.device
+                                                                                                      weights:[self weights_inception_4e_pool_proj]
+                                                                                                         bias:[self bias_inception_4e_pool_proj]
+                                                                                                      willPad:NO
+                                                                                                      strideX:1
+                                                                                                      strideY:1
+                                                                              destinationFeatureChannelOffset:704
+                                                                                                        group:1];
     
     GeneralLayer *inception_4e_pool_proj_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                      readCount:0
@@ -2374,19 +2374,19 @@ static const NSString *labels[] = {
                                                                          outputImage:nil
                                                                               kernel:pool4_3x3_s2_kernel];
     
-    SlimMPSCNNConvolution *inception_5a_1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:832
-                                                                                   outputFeatureChannels:256
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_5a_1x1]
-                                                                                                    bias:[self bias_inception_5a_1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_5a_1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                           kernelHeight:1
+                                                                                   inputFeatureChannels:832
+                                                                                  outputFeatureChannels:256
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_5a_1x1]
+                                                                                                   bias:[self bias_inception_5a_1x1]
+                                                                                                willPad:NO
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:0
+                                                                                                  group:1];
     
     GeneralLayer *inception_5a_1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -2398,38 +2398,38 @@ static const NSString *labels[] = {
                                                                                                    height:7
                                                                                           featureChannels:160];
     
-    SlimMPSCNNConvolution *inception_5a_3x3_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:832
-                                                                                          outputFeatureChannels:160
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_5a_3x3_reduce]
-                                                                                                           bias:[self bias_inception_5a_3x3_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_5a_3x3_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:832
+                                                                                         outputFeatureChannels:160
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_5a_3x3_reduce]
+                                                                                                          bias:[self bias_inception_5a_3x3_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_5a_3x3_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_5a_3x3_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_5a_3x3_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_5a_3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                            kernelHeight:3
-                                                                                    inputFeatureChannels:160
-                                                                                   outputFeatureChannels:320
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_5a_3x3]
-                                                                                                    bias:[self bias_inception_5a_3x3]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:256
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_5a_3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                           kernelHeight:3
+                                                                                   inputFeatureChannels:160
+                                                                                  outputFeatureChannels:320
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_5a_3x3]
+                                                                                                   bias:[self bias_inception_5a_3x3]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:256
+                                                                                                  group:1];
     
     GeneralLayer *inception_5a_3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -2441,38 +2441,38 @@ static const NSString *labels[] = {
                                                                                                    height:7
                                                                                           featureChannels:32];
     
-    SlimMPSCNNConvolution *inception_5a_5x5_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:832
-                                                                                          outputFeatureChannels:32
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_5a_5x5_reduce]
-                                                                                                           bias:[self bias_inception_5a_5x5_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_5a_5x5_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:832
+                                                                                         outputFeatureChannels:32
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_5a_5x5_reduce]
+                                                                                                          bias:[self bias_inception_5a_5x5_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_5a_5x5_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_5a_5x5_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_5a_5x5_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_5a_5x5_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
-                                                                                            kernelHeight:5
-                                                                                    inputFeatureChannels:32
-                                                                                   outputFeatureChannels:128
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_5a_5x5]
-                                                                                                    bias:[self bias_inception_5a_5x5]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:576
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_5a_5x5_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
+                                                                                           kernelHeight:5
+                                                                                   inputFeatureChannels:32
+                                                                                  outputFeatureChannels:128
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_5a_5x5]
+                                                                                                   bias:[self bias_inception_5a_5x5]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:576
+                                                                                                  group:1];
     
     GeneralLayer *inception_5a_5x5_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -2496,19 +2496,19 @@ static const NSString *labels[] = {
                                                                               outputImage:nil
                                                                                    kernel:inception_5a_pool_kernel];
     
-    SlimMPSCNNConvolution *inception_5a_pool_proj_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                  kernelHeight:1
-                                                                                          inputFeatureChannels:832
-                                                                                         outputFeatureChannels:128
-                                                                                                        neuron:relu
-                                                                                                        device:self.device
-                                                                                                       weights:[self weights_inception_5a_pool_proj]
-                                                                                                          bias:[self bias_inception_5a_pool_proj]
-                                                                                                       willPad:NO
-                                                                                                       strideX:1
-                                                                                                       strideY:1
-                                                                               destinationFeatureChannelOffset:704
-                                                                                                         group:1];
+    SlimMPSCNNConvolution *inception_5a_pool_proj_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                 kernelHeight:1
+                                                                                         inputFeatureChannels:832
+                                                                                        outputFeatureChannels:128
+                                                                                                       neuron:relu
+                                                                                                       device:self.device
+                                                                                                      weights:[self weights_inception_5a_pool_proj]
+                                                                                                         bias:[self bias_inception_5a_pool_proj]
+                                                                                                      willPad:NO
+                                                                                                      strideX:1
+                                                                                                      strideY:1
+                                                                              destinationFeatureChannelOffset:704
+                                                                                                        group:1];
     
     GeneralLayer *inception_5a_pool_proj_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                      readCount:0
@@ -2525,19 +2525,19 @@ static const NSString *labels[] = {
                                                                                 outputImage:nil
                                                                                      kernel:nil];
     
-    SlimMPSCNNConvolution *inception_5b_1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:832
-                                                                                   outputFeatureChannels:384
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_5b_1x1]
-                                                                                                    bias:[self bias_inception_5b_1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_5b_1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                           kernelHeight:1
+                                                                                   inputFeatureChannels:832
+                                                                                  outputFeatureChannels:384
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_5b_1x1]
+                                                                                                   bias:[self bias_inception_5b_1x1]
+                                                                                                willPad:NO
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:0
+                                                                                                  group:1];
     
     GeneralLayer *inception_5b_1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -2549,38 +2549,38 @@ static const NSString *labels[] = {
                                                                                                    height:7
                                                                                           featureChannels:192];
     
-    SlimMPSCNNConvolution *inception_5b_3x3_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:832
-                                                                                          outputFeatureChannels:192
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_5b_3x3_reduce]
-                                                                                                           bias:[self bias_inception_5b_3x3_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_5b_3x3_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:832
+                                                                                         outputFeatureChannels:192
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_5b_3x3_reduce]
+                                                                                                          bias:[self bias_inception_5b_3x3_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_5b_3x3_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_5b_3x3_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_5b_3x3_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_5b_3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                            kernelHeight:3
-                                                                                    inputFeatureChannels:192
-                                                                                   outputFeatureChannels:384
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_5b_3x3]
-                                                                                                    bias:[self bias_inception_5b_3x3]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:384
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_5b_3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                           kernelHeight:3
+                                                                                   inputFeatureChannels:192
+                                                                                  outputFeatureChannels:384
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_5b_3x3]
+                                                                                                   bias:[self bias_inception_5b_3x3]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:384
+                                                                                                  group:1];
     
     GeneralLayer *inception_5b_3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -2592,38 +2592,38 @@ static const NSString *labels[] = {
                                                                                                    height:7
                                                                                           featureChannels:48];
     
-    SlimMPSCNNConvolution *inception_5b_5x5_reduce_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                   kernelHeight:1
-                                                                                           inputFeatureChannels:832
-                                                                                          outputFeatureChannels:48
-                                                                                                         neuron:relu
-                                                                                                         device:self.device
-                                                                                                        weights:[self weights_inception_5b_5x5_reduce]
-                                                                                                           bias:[self bias_inception_5b_5x5_reduce]
-                                                                                                        willPad:NO
-                                                                                                        strideX:1
-                                                                                                        strideY:1
-                                                                                destinationFeatureChannelOffset:0
-                                                                                                          group:1];
+    SlimMPSCNNConvolution *inception_5b_5x5_reduce_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                  kernelHeight:1
+                                                                                          inputFeatureChannels:832
+                                                                                         outputFeatureChannels:48
+                                                                                                        neuron:relu
+                                                                                                        device:self.device
+                                                                                                       weights:[self weights_inception_5b_5x5_reduce]
+                                                                                                          bias:[self bias_inception_5b_5x5_reduce]
+                                                                                                       willPad:NO
+                                                                                                       strideX:1
+                                                                                                       strideY:1
+                                                                               destinationFeatureChannelOffset:0
+                                                                                                         group:1];
     
     GeneralLayer *inception_5b_5x5_reduce_layer = [[GeneralLayer alloc] initWithImageDescriptor:inception_5b_5x5_reduce_id
                                                                                       readCount:1
                                                                                     outputImage:nil
                                                                                          kernel:inception_5b_5x5_reduce_kernel];
     
-    SlimMPSCNNConvolution *inception_5b_5x5_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
-                                                                                            kernelHeight:5
-                                                                                    inputFeatureChannels:48
-                                                                                   outputFeatureChannels:128
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_inception_5b_5x5]
-                                                                                                    bias:[self bias_inception_5b_5x5]
-                                                                                                 willPad:YES
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:768
-                                                                                                   group:1];
+    SlimMPSCNNConvolution *inception_5b_5x5_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
+                                                                                           kernelHeight:5
+                                                                                   inputFeatureChannels:48
+                                                                                  outputFeatureChannels:128
+                                                                                                 neuron:relu
+                                                                                                 device:self.device
+                                                                                                weights:[self weights_inception_5b_5x5]
+                                                                                                   bias:[self bias_inception_5b_5x5]
+                                                                                                willPad:YES
+                                                                                                strideX:1
+                                                                                                strideY:1
+                                                                        destinationFeatureChannelOffset:768
+                                                                                                  group:1];
     
     GeneralLayer *inception_5b_5x5_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                readCount:0
@@ -2647,19 +2647,19 @@ static const NSString *labels[] = {
                                                                               outputImage:nil
                                                                                    kernel:inception_5b_pool_kernel];
     
-    SlimMPSCNNConvolution *inception_5b_pool_proj_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                                  kernelHeight:1
-                                                                                          inputFeatureChannels:832
-                                                                                         outputFeatureChannels:128
-                                                                                                        neuron:relu
-                                                                                                        device:self.device
-                                                                                                       weights:[self weights_inception_5b_pool_proj]
-                                                                                                          bias:[self bias_inception_5b_pool_proj]
-                                                                                                       willPad:NO
-                                                                                                       strideX:1
-                                                                                                       strideY:1
-                                                                               destinationFeatureChannelOffset:896
-                                                                                                         group:1];
+    SlimMPSCNNConvolution *inception_5b_pool_proj_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                                 kernelHeight:1
+                                                                                         inputFeatureChannels:832
+                                                                                        outputFeatureChannels:128
+                                                                                                       neuron:relu
+                                                                                                       device:self.device
+                                                                                                      weights:[self weights_inception_5b_pool_proj]
+                                                                                                         bias:[self bias_inception_5b_pool_proj]
+                                                                                                      willPad:NO
+                                                                                                      strideX:1
+                                                                                                      strideY:1
+                                                                              destinationFeatureChannelOffset:896
+                                                                                                        group:1];
     
     GeneralLayer *inception_5b_pool_proj_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                                      readCount:0
@@ -2717,7 +2717,7 @@ static const NSString *labels[] = {
                                                                                 height:1
                                                                        featureChannels:1000];
     
-    MPSImage *prob_image = [[MPSImage alloc] initWithDevice:self.device 
+    MPSImage *prob_image = [[MPSImage alloc] initWithDevice:self.device
                                             imageDescriptor:prob_id];
     
     MPSCNNSoftMax *prob_kernel = [[MPSCNNSoftMax alloc] initWithDevice:self.device];

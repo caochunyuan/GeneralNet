@@ -1096,19 +1096,19 @@ static const NSString *labels[] = {
                                                                                  height:111
                                                                         featureChannels:96];
     
-    SlimMPSCNNConvolution *conv1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:7
-                                                                                 kernelHeight:7
-                                                                         inputFeatureChannels:3
-                                                                        outputFeatureChannels:96
-                                                                                       neuron:relu
-                                                                                       device:self.device
-                                                                                      weights:[self weights_conv1]
-                                                                                         bias:[self bias_conv1]
-                                                                                      willPad:NO
-                                                                                      strideX:2
-                                                                                      strideY:2
-                                                              destinationFeatureChannelOffset:0
-                                                                                        group:1];
+    SlimMPSCNNConvolution *conv1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:7
+                                                                                kernelHeight:7
+                                                                        inputFeatureChannels:3
+                                                                       outputFeatureChannels:96
+                                                                                      neuron:relu
+                                                                                      device:self.device
+                                                                                     weights:[self weights_conv1]
+                                                                                        bias:[self bias_conv1]
+                                                                                     willPad:NO
+                                                                                     strideX:2
+                                                                                     strideY:2
+                                                             destinationFeatureChannelOffset:0
+                                                                                       group:1];
     
     GeneralLayer *conv1_layer = [[GeneralLayer alloc] initWithImageDescriptor:conv1_id
                                                                     readCount:1
@@ -1137,57 +1137,57 @@ static const NSString *labels[] = {
                                                                                             height:55
                                                                                    featureChannels:16];
     
-    SlimMPSCNNConvolution *fire2_squeeze1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:96
-                                                                                   outputFeatureChannels:16
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_fire2_squeeze1x1]
-                                                                                                    bias:[self bias_fire2_squeeze1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
-    
-    GeneralLayer *fire2_squeeze1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:fire2_squeeze1x1_id
-                                                                               readCount:2
-                                                                             outputImage:nil
-                                                                                  kernel:fire2_squeeze1x1_kernel];
-    
-    SlimMPSCNNConvolution *fire2_expand1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+    SlimMPSCNNConvolution *fire2_squeeze1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
                                                                                            kernelHeight:1
-                                                                                   inputFeatureChannels:16
-                                                                                  outputFeatureChannels:64
+                                                                                   inputFeatureChannels:96
+                                                                                  outputFeatureChannels:16
                                                                                                  neuron:relu
                                                                                                  device:self.device
-                                                                                                weights:[self weights_fire2_expand1x1]
-                                                                                                   bias:[self bias_fire2_expand1x1]
+                                                                                                weights:[self weights_fire2_squeeze1x1]
+                                                                                                   bias:[self bias_fire2_squeeze1x1]
                                                                                                 willPad:NO
                                                                                                 strideX:1
                                                                                                 strideY:1
                                                                         destinationFeatureChannelOffset:0
                                                                                                   group:1];
     
+    GeneralLayer *fire2_squeeze1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:fire2_squeeze1x1_id
+                                                                               readCount:2
+                                                                             outputImage:nil
+                                                                                  kernel:fire2_squeeze1x1_kernel];
+    
+    SlimMPSCNNConvolution *fire2_expand1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                          kernelHeight:1
+                                                                                  inputFeatureChannels:16
+                                                                                 outputFeatureChannels:64
+                                                                                                neuron:relu
+                                                                                                device:self.device
+                                                                                               weights:[self weights_fire2_expand1x1]
+                                                                                                  bias:[self bias_fire2_expand1x1]
+                                                                                               willPad:NO
+                                                                                               strideX:1
+                                                                                               strideY:1
+                                                                       destinationFeatureChannelOffset:0
+                                                                                                 group:1];
+    
     GeneralLayer *fire2_expand1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                               readCount:0
                                                                             outputImage:nil
                                                                                  kernel:fire2_expand1x1_kernel];
     
-    SlimMPSCNNConvolution *fire2_expand3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                           kernelHeight:3
-                                                                                   inputFeatureChannels:16
-                                                                                  outputFeatureChannels:64
-                                                                                                 neuron:relu
-                                                                                                 device:self.device
-                                                                                                weights:[self weights_fire2_expand3x3]
-                                                                                                   bias:[self bias_fire2_expand3x3]
-                                                                                                willPad:YES
-                                                                                                strideX:1
-                                                                                                strideY:1
-                                                                        destinationFeatureChannelOffset:64
-                                                                                                  group:1];
+    SlimMPSCNNConvolution *fire2_expand3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                          kernelHeight:3
+                                                                                  inputFeatureChannels:16
+                                                                                 outputFeatureChannels:64
+                                                                                                neuron:relu
+                                                                                                device:self.device
+                                                                                               weights:[self weights_fire2_expand3x3]
+                                                                                                  bias:[self bias_fire2_expand3x3]
+                                                                                               willPad:YES
+                                                                                               strideX:1
+                                                                                               strideY:1
+                                                                       destinationFeatureChannelOffset:64
+                                                                                                 group:1];
     
     GeneralLayer *fire2_expand3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                               readCount:0
@@ -1209,57 +1209,57 @@ static const NSString *labels[] = {
                                                                                             height:55
                                                                                    featureChannels:16];
     
-    SlimMPSCNNConvolution *fire3_squeeze1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:128
-                                                                                   outputFeatureChannels:16
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_fire3_squeeze1x1]
-                                                                                                    bias:[self bias_fire3_squeeze1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
-    
-    GeneralLayer *fire3_squeeze1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:fire3_squeeze1x1_id
-                                                                               readCount:2
-                                                                             outputImage:nil
-                                                                                  kernel:fire3_squeeze1x1_kernel];
-    
-    SlimMPSCNNConvolution *fire3_expand1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+    SlimMPSCNNConvolution *fire3_squeeze1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
                                                                                            kernelHeight:1
-                                                                                   inputFeatureChannels:16
-                                                                                  outputFeatureChannels:64
+                                                                                   inputFeatureChannels:128
+                                                                                  outputFeatureChannels:16
                                                                                                  neuron:relu
                                                                                                  device:self.device
-                                                                                                weights:[self weights_fire3_expand1x1]
-                                                                                                   bias:[self bias_fire3_expand1x1]
+                                                                                                weights:[self weights_fire3_squeeze1x1]
+                                                                                                   bias:[self bias_fire3_squeeze1x1]
                                                                                                 willPad:NO
                                                                                                 strideX:1
                                                                                                 strideY:1
                                                                         destinationFeatureChannelOffset:0
                                                                                                   group:1];
     
+    GeneralLayer *fire3_squeeze1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:fire3_squeeze1x1_id
+                                                                               readCount:2
+                                                                             outputImage:nil
+                                                                                  kernel:fire3_squeeze1x1_kernel];
+    
+    SlimMPSCNNConvolution *fire3_expand1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                          kernelHeight:1
+                                                                                  inputFeatureChannels:16
+                                                                                 outputFeatureChannels:64
+                                                                                                neuron:relu
+                                                                                                device:self.device
+                                                                                               weights:[self weights_fire3_expand1x1]
+                                                                                                  bias:[self bias_fire3_expand1x1]
+                                                                                               willPad:NO
+                                                                                               strideX:1
+                                                                                               strideY:1
+                                                                       destinationFeatureChannelOffset:0
+                                                                                                 group:1];
+    
     GeneralLayer *fire3_expand1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                               readCount:0
                                                                             outputImage:nil
                                                                                  kernel:fire3_expand1x1_kernel];
     
-    SlimMPSCNNConvolution *fire3_expand3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                           kernelHeight:3
-                                                                                   inputFeatureChannels:16
-                                                                                  outputFeatureChannels:64
-                                                                                                 neuron:relu
-                                                                                                 device:self.device
-                                                                                                weights:[self weights_fire3_expand3x3]
-                                                                                                   bias:[self bias_fire3_expand3x3]
-                                                                                                willPad:YES
-                                                                                                strideX:1
-                                                                                                strideY:1
-                                                                        destinationFeatureChannelOffset:64
-                                                                                                  group:1];
+    SlimMPSCNNConvolution *fire3_expand3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                          kernelHeight:3
+                                                                                  inputFeatureChannels:16
+                                                                                 outputFeatureChannels:64
+                                                                                                neuron:relu
+                                                                                                device:self.device
+                                                                                               weights:[self weights_fire3_expand3x3]
+                                                                                                  bias:[self bias_fire3_expand3x3]
+                                                                                               willPad:YES
+                                                                                               strideX:1
+                                                                                               strideY:1
+                                                                       destinationFeatureChannelOffset:64
+                                                                                                 group:1];
     
     GeneralLayer *fire3_expand3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                               readCount:0
@@ -1281,57 +1281,57 @@ static const NSString *labels[] = {
                                                                                             height:55
                                                                                    featureChannels:32];
     
-    SlimMPSCNNConvolution *fire4_squeeze1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:128
-                                                                                   outputFeatureChannels:32
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_fire4_squeeze1x1]
-                                                                                                    bias:[self bias_fire4_squeeze1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
-    
-    GeneralLayer *fire4_squeeze1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:fire4_squeeze1x1_id
-                                                                               readCount:2
-                                                                             outputImage:nil
-                                                                                  kernel:fire4_squeeze1x1_kernel];
-    
-    SlimMPSCNNConvolution *fire4_expand1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+    SlimMPSCNNConvolution *fire4_squeeze1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
                                                                                            kernelHeight:1
-                                                                                   inputFeatureChannels:32
-                                                                                  outputFeatureChannels:128
+                                                                                   inputFeatureChannels:128
+                                                                                  outputFeatureChannels:32
                                                                                                  neuron:relu
                                                                                                  device:self.device
-                                                                                                weights:[self weights_fire4_expand1x1]
-                                                                                                   bias:[self bias_fire4_expand1x1]
+                                                                                                weights:[self weights_fire4_squeeze1x1]
+                                                                                                   bias:[self bias_fire4_squeeze1x1]
                                                                                                 willPad:NO
                                                                                                 strideX:1
                                                                                                 strideY:1
                                                                         destinationFeatureChannelOffset:0
                                                                                                   group:1];
     
+    GeneralLayer *fire4_squeeze1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:fire4_squeeze1x1_id
+                                                                               readCount:2
+                                                                             outputImage:nil
+                                                                                  kernel:fire4_squeeze1x1_kernel];
+    
+    SlimMPSCNNConvolution *fire4_expand1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                          kernelHeight:1
+                                                                                  inputFeatureChannels:32
+                                                                                 outputFeatureChannels:128
+                                                                                                neuron:relu
+                                                                                                device:self.device
+                                                                                               weights:[self weights_fire4_expand1x1]
+                                                                                                  bias:[self bias_fire4_expand1x1]
+                                                                                               willPad:NO
+                                                                                               strideX:1
+                                                                                               strideY:1
+                                                                       destinationFeatureChannelOffset:0
+                                                                                                 group:1];
+    
     GeneralLayer *fire4_expand1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                               readCount:0
                                                                             outputImage:nil
                                                                                  kernel:fire4_expand1x1_kernel];
     
-    SlimMPSCNNConvolution *fire4_expand3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                           kernelHeight:3
-                                                                                   inputFeatureChannels:32
-                                                                                  outputFeatureChannels:128
-                                                                                                 neuron:relu
-                                                                                                 device:self.device
-                                                                                                weights:[self weights_fire4_expand3x3]
-                                                                                                   bias:[self bias_fire4_expand3x3]
-                                                                                                willPad:YES
-                                                                                                strideX:1
-                                                                                                strideY:1
-                                                                        destinationFeatureChannelOffset:128
-                                                                                                  group:1];
+    SlimMPSCNNConvolution *fire4_expand3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                          kernelHeight:3
+                                                                                  inputFeatureChannels:32
+                                                                                 outputFeatureChannels:128
+                                                                                                neuron:relu
+                                                                                                device:self.device
+                                                                                               weights:[self weights_fire4_expand3x3]
+                                                                                                  bias:[self bias_fire4_expand3x3]
+                                                                                               willPad:YES
+                                                                                               strideX:1
+                                                                                               strideY:1
+                                                                       destinationFeatureChannelOffset:128
+                                                                                                 group:1];
     
     GeneralLayer *fire4_expand3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                               readCount:0
@@ -1370,57 +1370,57 @@ static const NSString *labels[] = {
                                                                                             height:27
                                                                                    featureChannels:32];
     
-    SlimMPSCNNConvolution *fire5_squeeze1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:256
-                                                                                   outputFeatureChannels:32
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_fire5_squeeze1x1]
-                                                                                                    bias:[self bias_fire5_squeeze1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
-    
-    GeneralLayer *fire5_squeeze1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:fire5_squeeze1x1_id
-                                                                               readCount:2
-                                                                             outputImage:nil
-                                                                                  kernel:fire5_squeeze1x1_kernel];
-    
-    SlimMPSCNNConvolution *fire5_expand1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+    SlimMPSCNNConvolution *fire5_squeeze1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
                                                                                            kernelHeight:1
-                                                                                   inputFeatureChannels:32
-                                                                                  outputFeatureChannels:128
+                                                                                   inputFeatureChannels:256
+                                                                                  outputFeatureChannels:32
                                                                                                  neuron:relu
                                                                                                  device:self.device
-                                                                                                weights:[self weights_fire5_expand1x1]
-                                                                                                   bias:[self bias_fire5_expand1x1]
+                                                                                                weights:[self weights_fire5_squeeze1x1]
+                                                                                                   bias:[self bias_fire5_squeeze1x1]
                                                                                                 willPad:NO
                                                                                                 strideX:1
                                                                                                 strideY:1
                                                                         destinationFeatureChannelOffset:0
                                                                                                   group:1];
     
+    GeneralLayer *fire5_squeeze1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:fire5_squeeze1x1_id
+                                                                               readCount:2
+                                                                             outputImage:nil
+                                                                                  kernel:fire5_squeeze1x1_kernel];
+    
+    SlimMPSCNNConvolution *fire5_expand1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                          kernelHeight:1
+                                                                                  inputFeatureChannels:32
+                                                                                 outputFeatureChannels:128
+                                                                                                neuron:relu
+                                                                                                device:self.device
+                                                                                               weights:[self weights_fire5_expand1x1]
+                                                                                                  bias:[self bias_fire5_expand1x1]
+                                                                                               willPad:NO
+                                                                                               strideX:1
+                                                                                               strideY:1
+                                                                       destinationFeatureChannelOffset:0
+                                                                                                 group:1];
+    
     GeneralLayer *fire5_expand1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                               readCount:0
                                                                             outputImage:nil
                                                                                  kernel:fire5_expand1x1_kernel];
     
-    SlimMPSCNNConvolution *fire5_expand3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                           kernelHeight:3
-                                                                                   inputFeatureChannels:32
-                                                                                  outputFeatureChannels:128
-                                                                                                 neuron:relu
-                                                                                                 device:self.device
-                                                                                                weights:[self weights_fire5_expand3x3]
-                                                                                                   bias:[self bias_fire5_expand3x3]
-                                                                                                willPad:YES
-                                                                                                strideX:1
-                                                                                                strideY:1
-                                                                        destinationFeatureChannelOffset:128
-                                                                                                  group:1];
+    SlimMPSCNNConvolution *fire5_expand3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                          kernelHeight:3
+                                                                                  inputFeatureChannels:32
+                                                                                 outputFeatureChannels:128
+                                                                                                neuron:relu
+                                                                                                device:self.device
+                                                                                               weights:[self weights_fire5_expand3x3]
+                                                                                                  bias:[self bias_fire5_expand3x3]
+                                                                                               willPad:YES
+                                                                                               strideX:1
+                                                                                               strideY:1
+                                                                       destinationFeatureChannelOffset:128
+                                                                                                 group:1];
     
     GeneralLayer *fire5_expand3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                               readCount:0
@@ -1442,57 +1442,57 @@ static const NSString *labels[] = {
                                                                                             height:27
                                                                                    featureChannels:48];
     
-    SlimMPSCNNConvolution *fire6_squeeze1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:256
-                                                                                   outputFeatureChannels:48
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_fire6_squeeze1x1]
-                                                                                                    bias:[self bias_fire6_squeeze1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
-    
-    GeneralLayer *fire6_squeeze1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:fire6_squeeze1x1_id
-                                                                               readCount:2
-                                                                             outputImage:nil
-                                                                                  kernel:fire6_squeeze1x1_kernel];
-    
-    SlimMPSCNNConvolution *fire6_expand1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+    SlimMPSCNNConvolution *fire6_squeeze1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
                                                                                            kernelHeight:1
-                                                                                   inputFeatureChannels:48
-                                                                                  outputFeatureChannels:192
+                                                                                   inputFeatureChannels:256
+                                                                                  outputFeatureChannels:48
                                                                                                  neuron:relu
                                                                                                  device:self.device
-                                                                                                weights:[self weights_fire6_expand1x1]
-                                                                                                   bias:[self bias_fire6_expand1x1]
+                                                                                                weights:[self weights_fire6_squeeze1x1]
+                                                                                                   bias:[self bias_fire6_squeeze1x1]
                                                                                                 willPad:NO
                                                                                                 strideX:1
                                                                                                 strideY:1
                                                                         destinationFeatureChannelOffset:0
                                                                                                   group:1];
     
+    GeneralLayer *fire6_squeeze1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:fire6_squeeze1x1_id
+                                                                               readCount:2
+                                                                             outputImage:nil
+                                                                                  kernel:fire6_squeeze1x1_kernel];
+    
+    SlimMPSCNNConvolution *fire6_expand1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                          kernelHeight:1
+                                                                                  inputFeatureChannels:48
+                                                                                 outputFeatureChannels:192
+                                                                                                neuron:relu
+                                                                                                device:self.device
+                                                                                               weights:[self weights_fire6_expand1x1]
+                                                                                                  bias:[self bias_fire6_expand1x1]
+                                                                                               willPad:NO
+                                                                                               strideX:1
+                                                                                               strideY:1
+                                                                       destinationFeatureChannelOffset:0
+                                                                                                 group:1];
+    
     GeneralLayer *fire6_expand1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                               readCount:0
                                                                             outputImage:nil
                                                                                  kernel:fire6_expand1x1_kernel];
     
-    SlimMPSCNNConvolution *fire6_expand3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                           kernelHeight:3
-                                                                                   inputFeatureChannels:48
-                                                                                  outputFeatureChannels:192
-                                                                                                 neuron:relu
-                                                                                                 device:self.device
-                                                                                                weights:[self weights_fire6_expand3x3]
-                                                                                                   bias:[self bias_fire6_expand3x3]
-                                                                                                willPad:YES
-                                                                                                strideX:1
-                                                                                                strideY:1
-                                                                        destinationFeatureChannelOffset:192
-                                                                                                  group:1];
+    SlimMPSCNNConvolution *fire6_expand3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                          kernelHeight:3
+                                                                                  inputFeatureChannels:48
+                                                                                 outputFeatureChannels:192
+                                                                                                neuron:relu
+                                                                                                device:self.device
+                                                                                               weights:[self weights_fire6_expand3x3]
+                                                                                                  bias:[self bias_fire6_expand3x3]
+                                                                                               willPad:YES
+                                                                                               strideX:1
+                                                                                               strideY:1
+                                                                       destinationFeatureChannelOffset:192
+                                                                                                 group:1];
     
     GeneralLayer *fire6_expand3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                               readCount:0
@@ -1514,57 +1514,57 @@ static const NSString *labels[] = {
                                                                                             height:27
                                                                                    featureChannels:48];
     
-    SlimMPSCNNConvolution *fire7_squeeze1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:384
-                                                                                   outputFeatureChannels:48
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_fire7_squeeze1x1]
-                                                                                                    bias:[self bias_fire7_squeeze1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
-    
-    GeneralLayer *fire7_squeeze1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:fire7_squeeze1x1_id
-                                                                               readCount:2
-                                                                             outputImage:nil
-                                                                                  kernel:fire7_squeeze1x1_kernel];
-    
-    SlimMPSCNNConvolution *fire7_expand1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+    SlimMPSCNNConvolution *fire7_squeeze1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
                                                                                            kernelHeight:1
-                                                                                   inputFeatureChannels:48
-                                                                                  outputFeatureChannels:192
+                                                                                   inputFeatureChannels:384
+                                                                                  outputFeatureChannels:48
                                                                                                  neuron:relu
                                                                                                  device:self.device
-                                                                                                weights:[self weights_fire7_expand1x1]
-                                                                                                   bias:[self bias_fire7_expand1x1]
+                                                                                                weights:[self weights_fire7_squeeze1x1]
+                                                                                                   bias:[self bias_fire7_squeeze1x1]
                                                                                                 willPad:NO
                                                                                                 strideX:1
                                                                                                 strideY:1
                                                                         destinationFeatureChannelOffset:0
                                                                                                   group:1];
     
+    GeneralLayer *fire7_squeeze1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:fire7_squeeze1x1_id
+                                                                               readCount:2
+                                                                             outputImage:nil
+                                                                                  kernel:fire7_squeeze1x1_kernel];
+    
+    SlimMPSCNNConvolution *fire7_expand1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                          kernelHeight:1
+                                                                                  inputFeatureChannels:48
+                                                                                 outputFeatureChannels:192
+                                                                                                neuron:relu
+                                                                                                device:self.device
+                                                                                               weights:[self weights_fire7_expand1x1]
+                                                                                                  bias:[self bias_fire7_expand1x1]
+                                                                                               willPad:NO
+                                                                                               strideX:1
+                                                                                               strideY:1
+                                                                       destinationFeatureChannelOffset:0
+                                                                                                 group:1];
+    
     GeneralLayer *fire7_expand1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                               readCount:0
                                                                             outputImage:nil
                                                                                  kernel:fire7_expand1x1_kernel];
     
-    SlimMPSCNNConvolution *fire7_expand3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                           kernelHeight:3
-                                                                                   inputFeatureChannels:48
-                                                                                  outputFeatureChannels:192
-                                                                                                 neuron:relu
-                                                                                                 device:self.device
-                                                                                                weights:[self weights_fire7_expand3x3]
-                                                                                                   bias:[self bias_fire7_expand3x3]
-                                                                                                willPad:YES
-                                                                                                strideX:1
-                                                                                                strideY:1
-                                                                        destinationFeatureChannelOffset:192
-                                                                                                  group:1];
+    SlimMPSCNNConvolution *fire7_expand3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                          kernelHeight:3
+                                                                                  inputFeatureChannels:48
+                                                                                 outputFeatureChannels:192
+                                                                                                neuron:relu
+                                                                                                device:self.device
+                                                                                               weights:[self weights_fire7_expand3x3]
+                                                                                                  bias:[self bias_fire7_expand3x3]
+                                                                                               willPad:YES
+                                                                                               strideX:1
+                                                                                               strideY:1
+                                                                       destinationFeatureChannelOffset:192
+                                                                                                 group:1];
     
     GeneralLayer *fire7_expand3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                               readCount:0
@@ -1586,57 +1586,57 @@ static const NSString *labels[] = {
                                                                                             height:27
                                                                                    featureChannels:64];
     
-    SlimMPSCNNConvolution *fire8_squeeze1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:384
-                                                                                   outputFeatureChannels:64
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_fire8_squeeze1x1]
-                                                                                                    bias:[self bias_fire8_squeeze1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
-    
-    GeneralLayer *fire8_squeeze1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:fire8_squeeze1x1_id
-                                                                               readCount:2
-                                                                             outputImage:nil
-                                                                                  kernel:fire8_squeeze1x1_kernel];
-    
-    SlimMPSCNNConvolution *fire8_expand1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+    SlimMPSCNNConvolution *fire8_squeeze1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
                                                                                            kernelHeight:1
-                                                                                   inputFeatureChannels:64
-                                                                                  outputFeatureChannels:256
+                                                                                   inputFeatureChannels:384
+                                                                                  outputFeatureChannels:64
                                                                                                  neuron:relu
                                                                                                  device:self.device
-                                                                                                weights:[self weights_fire8_expand1x1]
-                                                                                                   bias:[self bias_fire8_expand1x1]
+                                                                                                weights:[self weights_fire8_squeeze1x1]
+                                                                                                   bias:[self bias_fire8_squeeze1x1]
                                                                                                 willPad:NO
                                                                                                 strideX:1
                                                                                                 strideY:1
                                                                         destinationFeatureChannelOffset:0
                                                                                                   group:1];
     
+    GeneralLayer *fire8_squeeze1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:fire8_squeeze1x1_id
+                                                                               readCount:2
+                                                                             outputImage:nil
+                                                                                  kernel:fire8_squeeze1x1_kernel];
+    
+    SlimMPSCNNConvolution *fire8_expand1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                          kernelHeight:1
+                                                                                  inputFeatureChannels:64
+                                                                                 outputFeatureChannels:256
+                                                                                                neuron:relu
+                                                                                                device:self.device
+                                                                                               weights:[self weights_fire8_expand1x1]
+                                                                                                  bias:[self bias_fire8_expand1x1]
+                                                                                               willPad:NO
+                                                                                               strideX:1
+                                                                                               strideY:1
+                                                                       destinationFeatureChannelOffset:0
+                                                                                                 group:1];
+    
     GeneralLayer *fire8_expand1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                               readCount:0
                                                                             outputImage:nil
                                                                                  kernel:fire8_expand1x1_kernel];
     
-    SlimMPSCNNConvolution *fire8_expand3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                           kernelHeight:3
-                                                                                   inputFeatureChannels:64
-                                                                                  outputFeatureChannels:256
-                                                                                                 neuron:relu
-                                                                                                 device:self.device
-                                                                                                weights:[self weights_fire8_expand3x3]
-                                                                                                   bias:[self bias_fire8_expand3x3]
-                                                                                                willPad:YES
-                                                                                                strideX:1
-                                                                                                strideY:1
-                                                                        destinationFeatureChannelOffset:256
-                                                                                                  group:1];
+    SlimMPSCNNConvolution *fire8_expand3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                          kernelHeight:3
+                                                                                  inputFeatureChannels:64
+                                                                                 outputFeatureChannels:256
+                                                                                                neuron:relu
+                                                                                                device:self.device
+                                                                                               weights:[self weights_fire8_expand3x3]
+                                                                                                  bias:[self bias_fire8_expand3x3]
+                                                                                               willPad:YES
+                                                                                               strideX:1
+                                                                                               strideY:1
+                                                                       destinationFeatureChannelOffset:256
+                                                                                                 group:1];
     
     GeneralLayer *fire8_expand3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                               readCount:0
@@ -1675,57 +1675,57 @@ static const NSString *labels[] = {
                                                                                             height:13
                                                                                    featureChannels:64];
     
-    SlimMPSCNNConvolution *fire9_squeeze1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                            kernelHeight:1
-                                                                                    inputFeatureChannels:512
-                                                                                   outputFeatureChannels:64
-                                                                                                  neuron:relu
-                                                                                                  device:self.device
-                                                                                                 weights:[self weights_fire9_squeeze1x1]
-                                                                                                    bias:[self bias_fire9_squeeze1x1]
-                                                                                                 willPad:NO
-                                                                                                 strideX:1
-                                                                                                 strideY:1
-                                                                         destinationFeatureChannelOffset:0
-                                                                                                   group:1];
-    
-    GeneralLayer *fire9_squeeze1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:fire9_squeeze1x1_id
-                                                                               readCount:2
-                                                                             outputImage:nil
-                                                                                  kernel:fire9_squeeze1x1_kernel];
-    
-    SlimMPSCNNConvolution *fire9_expand1x1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+    SlimMPSCNNConvolution *fire9_squeeze1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
                                                                                            kernelHeight:1
-                                                                                   inputFeatureChannels:64
-                                                                                  outputFeatureChannels:256
+                                                                                   inputFeatureChannels:512
+                                                                                  outputFeatureChannels:64
                                                                                                  neuron:relu
                                                                                                  device:self.device
-                                                                                                weights:[self weights_fire9_expand1x1]
-                                                                                                   bias:[self bias_fire9_expand1x1]
+                                                                                                weights:[self weights_fire9_squeeze1x1]
+                                                                                                   bias:[self bias_fire9_squeeze1x1]
                                                                                                 willPad:NO
                                                                                                 strideX:1
                                                                                                 strideY:1
                                                                         destinationFeatureChannelOffset:0
                                                                                                   group:1];
     
+    GeneralLayer *fire9_squeeze1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:fire9_squeeze1x1_id
+                                                                               readCount:2
+                                                                             outputImage:nil
+                                                                                  kernel:fire9_squeeze1x1_kernel];
+    
+    SlimMPSCNNConvolution *fire9_expand1x1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                          kernelHeight:1
+                                                                                  inputFeatureChannels:64
+                                                                                 outputFeatureChannels:256
+                                                                                                neuron:relu
+                                                                                                device:self.device
+                                                                                               weights:[self weights_fire9_expand1x1]
+                                                                                                  bias:[self bias_fire9_expand1x1]
+                                                                                               willPad:NO
+                                                                                               strideX:1
+                                                                                               strideY:1
+                                                                       destinationFeatureChannelOffset:0
+                                                                                                 group:1];
+    
     GeneralLayer *fire9_expand1x1_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                               readCount:0
                                                                             outputImage:nil
                                                                                  kernel:fire9_expand1x1_kernel];
     
-    SlimMPSCNNConvolution *fire9_expand3x3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                           kernelHeight:3
-                                                                                   inputFeatureChannels:64
-                                                                                  outputFeatureChannels:256
-                                                                                                 neuron:relu
-                                                                                                 device:self.device
-                                                                                                weights:[self weights_fire9_expand3x3]
-                                                                                                   bias:[self bias_fire9_expand3x3]
-                                                                                                willPad:YES
-                                                                                                strideX:1
-                                                                                                strideY:1
-                                                                        destinationFeatureChannelOffset:256
-                                                                                                  group:1];
+    SlimMPSCNNConvolution *fire9_expand3x3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                          kernelHeight:3
+                                                                                  inputFeatureChannels:64
+                                                                                 outputFeatureChannels:256
+                                                                                                neuron:relu
+                                                                                                device:self.device
+                                                                                               weights:[self weights_fire9_expand3x3]
+                                                                                                  bias:[self bias_fire9_expand3x3]
+                                                                                               willPad:YES
+                                                                                               strideX:1
+                                                                                               strideY:1
+                                                                       destinationFeatureChannelOffset:256
+                                                                                                 group:1];
     
     GeneralLayer *fire9_expand3x3_layer = [[GeneralLayer alloc] initWithImageDescriptor:nil
                                                                               readCount:0
@@ -1747,19 +1747,19 @@ static const NSString *labels[] = {
                                                                                   height:13
                                                                          featureChannels:1000];
     
-    SlimMPSCNNConvolution *conv10_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
-                                                                                  kernelHeight:1
-                                                                          inputFeatureChannels:512
-                                                                         outputFeatureChannels:1000
-                                                                                        neuron:relu
-                                                                                        device:self.device
-                                                                                       weights:[self weights_conv10]
-                                                                                          bias:[self bias_conv10]
-                                                                                       willPad:NO
-                                                                                       strideX:1
-                                                                                       strideY:1
-                                                               destinationFeatureChannelOffset:0
-                                                                                         group:1];
+    SlimMPSCNNConvolution *conv10_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:1
+                                                                                 kernelHeight:1
+                                                                         inputFeatureChannels:512
+                                                                        outputFeatureChannels:1000
+                                                                                       neuron:relu
+                                                                                       device:self.device
+                                                                                      weights:[self weights_conv10]
+                                                                                         bias:[self bias_conv10]
+                                                                                      willPad:NO
+                                                                                      strideX:1
+                                                                                      strideY:1
+                                                              destinationFeatureChannelOffset:0
+                                                                                        group:1];
     
     GeneralLayer *conv10_layer = [[GeneralLayer alloc] initWithImageDescriptor:conv10_id
                                                                      readCount:1
@@ -1785,7 +1785,7 @@ static const NSString *labels[] = {
                                                                                 height:1
                                                                        featureChannels:1000];
     
-    MPSImage *prob_image = [[MPSImage alloc] initWithDevice:self.device 
+    MPSImage *prob_image = [[MPSImage alloc] initWithDevice:self.device
                                             imageDescriptor:prob_id];
     
     MPSCNNSoftMax *prob_kernel = [[MPSCNNSoftMax alloc] initWithDevice:self.device];

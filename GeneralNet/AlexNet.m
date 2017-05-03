@@ -1096,19 +1096,19 @@ static const NSString *labels[] = {
                                                                                  height:55
                                                                         featureChannels:96];
     
-    SlimMPSCNNConvolution *conv1_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:11
-                                                                                 kernelHeight:11
-                                                                         inputFeatureChannels:3
-                                                                        outputFeatureChannels:96
-                                                                                       neuron:relu
-                                                                                       device:self.device
-                                                                                      weights:[self weights_conv1]
-                                                                                         bias:[self bias_conv1]
-                                                                                      willPad:NO
-                                                                                      strideX:4
-                                                                                      strideY:4
-                                                              destinationFeatureChannelOffset:0
-                                                                                        group:1];
+    SlimMPSCNNConvolution *conv1_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:11
+                                                                                kernelHeight:11
+                                                                        inputFeatureChannels:3
+                                                                       outputFeatureChannels:96
+                                                                                      neuron:relu
+                                                                                      device:self.device
+                                                                                     weights:[self weights_conv1]
+                                                                                        bias:[self bias_conv1]
+                                                                                     willPad:NO
+                                                                                     strideX:4
+                                                                                     strideY:4
+                                                             destinationFeatureChannelOffset:0
+                                                                                       group:1];
     
     GeneralLayer *conv1_layer = [[GeneralLayer alloc] initWithImageDescriptor:conv1_id
                                                                     readCount:1
@@ -1122,8 +1122,8 @@ static const NSString *labels[] = {
     
     SlimMPSCNNLocalResponseNormalization *norm1_kernel = [[SlimMPSCNNLocalResponseNormalization alloc] initWithDevice:self.device
                                                                                                             localSize:5
-                                                                                                                alpha:0.0001
-                                                                                                                 beta:0.75];
+                                                                                                                alpha:0.000100
+                                                                                                                 beta:0.750000];
     
     GeneralLayer *norm1_layer = [[GeneralLayer alloc] initWithImageDescriptor:norm1_id
                                                                     readCount:1
@@ -1152,19 +1152,19 @@ static const NSString *labels[] = {
                                                                                  height:27
                                                                         featureChannels:256];
     
-    SlimMPSCNNConvolution *conv2_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
-                                                                                 kernelHeight:5
-                                                                         inputFeatureChannels:96
-                                                                        outputFeatureChannels:256
-                                                                                       neuron:relu
-                                                                                       device:self.device
-                                                                                      weights:[self weights_conv2]
-                                                                                         bias:[self bias_conv2]
-                                                                                      willPad:YES
-                                                                                      strideX:1
-                                                                                      strideY:1
-                                                              destinationFeatureChannelOffset:0
-                                                                                        group:2];
+    SlimMPSCNNConvolution *conv2_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:5
+                                                                                kernelHeight:5
+                                                                        inputFeatureChannels:96
+                                                                       outputFeatureChannels:256
+                                                                                      neuron:relu
+                                                                                      device:self.device
+                                                                                     weights:[self weights_conv2]
+                                                                                        bias:[self bias_conv2]
+                                                                                     willPad:YES
+                                                                                     strideX:1
+                                                                                     strideY:1
+                                                             destinationFeatureChannelOffset:0
+                                                                                       group:2];
     
     GeneralLayer *conv2_layer = [[GeneralLayer alloc] initWithImageDescriptor:conv2_id
                                                                     readCount:1
@@ -1178,8 +1178,8 @@ static const NSString *labels[] = {
     
     SlimMPSCNNLocalResponseNormalization *norm2_kernel = [[SlimMPSCNNLocalResponseNormalization alloc] initWithDevice:self.device
                                                                                                             localSize:5
-                                                                                                                alpha:0.0001
-                                                                                                                 beta:0.75];
+                                                                                                                alpha:0.000100
+                                                                                                                 beta:0.750000];
     
     GeneralLayer *norm2_layer = [[GeneralLayer alloc] initWithImageDescriptor:norm2_id
                                                                     readCount:1
@@ -1208,19 +1208,19 @@ static const NSString *labels[] = {
                                                                                  height:13
                                                                         featureChannels:384];
     
-    SlimMPSCNNConvolution *conv3_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                 kernelHeight:3
-                                                                         inputFeatureChannels:256
-                                                                        outputFeatureChannels:384
-                                                                                       neuron:relu
-                                                                                       device:self.device
-                                                                                      weights:[self weights_conv3]
-                                                                                         bias:[self bias_conv3]
-                                                                                      willPad:YES
-                                                                                      strideX:1
-                                                                                      strideY:1
-                                                              destinationFeatureChannelOffset:0
-                                                                                        group:1];
+    SlimMPSCNNConvolution *conv3_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                kernelHeight:3
+                                                                        inputFeatureChannels:256
+                                                                       outputFeatureChannels:384
+                                                                                      neuron:relu
+                                                                                      device:self.device
+                                                                                     weights:[self weights_conv3]
+                                                                                        bias:[self bias_conv3]
+                                                                                     willPad:YES
+                                                                                     strideX:1
+                                                                                     strideY:1
+                                                             destinationFeatureChannelOffset:0
+                                                                                       group:1];
     
     GeneralLayer *conv3_layer = [[GeneralLayer alloc] initWithImageDescriptor:conv3_id
                                                                     readCount:1
@@ -1232,19 +1232,19 @@ static const NSString *labels[] = {
                                                                                  height:13
                                                                         featureChannels:384];
     
-    SlimMPSCNNConvolution *conv4_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                 kernelHeight:3
-                                                                         inputFeatureChannels:384
-                                                                        outputFeatureChannels:384
-                                                                                       neuron:relu
-                                                                                       device:self.device
-                                                                                      weights:[self weights_conv4]
-                                                                                         bias:[self bias_conv4]
-                                                                                      willPad:YES
-                                                                                      strideX:1
-                                                                                      strideY:1
-                                                              destinationFeatureChannelOffset:0
-                                                                                        group:2];
+    SlimMPSCNNConvolution *conv4_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                kernelHeight:3
+                                                                        inputFeatureChannels:384
+                                                                       outputFeatureChannels:384
+                                                                                      neuron:relu
+                                                                                      device:self.device
+                                                                                     weights:[self weights_conv4]
+                                                                                        bias:[self bias_conv4]
+                                                                                     willPad:YES
+                                                                                     strideX:1
+                                                                                     strideY:1
+                                                             destinationFeatureChannelOffset:0
+                                                                                       group:2];
     
     GeneralLayer *conv4_layer = [[GeneralLayer alloc] initWithImageDescriptor:conv4_id
                                                                     readCount:1
@@ -1256,19 +1256,19 @@ static const NSString *labels[] = {
                                                                                  height:13
                                                                         featureChannels:256];
     
-    SlimMPSCNNConvolution *conv5_kernel  = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
-                                                                                 kernelHeight:3
-                                                                         inputFeatureChannels:384
-                                                                        outputFeatureChannels:256
-                                                                                       neuron:relu
-                                                                                       device:self.device
-                                                                                      weights:[self weights_conv5]
-                                                                                         bias:[self bias_conv5]
-                                                                                      willPad:YES
-                                                                                      strideX:1
-                                                                                      strideY:1
-                                                              destinationFeatureChannelOffset:0
-                                                                                        group:2];
+    SlimMPSCNNConvolution *conv5_kernel = [[SlimMPSCNNConvolution alloc] initWithKernelWidth:3
+                                                                                kernelHeight:3
+                                                                        inputFeatureChannels:384
+                                                                       outputFeatureChannels:256
+                                                                                      neuron:relu
+                                                                                      device:self.device
+                                                                                     weights:[self weights_conv5]
+                                                                                        bias:[self bias_conv5]
+                                                                                     willPad:YES
+                                                                                     strideX:1
+                                                                                     strideY:1
+                                                             destinationFeatureChannelOffset:0
+                                                                                       group:2];
     
     GeneralLayer *conv5_layer = [[GeneralLayer alloc] initWithImageDescriptor:conv5_id
                                                                     readCount:1
@@ -1357,7 +1357,7 @@ static const NSString *labels[] = {
                                                                                 height:1
                                                                        featureChannels:1000];
     
-    MPSImage *prob_image = [[MPSImage alloc] initWithDevice:self.device 
+    MPSImage *prob_image = [[MPSImage alloc] initWithDevice:self.device
                                             imageDescriptor:prob_id];
     
     MPSCNNSoftMax *prob_kernel = [[MPSCNNSoftMax alloc] initWithDevice:self.device];
