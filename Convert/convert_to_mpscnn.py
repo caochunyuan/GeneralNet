@@ -100,6 +100,7 @@ def convert(src_path):
 	
 	    else:
 	        print 'Unsupported layer: ' + layer.name + ', of type: ' + layer.type
+	        exit(-1)
 	
 	    if new_layer.type != LayerType.none:
 	        new_layer.name = layer.name
@@ -388,9 +389,9 @@ initWithImageDescriptor:%s_id' % ((show_name,) * 2),
 	        concat_txt += '%s_layer.concatLayer = %s_layer;\n' \
 	                      % (modify_name(layer.name), modify_name(concat_parent_dict[layer.name]))
 	
-	if concat_txt:print concat_txt
-	if add_layer_txt:print add_layer_txt
-	if encode_txt:print encode_txt[:-1]
+	if concat_txt:	print concat_txt
+	if add_layer_txt:	print add_layer_txt
+	if encode_txt:	print encode_txt[:-1]
 	print '}'
 	
 	

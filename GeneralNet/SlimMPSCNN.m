@@ -58,6 +58,46 @@
     return self;
 }
 
+- (SlimMPSCNNConvolution *) initWithKernelSize:(uint)kernelSize
+                          inputFeatureChannels:(uint)inChannels
+                         outputFeatureChannels:(uint)outChannels
+                                        neuron:(MPSCNNNeuron *)neuron
+                                        device:(id <MTLDevice>)device
+                                       weights:(const float *)weights
+                                          bias:(const float *)bias
+                                       willPad:(BOOL)willPad
+                                        stride:(uint)stride
+               destinationFeatureChannelOffset:(uint)offset
+                                         group:(uint)group {
+    
+    // create appropriate convolution descriptor with appropriate stride
+    MPSCNNConvolutionDescriptor *convDesc;
+    convDesc = [MPSCNNConvolutionDescriptor cnnConvolutionDescriptorWithKernelWidth:kernelSize
+                                                                       kernelHeight:kernelSize
+                                                               inputFeatureChannels:inChannels
+                                                              outputFeatureChannels:outChannels
+                                                                       neuronFilter:neuron];
+    convDesc.strideInPixelsX = stride;
+    convDesc.strideInPixelsY = stride;
+    
+    NSAssert(group > 0, @"Group size can't be less than 1");
+    convDesc.groups = group;
+    
+    // initialize the convolution layer by calling the parent's (MPSCNNConvlution's) initializer
+    if (self = [super initWithDevice:device
+               convolutionDescriptor:convDesc
+                       kernelWeights:weights
+                           biasTerms:bias
+                               flags:MPSCNNConvolutionFlagsNone]) {
+        self.destinationFeatureChannelOffset = offset;
+        
+        // set padding for calculation of offset during encode call
+        self.padding = willPad;
+    }
+    
+    return self;
+}
+
 - (void) encodeToCommandBuffer:(nonnull id <MTLCommandBuffer>) commandBuffer
                    sourceImage:(MPSImage * __nonnull) sourceImage
               destinationImage:(MPSImage * __nonnull) destinationImage
@@ -121,6 +161,32 @@ MPS_SWIFT_NAME(encode(commandBuffer:sourceImage:destinationImage:)) {
     return self;
 }
 
+- (SlimMPSCNNFullyConnected *) initWithKernelSize:(uint)kernelSize
+                             inputFeatureChannels:(uint)inChannels
+                            outputFeatureChannels:(uint)outChannels
+                                           neuron:(MPSCNNNeuron *)neuron
+                                           device:(id <MTLDevice>)device
+                                          weights:(const float *)weights
+                                             bias:(const float *)bias
+                  destinationFeatureChannelOffset:(uint)offset{
+    
+    // create appropriate convolution descriptor (in fully connected, stride is always 1)
+    MPSCNNConvolutionDescriptor *convDesc;
+    convDesc = [MPSCNNConvolutionDescriptor cnnConvolutionDescriptorWithKernelWidth:kernelSize
+                                                                       kernelHeight:kernelSize
+                                                               inputFeatureChannels:inChannels
+                                                              outputFeatureChannels:outChannels
+                                                                       neuronFilter:neuron];
+    self = [super initWithDevice:device
+           convolutionDescriptor:convDesc
+                   kernelWeights:weights
+                       biasTerms:bias
+                           flags:MPSCNNConvolutionFlagsNone];
+    self.destinationFeatureChannelOffset = offset;
+    
+    return self;
+}
+
 @end
 
 @implementation SlimMPSCNNPoolingMax
@@ -136,6 +202,21 @@ MPS_SWIFT_NAME(encode(commandBuffer:sourceImage:destinationImage:)) {
                         kernelHeight:kernelHeight
                      strideInPixelsX:strideInPixelsX
                      strideInPixelsY:strideInPixelsY]) {
+        _padding = willPad;
+    }
+    
+    return self;
+}
+
+- (SlimMPSCNNPoolingMax *) initWithDevice:(id <MTLDevice>)device
+                               kernelSize:(NSUInteger)kernelSize
+                                   stride:(NSUInteger)stride
+                                  willPad:(BOOL)willPad {
+    if (self = [super initWithDevice:device
+                         kernelWidth:kernelSize
+                        kernelHeight:kernelSize
+                     strideInPixelsX:stride
+                     strideInPixelsY:stride]) {
         _padding = willPad;
     }
     
@@ -182,6 +263,25 @@ MPS_SWIFT_NAME(encode(commandBuffer:sourceImage:destinationImage:)) {
     if (self = [super initWithDevice:device
                          kernelWidth:kernelWidth
                         kernelHeight:kernelHeight
+                     strideInPixelsX:0
+                     strideInPixelsY:0]) {
+        MPSOffset offset;
+        offset.x = self.kernelWidth / 2;
+        offset.y = self.kernelHeight / 2;
+        offset.z = 0;
+        self.offset = offset;
+        
+        self.edgeMode = MPSImageEdgeModeClamp;
+    }
+    
+    return self;
+}
+
+- (SlimMPSCNNPoolingGlobalAverage *) initWithDevice:(id <MTLDevice>)device
+                                         kernelSize:(NSUInteger)kernelSize{
+    if (self = [super initWithDevice:device
+                         kernelWidth:kernelSize
+                        kernelHeight:kernelSize
                      strideInPixelsX:0
                      strideInPixelsY:0]) {
         MPSOffset offset;

@@ -27,6 +27,18 @@
                 destinationFeatureChannelOffset:(uint)offset
                                           group:(uint)group;
 
+- (SlimMPSCNNConvolution *) initWithKernelSize:(uint)kernelSize
+                          inputFeatureChannels:(uint)inChannels
+                         outputFeatureChannels:(uint)outChannels
+                                        neuron:(MPSCNNNeuron *)neuron
+                                        device:(id <MTLDevice>)device
+                                       weights:(const float *)weights
+                                          bias:(const float *)bias
+                                       willPad:(BOOL)willPad
+                                        stride:(uint)stride
+               destinationFeatureChannelOffset:(uint)offset
+                                         group:(uint)group;
+
 @end
 
 @interface SlimMPSCNNFullyConnected : MPSCNNFullyConnected
@@ -41,6 +53,15 @@
                                               bias:(const float *)bias
                    destinationFeatureChannelOffset:(uint)offset;
 
+- (SlimMPSCNNFullyConnected *) initWithKernelSize:(uint)kernelSize
+                             inputFeatureChannels:(uint)inChannels
+                            outputFeatureChannels:(uint)outChannels
+                                           neuron:(MPSCNNNeuron *)neuron
+                                           device:(id <MTLDevice>)device
+                                          weights:(const float *)weights
+                                             bias:(const float *)bias
+                  destinationFeatureChannelOffset:(uint)offset;
+
 @end
 
 @interface SlimMPSCNNPoolingMax : MPSCNNPoolingMax
@@ -54,6 +75,11 @@
                           strideInPixelsY:(NSUInteger)strideInPixelsY
                                   willPad:(BOOL)willPad;
 
+- (SlimMPSCNNPoolingMax *) initWithDevice:(id <MTLDevice>)device
+                               kernelSize:(NSUInteger)kernelSize
+                                   stride:(NSUInteger)stride
+                                  willPad:(BOOL)willPad;
+
 @end
 
 @interface SlimMPSCNNPoolingGlobalAverage : MPSCNNPoolingAverage
@@ -61,6 +87,9 @@
 - (SlimMPSCNNPoolingGlobalAverage *) initWithDevice:(id <MTLDevice>)device
                                         kernelWidth:(NSUInteger)kernelWidth
                                        kernelHeight:(NSUInteger)kernelHeight;
+
+- (SlimMPSCNNPoolingGlobalAverage *) initWithDevice:(id <MTLDevice>)device
+                                         kernelSize:(NSUInteger)kernelSize;
 
 @end
 

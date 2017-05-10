@@ -8,10 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <MetalKit/MetalKit.h>
-#import <MetalPerformanceShaders/MetalPerformanceShaders.h>
-#import "AlexNet.h"
-#import "GoogleNet.h"
-#import "SqueezeNet.h"
+#import "GeneralNet.h"
 
 @interface ViewController : UIViewController
 
@@ -20,13 +17,9 @@
 @property (weak, nonatomic) IBOutlet UIImageView *predictView;
 
 // some properties used to control the app and store appropriate values
-@property (strong, nonatomic) AlexNet *alexnet;
-@property (strong, nonatomic) GoogleNet *googlenet;
-@property (strong, nonatomic) SqueezeNet *squeezenet;
-@property (strong, nonatomic) id <MTLDevice> device;
-@property (strong, nonatomic) id <MTLCommandQueue> commandQueue;
-@property (strong, nonatomic) id <MTLTexture> sourceTexture;
-@property (strong, nonatomic) MTKTextureLoader *textureLoader;
+@property (strong, nonatomic) GeneralNet *alexnet;
+@property (strong, nonatomic) GeneralNet *googlenet;
+@property (strong, nonatomic) GeneralNet *squeezenet;
 
 @property (assign, nonatomic) NSInteger imageNum;
 @property (assign, nonatomic) NSInteger total;
