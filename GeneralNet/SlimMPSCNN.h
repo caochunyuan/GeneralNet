@@ -13,67 +13,36 @@
 
 @property (nonatomic) BOOL padding;
 
-- (SlimMPSCNNConvolution *) initWithKernelWidth:(uint)width
-                                   kernelHeight:(uint)height
-                           inputFeatureChannels:(uint)inChannels
-                          outputFeatureChannels:(uint)outChannels
-                                         neuron:(MPSCNNNeuron *)neuron
-                                         device:(id <MTLDevice>)device
-                                        weights:(const float *)weights
-                                           bias:(const float *)bias
-                                        willPad:(BOOL)willPad
-                                        strideX:(uint)strideX
-                                        strideY:(uint)strideY
-                destinationFeatureChannelOffset:(uint)offset
-                                          group:(uint)group;
-
-- (SlimMPSCNNConvolution *) initWithKernelSize:(uint)kernelSize
-                          inputFeatureChannels:(uint)inChannels
-                         outputFeatureChannels:(uint)outChannels
+- (SlimMPSCNNConvolution *) initWithKernelSize:(NSUInteger)kernelSize
+                          inputFeatureChannels:(NSUInteger)inChannels
+                         outputFeatureChannels:(NSUInteger)outChannels
                                         neuron:(MPSCNNNeuron *)neuron
                                         device:(id <MTLDevice>)device
                                        weights:(const float *)weights
                                           bias:(const float *)bias
                                        willPad:(BOOL)willPad
-                                        stride:(uint)stride
-               destinationFeatureChannelOffset:(uint)offset
-                                         group:(uint)group;
+                                        stride:(NSUInteger)stride
+               destinationFeatureChannelOffset:(NSUInteger)offset
+                                         group:(NSUInteger)group;
 
 @end
 
 @interface SlimMPSCNNFullyConnected : MPSCNNFullyConnected
 
-- (SlimMPSCNNFullyConnected *) initWithKernelWidth:(uint)width
-                                      kernelHeight:(uint)height
-                              inputFeatureChannels:(uint)inChannels
-                             outputFeatureChannels:(uint)outChannels
-                                            neuron:(MPSCNNNeuron *)neuron
-                                            device:(id <MTLDevice>)device
-                                           weights:(const float *)weights
-                                              bias:(const float *)bias
-                   destinationFeatureChannelOffset:(uint)offset;
-
-- (SlimMPSCNNFullyConnected *) initWithKernelSize:(uint)kernelSize
-                             inputFeatureChannels:(uint)inChannels
-                            outputFeatureChannels:(uint)outChannels
+- (SlimMPSCNNFullyConnected *) initWithKernelSize:(NSUInteger)kernelSize
+                             inputFeatureChannels:(NSUInteger)inChannels
+                            outputFeatureChannels:(NSUInteger)outChannels
                                            neuron:(MPSCNNNeuron *)neuron
                                            device:(id <MTLDevice>)device
                                           weights:(const float *)weights
                                              bias:(const float *)bias
-                  destinationFeatureChannelOffset:(uint)offset;
+                  destinationFeatureChannelOffset:(NSUInteger)offset;
 
 @end
 
 @interface SlimMPSCNNPoolingMax : MPSCNNPoolingMax
 
 @property (nonatomic) BOOL padding;
-
-- (SlimMPSCNNPoolingMax *) initWithDevice:(id <MTLDevice>)device
-                              kernelWidth:(NSUInteger)kernelWidth
-                             kernelHeight:(NSUInteger)kernelHeight
-                          strideInPixelsX:(NSUInteger)strideInPixelsX
-                          strideInPixelsY:(NSUInteger)strideInPixelsY
-                                  willPad:(BOOL)willPad;
 
 - (SlimMPSCNNPoolingMax *) initWithDevice:(id <MTLDevice>)device
                                kernelSize:(NSUInteger)kernelSize
@@ -85,10 +54,6 @@
 @interface SlimMPSCNNPoolingGlobalAverage : MPSCNNPoolingAverage
 
 - (SlimMPSCNNPoolingGlobalAverage *) initWithDevice:(id <MTLDevice>)device
-                                        kernelWidth:(NSUInteger)kernelWidth
-                                       kernelHeight:(NSUInteger)kernelHeight;
-
-- (SlimMPSCNNPoolingGlobalAverage *) initWithDevice:(id <MTLDevice>)device
                                          kernelSize:(NSUInteger)kernelSize;
 
 @end
@@ -96,7 +61,7 @@
 @interface SlimMPSCNNLocalResponseNormalization : MPSCNNCrossChannelNormalization
 
 - (SlimMPSCNNLocalResponseNormalization *) initWithDevice:(id <MTLDevice>)device
-                                                localSize:(uint)localSize
+                                                localSize:(NSUInteger)localSize
                                                     alpha:(float)alpha
                                                      beta:(float)beta;
 
