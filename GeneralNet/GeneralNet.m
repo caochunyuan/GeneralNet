@@ -193,16 +193,27 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
     @autoreleasepool {
         id <MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
         
+#if ALLOW_PRINT
+        [MPSTemporaryImage prefetchStorageWithCommandBuffer:commandBuffer imageDescriptorList:@[_input_id, _input_id]];
+#else
         [MPSTemporaryImage prefetchStorageWithCommandBuffer:commandBuffer imageDescriptorList:_prefetchList];
+#endif
         
         MPSTemporaryImage *srcImage = [MPSTemporaryImage temporaryImageWithCommandBuffer:commandBuffer imageDescriptor:_input_id];
         MPSTemporaryImage *preImage = [MPSTemporaryImage temporaryImageWithCommandBuffer:commandBuffer imageDescriptor:_input_id];
         
         // create MPSTemporaryImage for inside layers
         for (GeneralLayer *layer in _tempImageList) {
+#if ALLOW_PRINT
+            if (!layer.outputImage) {
+                layer.outputImage = [[MPSImage alloc] initWithDevice:_device
+                                                     imageDescriptor:layer.imageDescriptor];
+            }
+#else
             MPSTemporaryImage *tempImage = [MPSTemporaryImage temporaryImageWithCommandBuffer:commandBuffer imageDescriptor:layer.imageDescriptor];
             tempImage.readCount = layer.readCount;
             layer.outputImage = tempImage;
+#endif
         }
         
         // scale input image to 227x227
@@ -236,6 +247,15 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         [commandBuffer commit];
         [commandBuffer waitUntilCompleted];
         
+#if ALLOW_PRINT
+        for (NSArray *triplet in _encodeSequence) {
+            if (((GeneralLayer *)triplet[2]).outputImage) {
+                [self printImage:((GeneralLayer *)triplet[2]).outputImage
+                         ofLayer:((GeneralLayer *)triplet[2]).name];
+            }
+        }
+#endif
+        
         return [self getTopProbs];
     }
 }
@@ -248,12 +268,8 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
     NSUInteger count = _dstImage.texture.width * _dstImage.texture.height * _dstImage.featureChannels;
     NSUInteger channelsPerSlice = 4;    // textures are in RGBA format
     
-    uint16_t *output = malloc(sizeof(uint16_t) * count);
-    float *outputF = malloc(sizeof(float) * count);
-    for (int i = 0; i < count; i++) {
-        output[i] = 3;
-        outputF[i] = 0.6;
-    }
+    uint16_t *output = calloc(count, sizeof(uint16_t));
+    float *outputF = calloc(count, sizeof(float));
     
     // get probabilities of each label in UIn16 array we use this to contain float16s
     for (int i = 0; i < numSlices; i++) {
@@ -293,7 +309,62 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         returnString = [NSString stringWithFormat:@"%@%3.2f%%: %@\n", returnString, [(NSNumber *)probAndIndex[0] floatValue] * 100, _labels[[(NSNumber *)probAndIndex[1] intValue]]];
     }
     
+    free(output);
+    free(outputF);
+    
     return returnString;
 }
+
+#if ALLOW_PRINT
+- (void)printImage:(MPSImage *)image ofLayer:(NSString *)layer {
+    NSLog(@"Now comes %@",layer);
+    
+    NSUInteger width = image.width;
+    NSUInteger height = image.height;
+    NSUInteger numSlices = (image.featureChannels + 3) / 4;
+    NSUInteger count = image.texture.width * image.texture.height * image.featureChannels;
+    NSUInteger channelsPerSlice = 4;    // textures are in RGBA format
+    
+    uint16_t *output = calloc(count, sizeof(uint16_t));
+    float *outputF = calloc(count, sizeof(float));
+    
+    // get probabilities of each label in UIn16 array we use this to contain float16s
+    for (int i = 0; i < numSlices; i++) {
+        [image.texture getBytes:&output[height * width * channelsPerSlice * i]
+                    bytesPerRow:sizeof(uint16_t) * width * channelsPerSlice
+                  bytesPerImage:0
+                     fromRegion:MTLRegionMake3D(0, 0, 0, width, height, 1)
+                    mipmapLevel:0
+                          slice:i];
+    }
+    
+    // use VImage to convert Float16 to Float32 so we can use them
+    vImage_Buffer fullResultVImagebuf = {outputF, 1, count, count * 4};
+    vImage_Buffer halfResultVImagebuf = {output, 1, count, count * 2};
+    
+    if(vImageConvert_Planar16FtoPlanarF(&halfResultVImagebuf, &fullResultVImagebuf, 0) != kvImageNoError){
+        NSLog(@"Error in vImage");
+    }
+    
+    for (int i = 0; i < 8; i++) {
+        printf("%d: %f\n", i, outputF[i]);
+    }
+    
+    float sum = 0.0f;
+    for (int i = 0; i < count; i++) {
+        sum += fabsf(outputF[i]);
+    }
+    printf("sum: %f\n",sum);
+    
+    float sqr = 0.0f;
+    for (int i = 0; i < count; i++) {
+        sqr += powf(outputF[i], 2);
+    }
+    printf("square: %f\n",sqr);
+    
+    free(output);
+    free(outputF);
+}
+#endif
 
 @end

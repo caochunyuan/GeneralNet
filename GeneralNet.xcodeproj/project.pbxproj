@@ -56,6 +56,7 @@
 		BD1633841EB1B2C8009A3CD5 /* params_squeezenet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = params_squeezenet.dat; sourceTree = "<group>"; };
 		BD2190041EC1C66200DB2E29 /* GeneralNet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeneralNet.h; sourceTree = "<group>"; };
 		BD2190051EC1C66200DB2E29 /* GeneralNet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneralNet.m; sourceTree = "<group>"; };
+		BD5AE7C81EC77AFB00A2BD5F /* GlobalHeader.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GlobalHeader.pch; sourceTree = "<group>"; };
 		BD5F17991EC3322E00A5578B /* googlenet.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = googlenet.json; sourceTree = "<group>"; };
 		BD5F179B1EC332AE00A5578B /* alexnet.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = alexnet.json; sourceTree = "<group>"; };
 		BD5F179C1EC332AE00A5578B /* squeezenet.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = squeezenet.json; sourceTree = "<group>"; };
@@ -149,6 +150,7 @@
 				BD2190051EC1C66200DB2E29 /* GeneralNet.m */,
 				BD87B7811EA600A300DF731C /* Shaders.metal */,
 				BD87B7511EA6006C00DF731C /* Main.storyboard */,
+				BD5AE7C81EC77AFB00A2BD5F /* GlobalHeader.pch */,
 				BD5F179B1EC332AE00A5578B /* alexnet.json */,
 				BD5F17991EC3322E00A5578B /* googlenet.json */,
 				BD5F179C1EC332AE00A5578B /* squeezenet.json */,
@@ -514,6 +516,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = H932E53VEH;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/GeneralNet/GlobalHeader.pch";
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "";
 				INFOPLIST_FILE = GeneralNet/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = Lun.GeneralNet;
@@ -526,6 +531,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = H932E53VEH;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/GeneralNet/GlobalHeader.pch";
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "";
 				INFOPLIST_FILE = GeneralNet/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = Lun.GeneralNet;

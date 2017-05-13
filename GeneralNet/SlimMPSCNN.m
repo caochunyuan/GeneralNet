@@ -55,10 +55,10 @@
 MPS_SWIFT_NAME(encode(commandBuffer:sourceImage:destinationImage:)) {
     
     if (_padding) {
-        long int pad_along_height = ((destinationImage.height - 1) * self.strideInPixelsY + self.kernelHeight - sourceImage.height);
-        long int pad_along_width = ((destinationImage.width - 1) * self.strideInPixelsX + self.kernelWidth - sourceImage.width);
-        long int pad_top = pad_along_height / 2;
-        long int pad_left = pad_along_width / 2;
+        NSUInteger pad_along_height = ((destinationImage.height - 1) * self.strideInPixelsY + self.kernelHeight - sourceImage.height);
+        NSUInteger pad_along_width = ((destinationImage.width - 1) * self.strideInPixelsX + self.kernelWidth - sourceImage.width);
+        NSUInteger pad_top = pad_along_height / 2;
+        NSUInteger pad_left = pad_along_width / 2;
         
         MPSOffset offset;
         offset.x = self.kernelWidth / 2 - pad_left;
@@ -136,10 +136,10 @@ MPS_SWIFT_NAME(encode(commandBuffer:sourceImage:destinationImage:)) {
 MPS_SWIFT_NAME(encode(commandBuffer:sourceImage:destinationImage:)) {
     
     if (_padding) {
-        long int pad_along_height = ((destinationImage.height - 1) * self.strideInPixelsY + self.kernelHeight - sourceImage.height);
-        long int pad_along_width = ((destinationImage.width - 1) * self.strideInPixelsX + self.kernelWidth - sourceImage.width);
-        long int pad_top = pad_along_height / 2;
-        long int pad_left = pad_along_width / 2;
+        NSUInteger pad_along_height = ((destinationImage.height - 1) * self.strideInPixelsY + self.kernelHeight - sourceImage.height);
+        NSUInteger pad_along_width = ((destinationImage.width - 1) * self.strideInPixelsX + self.kernelWidth - sourceImage.width);
+        NSUInteger pad_top = pad_along_height / 2;
+        NSUInteger pad_left = pad_along_width / 2;
         
         MPSOffset offset;
         offset.x = self.kernelWidth / 2 - pad_left;
