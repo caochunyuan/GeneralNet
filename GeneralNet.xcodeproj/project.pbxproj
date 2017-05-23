@@ -33,6 +33,7 @@
 		BD87B7C51EA6013000DF731C /* final6.jpg in Resources */ = {isa = PBXBuildFile; fileRef = BD87B7BD1EA6013000DF731C /* final6.jpg */; };
 		BD9593901EAAE8C80095F009 /* final0.jpg in Resources */ = {isa = PBXBuildFile; fileRef = BD95938F1EAAE8C80095F009 /* final0.jpg */; };
 		BDB3DE081ECF04FF00F9B865 /* final9.jpg in Resources */ = {isa = PBXBuildFile; fileRef = BDB3DE071ECF04FF00F9B865 /* final9.jpg */; };
+		BDCE1C681ED3E928006BBD69 /* CPULayer.m in Sources */ = {isa = PBXBuildFile; fileRef = BDCE1C671ED3E928006BBD69 /* CPULayer.m */; };
 		BDF651A91EB06783009E35A6 /* metal_googlenet.dat in Resources */ = {isa = PBXBuildFile; fileRef = BDF651A81EB06783009E35A6 /* metal_googlenet.dat */; };
 /* End PBXBuildFile section */
 
@@ -91,6 +92,11 @@
 		BD87B7BD1EA6013000DF731C /* final6.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = final6.jpg; sourceTree = "<group>"; };
 		BD95938F1EAAE8C80095F009 /* final0.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = final0.jpg; sourceTree = "<group>"; };
 		BDB3DE071ECF04FF00F9B865 /* final9.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = final9.jpg; sourceTree = "<group>"; };
+		BDCE1C661ED3E928006BBD69 /* CPULayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPULayer.h; sourceTree = "<group>"; };
+		BDCE1C671ED3E928006BBD69 /* CPULayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CPULayer.m; sourceTree = "<group>"; };
+		BDCE1C691ED3FF37006BBD69 /* cpu_alexnet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = cpu_alexnet.dat; sourceTree = "<group>"; };
+		BDCE1C6A1ED3FF4B006BBD69 /* cpu_googlenet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = cpu_googlenet.dat; sourceTree = "<group>"; };
+		BDCE1C6B1ED3FF60006BBD69 /* cpu_squeezenet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = cpu_squeezenet.dat; sourceTree = "<group>"; };
 		BDF651A81EB06783009E35A6 /* metal_googlenet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = metal_googlenet.dat; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -146,10 +152,12 @@
 				BD87B74C1EA6006C00DF731C /* AppDelegate.m */,
 				BD87B77B1EA600A300DF731C /* ViewController.h */,
 				BD87B77C1EA600A300DF731C /* ViewController.m */,
-				BD87B77F1EA600A300DF731C /* SlimMPSCNN.h */,
-				BD87B7801EA600A300DF731C /* SlimMPSCNN.m */,
 				BD2190041EC1C66200DB2E29 /* GeneralNet.h */,
 				BD2190051EC1C66200DB2E29 /* GeneralNet.m */,
+				BD87B77F1EA600A300DF731C /* SlimMPSCNN.h */,
+				BD87B7801EA600A300DF731C /* SlimMPSCNN.m */,
+				BDCE1C661ED3E928006BBD69 /* CPULayer.h */,
+				BDCE1C671ED3E928006BBD69 /* CPULayer.m */,
 				BD87B7811EA600A300DF731C /* Shaders.metal */,
 				BD87B7511EA6006C00DF731C /* Main.storyboard */,
 				BD5AE7C81EC77AFB00A2BD5F /* GlobalHeader.pch */,
@@ -159,6 +167,9 @@
 				BD87B7861EA600F600DF731C /* metal_alexnet.dat */,
 				BDF651A81EB06783009E35A6 /* metal_googlenet.dat */,
 				BD1633841EB1B2C8009A3CD5 /* metal_squeezenet.dat */,
+				BDCE1C691ED3FF37006BBD69 /* cpu_alexnet.dat */,
+				BDCE1C6A1ED3FF4B006BBD69 /* cpu_googlenet.dat */,
+				BDCE1C6B1ED3FF60006BBD69 /* cpu_squeezenet.dat */,
 				BD87B7541EA6006C00DF731C /* Assets.xcassets */,
 				BD87B7561EA6006C00DF731C /* LaunchScreen.storyboard */,
 				BD87B7591EA6006C00DF731C /* Info.plist */,
@@ -368,6 +379,7 @@
 				BD87B7841EA600A300DF731C /* SlimMPSCNN.m in Sources */,
 				BD2190061EC1C66200DB2E29 /* GeneralNet.m in Sources */,
 				BD87B74D1EA6006C00DF731C /* AppDelegate.m in Sources */,
+				BDCE1C681ED3E928006BBD69 /* CPULayer.m in Sources */,
 				BD87B74A1EA6006C00DF731C /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -224,7 +224,7 @@ def generate_param_txt(prototxt_path, labels_path, json_file_name):
                           param.kernel_size[0] * param.kernel_size[0] / param.group
             bias_size = layer.out_channel
 
-            layer.param_dict = {'type': 'Convolution',
+            layer.param_dict = {'layer_type': 'Convolution',
                                 'kernel_size': param.kernel_size[0],
                                 'weight_offset': data_file_offset,
                                 'bias_offset': data_file_offset + weight_size,
@@ -246,7 +246,7 @@ def generate_param_txt(prototxt_path, labels_path, json_file_name):
             weight_size = layer.in_channel * layer.out_channel * kernel_size * kernel_size
             bias_size = layer.out_channel
 
-            layer.param_dict = {'type': 'FullyConnected',
+            layer.param_dict = {'layer_type': 'FullyConnected',
                                 'kernel_size': kernel_size,
                                 'weight_offset': data_file_offset,
                                 'bias_offset': data_file_offset + weight_size,
@@ -259,7 +259,7 @@ def generate_param_txt(prototxt_path, labels_path, json_file_name):
         elif layer.type == LayerType.pmax:
             param = layer.layer_param.pooling_param
 
-            layer.param_dict = {'type': 'PoolingMax',
+            layer.param_dict = {'layer_type': 'PoolingMax',
                                 'kernel_size': param.kernel_size,
                                 'stride': param.stride,
                                 'pad': (param.pad or 0)
@@ -275,13 +275,13 @@ def generate_param_txt(prototxt_path, labels_path, json_file_name):
                         in_size = bottom_layer.out_size
                         break
 
-                layer.param_dict = {'type': 'PoolingAverage',
+                layer.param_dict = {'layer_type': 'PoolingAverage',
                                     'global': True,
                                     'kernel_size': in_size
                                     }
 
             else:
-                layer.param_dict = {'type': 'PoolingAverage',
+                layer.param_dict = {'layer_type': 'PoolingAverage',
                                     'global': False,
                                     'kernel_size': param.kernel_size,
                                     'stride': param.stride
@@ -290,18 +290,18 @@ def generate_param_txt(prototxt_path, labels_path, json_file_name):
         elif layer.type == LayerType.lrn:
             param = layer.layer_param.lrn_param
 
-            layer.param_dict = {'type': 'LocalResponseNormalization',
+            layer.param_dict = {'layer_type': 'LocalResponseNormalization',
                                 'local_size': param.local_size,
                                 'alpha': param.alpha,
                                 'beta': param.beta
                                 }
 
         elif layer.type == LayerType.sft:
-            layer.param_dict = {'type': 'SoftMax',
+            layer.param_dict = {'layer_type': 'SoftMax',
                                 }
 
         elif layer.type == LayerType.concat:
-            layer.param_dict = {'type': 'Concat',
+            layer.param_dict = {'layer_type': 'Concat',
                                 'bottom_layer': [name for name in concat_name_dict[layer.name]]
                                 }
 

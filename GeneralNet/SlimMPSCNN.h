@@ -54,7 +54,7 @@
 @interface SlimMPSCNNPoolingGlobalAverage : MPSCNNPoolingAverage
 
 - (SlimMPSCNNPoolingGlobalAverage *) initWithDevice:(id <MTLDevice>)device
-                                         kernelSize:(NSUInteger)kernelSize;
+                                          inputSize:(NSUInteger)inputSize;
 
 @end
 

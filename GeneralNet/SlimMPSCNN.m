@@ -164,10 +164,10 @@ MPS_SWIFT_NAME(encode(commandBuffer:sourceImage:destinationImage:)) {
 @implementation SlimMPSCNNPoolingGlobalAverage
 
 - (SlimMPSCNNPoolingGlobalAverage *) initWithDevice:(id <MTLDevice>)device
-                                         kernelSize:(NSUInteger)kernelSize{
+                                          inputSize:(NSUInteger)inputSize{
     if (self = [super initWithDevice:device
-                         kernelWidth:kernelSize
-                        kernelHeight:kernelSize
+                         kernelWidth:inputSize
+                        kernelHeight:inputSize
                      strideInPixelsX:0
                      strideInPixelsY:0]) {
         MPSOffset offset;

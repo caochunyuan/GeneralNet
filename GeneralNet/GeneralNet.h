@@ -6,6 +6,7 @@
 //  Copyright © 2017年 Lun. All rights reserved.
 //
 
+#pragma mark - if use Metal
 #if USE_METAL
 
 #import <Foundation/Foundation.h>
@@ -44,9 +45,9 @@
 @property (strong, nonatomic) MPSImageLanczosScale *lanczos;
 @property (strong, nonatomic) MPSImageDescriptor *input_id;
 @property (strong, nonatomic) MPSImage *dstImage;
+
 @property (strong, nonatomic) GeneralLayer *firstLayer;
 @property (strong, nonatomic) NSString *lastLayerName;
-
 @property (strong, nonatomic) NSArray *labels;
 @property (strong, nonatomic) NSMutableDictionary *layersDict;
 @property (strong, nonatomic) NSMutableArray *encodeSequence;
@@ -59,8 +60,31 @@
 
 @end
 
+#pragma mark - if not use Metal
 #else
 
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+#import <Accelerate/Accelerate.h>
+#import <sys/mman.h>
+#import "CPULayer.h"
 
+@interface GeneralNet : NSObject
+
+@property (assign, nonatomic) float *basePtr;
+@property (assign, nonatomic) int fd;
+
+@property (assign, nonatomic) float *dstPtr;
+@property (strong, nonatomic) CPULayer *firstLayer;
+@property (strong, nonatomic) NSString *lastLayerName;
+@property (strong, nonatomic) NSArray *labels;
+@property (strong, nonatomic) NSMutableDictionary *layersDict;
+@property (strong, nonatomic) NSMutableArray *encodeSequence;
+
+- (instancetype)initWithDescriptionFile:(NSString *)descriptionFile
+                               dataFile:(NSString *)dataFile;
+- (NSString *)forwardWithImage:(UIImage *)image;
+
+@end
 
 #endif

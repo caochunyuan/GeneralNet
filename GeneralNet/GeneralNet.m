@@ -8,6 +8,7 @@
 
 #import "GeneralNet.h"
 
+#pragma mark - if use Metal
 #if USE_METAL
 
 @implementation GeneralLayer
@@ -104,7 +105,7 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
 - (void)constructLayersFromInfo:(NSArray *)layers {
     for (NSDictionary *layer in layers) {
         NSString *layerName = layer[@"name"];
-        NSString *layerType = layer[@"type"];
+        NSString *layerType = layer[@"layer_type"];
         NSString *imageType = layer[@"image_type"];
         
         // construct kernel
@@ -140,7 +141,7 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         } else if ([layerType isEqualToString:@"PoolingAverage"]) {
             if ((BOOL)layer[@"global"]) {
                 kernel = [[SlimMPSCNNPoolingGlobalAverage alloc] initWithDevice:_device
-                                                                     kernelSize:[(NSNumber *)layer[@"kernel_size"] intValue]];
+                                                                      inputSize:[(NSNumber *)layer[@"input_size"] intValue]];
             } else {
                 kernel = [[MPSCNNPoolingAverage alloc] initWithDevice:_device
                                                           kernelWidth:[(NSNumber *)layer[@"kernel_size"] intValue]
@@ -373,6 +374,116 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
 
 @end
 
+#pragma mark - if not use Metal
 #else
+
+@implementation GeneralNet
+
+- (instancetype)initWithDescriptionFile:(NSString *)descriptionFile
+                               dataFile:(NSString *)dataFile {
+    if (self = [super init]) {
+        
+        // read JSON file
+        NSData *jsonData = [NSData dataWithContentsOfFile:descriptionFile];
+        NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:NULL];
+        
+        NSDictionary *inoutInfo = jsonDict[@"inout_info"];
+        NSArray *layerInfo = jsonDict[@"layer_info"];
+        NSArray *encodeSeq = jsonDict[@"encode_seq"];
+        
+        // read parameters
+        _fd = open([dataFile UTF8String], O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+        NSAssert(_fd != -1, @"Error: failed to open params file with errno = %d", errno);
+        
+        _basePtr = mmap(nil, [(NSNumber *)inoutInfo[@"file_size"] unsignedIntegerValue], PROT_READ, MAP_FILE | MAP_SHARED, _fd, 0);
+        NSAssert(_basePtr, @"Error: mmap failed with errno = %d", errno);
+        
+        // construct layers and encode sequence
+        _lastLayerName = inoutInfo[@"last_layer"];
+        [self constructLayersFromInfo:layerInfo];
+        _firstLayer = _layersDict[inoutInfo[@"first_layer"]];
+        for (NSArray *triplet in encodeSeq) {
+            [_encodeSequence addObject:_layersDict[triplet[0]]];
+        }
+    }
+    
+    return self;
+}
+
+- (void)constructLayersFromInfo:(NSArray *)layers {
+    for (NSDictionary *layer in layers) {
+        NSString *layerName = layer[@"name"];
+        NSString *layerType = layer[@"layer_type"];
+        NSString *imageType = layer[@"image_type"];
+        
+        CPULayer *cpuLayer;
+        
+        // construct forward method
+        if ([layerType isEqualToString:@"Convolution"]) {
+            cpuLayer = [[CPUConvolutionLayer alloc] initWithName:layerName
+                                                          weight:_basePtr + [(NSNumber *)layer[@"weight_offset"] intValue]
+                                                            bias:_basePtr + [(NSNumber *)layer[@"bias_offset"] intValue]
+                                                           group:[(NSNumber *)layer[@"group"] intValue]
+                                                    inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]
+                                                   outputChannel:[(NSNumber *)layer[@"output_channel"] intValue]
+                                                       inputSize:[(NSNumber *)layer[@"input_size"] intValue]
+                                                      outputSize:[(NSNumber *)layer[@"output_size"] intValue]
+                                                      kernelSize:[(NSNumber *)layer[@"kernel_size"] intValue]
+                                                             pad:[(NSNumber *)layer[@"pad"] intValue]
+                                                          stride:[(NSNumber *)layer[@"stride"] intValue]
+                                                          doReLU:[(NSString *)layer[@"activation"] isEqualToString:@"ReLU"]? YES : NO];
+        } else if ([layerType isEqualToString:@"FullyConnected"]) {
+            cpuLayer = [[CPUFullyConnectedLayer alloc] initWithName:layerName
+                                                             weight:_basePtr + [(NSNumber *)layer[@"weight_offset"] intValue]
+                                                               bias:_basePtr + [(NSNumber *)layer[@"bias_offset"] intValue]
+                                                       inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]
+                                                      outputChannel:[(NSNumber *)layer[@"output_channel"] intValue]
+                                                          inputSize:[(NSNumber *)layer[@"input_size"] intValue]
+                                                             doReLU:[(NSString *)layer[@"activation"] isEqualToString:@"ReLU"]? YES : NO];
+        }
+    }
+}
+
+- (NSString *)forwardWithImage:(UIImage *)image {
+    for (CPULayer *layer in _encodeSequence) {
+        [layer forward];
+    }
+    
+    return [self getTopProbs];
+}
+
+- (NSString *)getTopProbs {
+    
+    // copy output probabilities into an array of touples of (probability, index)
+    NSMutableArray *indexedProbabilities = [[NSMutableArray alloc] initWithCapacity:_labels.count];
+    for (int i = 0; i < _labels.count; i++) {
+        [indexedProbabilities addObject:@[@(_dstPtr[i]), @(i)]];
+    }
+    
+    // sort the touple array to have top5 guesses in the front
+    NSArray *sortedIndexedProbabilities = [indexedProbabilities sortedArrayUsingComparator:^NSComparisonResult(id a, id b) {
+        NSNumber *first = [(NSArray *)a objectAtIndex:0];
+        NSNumber *second = [(NSArray *)b objectAtIndex:0];
+        return [second compare:first];
+    }];
+    
+    // get top 5 valid guesses and add them to return string with top 5 guesses
+    NSString *returnString = @"";
+    for (int i = 0; i < 5; i++) {
+        NSArray* probAndIndex = sortedIndexedProbabilities[i];
+        returnString = [NSString stringWithFormat:@"%@%3.2f%%: %@\n", returnString, [(NSNumber *)probAndIndex[0] floatValue] * 100, _labels[[(NSNumber *)probAndIndex[1] intValue]]];
+    }
+    
+    return returnString;
+}
+
+- (void)dealloc {
+    
+    // close file
+    NSAssert(munmap(_basePtr, [(NSNumber *)inoutInfo[@"file_size"] unsignedIntegerValue]) == 0, @"Error: munmap failed with errno = %d", errno);
+    close(_fd);
+}
+
+@end
 
 #endif

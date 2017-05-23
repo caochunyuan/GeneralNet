@@ -32,7 +32,12 @@
     _squeezenet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"squeezenet" ofType:@"json"]
                                                      dataFile:[[NSBundle mainBundle] pathForResource:@"metal_squeezenet" ofType:@"dat"]];
 #else
-    
+    _alexnet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"alexnet" ofType:@"json"]
+                                                  dataFile:[[NSBundle mainBundle] pathForResource:@"cpu_alexnet" ofType:@"dat"]];
+    _googlenet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"googlenet" ofType:@"json"]
+                                                    dataFile:[[NSBundle mainBundle] pathForResource:@"cpu_googlenet" ofType:@"dat"]];
+    _squeezenet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"squeezenet" ofType:@"json"]
+                                                     dataFile:[[NSBundle mainBundle] pathForResource:@"cpu_squeezenet" ofType:@"dat"]];
 #endif
     
     _predictView.image = [UIImage imageNamed:[[@"final" stringByAppendingString:@(_imageNum).stringValue] stringByAppendingString:@".jpg"]];
@@ -45,6 +50,8 @@
     
 #if USE_METAL
     NSLog(@"Using Metal");
+#else
+    NSLog(@"Using CPU");
 #endif
 }
 
@@ -84,37 +91,22 @@
 - (IBAction)runAlex:(id)sender {
     
     NSDate *startTime = [NSDate date];
-    
-#if USE_METAL
     _predictLabel.text = [[_alexnet forwardWithImage:self.predictView.image] stringByAppendingFormat:@"\nElapsed time: %.0f millisecs.", -[startTime timeIntervalSinceNow] * 1000];
     _predictLabel.hidden = NO;
-#else
-    
-#endif
 }
 
 - (IBAction)runGoogle:(id)sender {
     
     NSDate *startTime = [NSDate date];
-    
-#if USE_METAL
     _predictLabel.text = [[_googlenet forwardWithImage:self.predictView.image] stringByAppendingFormat:@"\nElapsed time: %.0f millisecs.", -[startTime timeIntervalSinceNow] * 1000];
     _predictLabel.hidden = NO;
-#else
-    
-#endif
 }
 
 - (IBAction)runSqueeze:(id)sender {
 
     NSDate *startTime = [NSDate date];
-    
-#if USE_METAL
     _predictLabel.text = [[_squeezenet forwardWithImage:self.predictView.image] stringByAppendingFormat:@"\nElapsed time: %.0f millisecs.", -[startTime timeIntervalSinceNow] * 1000];
     _predictLabel.hidden = NO;
-#else
-    
-#endif
 }
 
 @end
