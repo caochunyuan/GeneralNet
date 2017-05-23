@@ -8,6 +8,8 @@
 
 #import "GeneralNet.h"
 
+#if USE_METAL
+
 @implementation GeneralLayer
 
 - (instancetype)initWithName:(NSString *)name
@@ -38,7 +40,7 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         // preparation for Metal
         _device = MTLCreateSystemDefaultDevice();
         
-        NSAssert(MPSSupportsMTLDevice(_device), @"Metal Performance Shaders not Supported on current Device");
+        NSAssert(MPSSupportsMTLDevice(_device), @"Metal Performance Shaders not supported on current device");
         
         _commandQueue = [_device newCommandQueue];
         _textureLoader = [[MTKTextureLoader alloc] initWithDevice:_device];
@@ -155,6 +157,8 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
             kernel = [[MPSCNNSoftMax alloc] initWithDevice:_device];
         } else if ([layerType isEqualToString:@"Concat"]) {
             // does not need a kernel
+        } else {
+            assert("Unsupported layer!");
         }
         
         // construct output image
@@ -368,3 +372,7 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
 #endif
 
 @end
+
+#else
+
+#endif

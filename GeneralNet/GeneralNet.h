@@ -6,6 +6,8 @@
 //  Copyright © 2017年 Lun. All rights reserved.
 //
 
+#if USE_METAL
+
 #import <Foundation/Foundation.h>
 #import <MetalKit/MetalKit.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
@@ -56,3 +58,9 @@
 - (NSString *)forwardWithImage:(UIImage *)image;
 
 @end
+
+#else
+
+
+
+#endif

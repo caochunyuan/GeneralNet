@@ -12,20 +12,23 @@
 
 @interface ViewController : UIViewController
 
-// Outlets to label and view
 @property (weak, nonatomic) IBOutlet UILabel *predictLabel;
 @property (weak, nonatomic) IBOutlet UIImageView *predictView;
 
-// some properties used to control the app and store appropriate values
+#if USE_METAL
 @property (strong, nonatomic) GeneralNet *alexnet;
 @property (strong, nonatomic) GeneralNet *googlenet;
 @property (strong, nonatomic) GeneralNet *squeezenet;
+#else
+
+#endif
 
 @property (assign, nonatomic) NSInteger imageNum;
 @property (assign, nonatomic) NSInteger total;
 
 - (IBAction)swipeLeft:(UISwipeGestureRecognizer *)sender;
 - (IBAction)swipeRight:(UISwipeGestureRecognizer *)sender;
+
 - (IBAction)runAlex:(id)sender;
 - (IBAction)runGoogle:(id)sender;
 - (IBAction)runSqueeze:(id)sender;

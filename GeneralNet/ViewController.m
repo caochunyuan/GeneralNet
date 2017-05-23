@@ -21,19 +21,31 @@
     // Do any additional setup after loading the view, typically from a nib.
     
     _imageNum = 0;
-    _total = 9;
+    _total = 10;
     
     // Load the appropriate Network
+#if USE_METAL
     _alexnet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"alexnet" ofType:@"json"]
-                                                  dataFile:[[NSBundle mainBundle] pathForResource:@"params_alexnet" ofType:@"dat"]];
+                                                  dataFile:[[NSBundle mainBundle] pathForResource:@"metal_alexnet" ofType:@"dat"]];
     _googlenet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"googlenet" ofType:@"json"]
-                                                    dataFile:[[NSBundle mainBundle] pathForResource:@"params_googlenet" ofType:@"dat"]];
+                                                    dataFile:[[NSBundle mainBundle] pathForResource:@"metal_googlenet" ofType:@"dat"]];
     _squeezenet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"squeezenet" ofType:@"json"]
-                                                     dataFile:[[NSBundle mainBundle] pathForResource:@"params_squeezenet" ofType:@"dat"]];
+                                                     dataFile:[[NSBundle mainBundle] pathForResource:@"metal_squeezenet" ofType:@"dat"]];
+#else
     
-    NSString *name = [@"final" stringByAppendingString:@(_imageNum).stringValue];
-    NSURL *URL = [[NSBundle mainBundle] URLForResource:name withExtension:@"jpg"];
-    _predictView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:URL]];
+#endif
+    
+    _predictView.image = [UIImage imageNamed:[[@"final" stringByAppendingString:@(_imageNum).stringValue] stringByAppendingString:@".jpg"]];
+    
+#if ALLOW_PRINT
+    NSLog(@"Print allowed");
+#else
+    NSLog(@"Print forbidden");
+#endif
+    
+#if USE_METAL
+    NSLog(@"Using Metal");
+#endif
 }
 
 - (void)didReceiveMemoryWarning {
@@ -49,11 +61,8 @@
     // get the next image
     _imageNum = (_imageNum + 1) % _total;
     
-    // get appropriate image name and path
-    NSString *name = [@"final" stringByAppendingString:@(_imageNum).stringValue];
-    NSURL *URL = [[NSBundle mainBundle] URLForResource:name withExtension:@"jpg"];
     // display the image in UIImage View
-    _predictView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:URL]];
+    _predictView.image = [UIImage imageNamed:[[@"final" stringByAppendingString:@(_imageNum).stringValue] stringByAppendingString:@".jpg"]];
 }
 
 - (IBAction)swipeRight:(UISwipeGestureRecognizer *)sender {
@@ -68,32 +77,44 @@
         _imageNum = _total - 1;
     }
     
-    // get appropriate image name and path
-    NSString *name = [@"final" stringByAppendingString:@(_imageNum).stringValue];
-    NSURL *URL = [[NSBundle mainBundle] URLForResource:name withExtension:@"jpg"];
     // display the image in UIImage View
-    _predictView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:URL]];
+    _predictView.image = [UIImage imageNamed:[[@"final" stringByAppendingString:@(_imageNum).stringValue] stringByAppendingString:@".jpg"]];
 }
 
 - (IBAction)runAlex:(id)sender {
     
     NSDate *startTime = [NSDate date];
+    
+#if USE_METAL
     _predictLabel.text = [[_alexnet forwardWithImage:self.predictView.image] stringByAppendingFormat:@"\nElapsed time: %.0f millisecs.", -[startTime timeIntervalSinceNow] * 1000];
     _predictLabel.hidden = NO;
+#else
+    
+#endif
 }
 
 - (IBAction)runGoogle:(id)sender {
     
     NSDate *startTime = [NSDate date];
+    
+#if USE_METAL
     _predictLabel.text = [[_googlenet forwardWithImage:self.predictView.image] stringByAppendingFormat:@"\nElapsed time: %.0f millisecs.", -[startTime timeIntervalSinceNow] * 1000];
     _predictLabel.hidden = NO;
+#else
+    
+#endif
 }
 
 - (IBAction)runSqueeze:(id)sender {
 
     NSDate *startTime = [NSDate date];
+    
+#if USE_METAL
     _predictLabel.text = [[_squeezenet forwardWithImage:self.predictView.image] stringByAppendingFormat:@"\nElapsed time: %.0f millisecs.", -[startTime timeIntervalSinceNow] * 1000];
     _predictLabel.hidden = NO;
+#else
+    
+#endif
 }
 
 @end
