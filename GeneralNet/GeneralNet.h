@@ -44,9 +44,8 @@
 @property (strong, nonatomic) MTKTextureLoader *textureLoader;
 @property (strong, nonatomic) MPSImageLanczosScale *lanczos;
 @property (strong, nonatomic) MPSImageDescriptor *input_id;
-@property (strong, nonatomic) MPSImage *dstImage;
 
-@property (strong, nonatomic) GeneralLayer *firstLayer;
+@property (strong, nonatomic) NSString *firstLayerName;
 @property (strong, nonatomic) NSString *lastLayerName;
 @property (strong, nonatomic) NSArray *labels;
 @property (strong, nonatomic) NSMutableDictionary *layersDict;
@@ -73,9 +72,12 @@
 
 @property (assign, nonatomic) float *basePtr;
 @property (assign, nonatomic) int fd;
+@property (assign, nonatomic) size_t fileSize;
+@property (assign, nonatomic) int inputSize;
+@property (assign, nonatomic) unsigned char *imageRawData;
+@property (assign, nonatomic) float *imageData;
 
-@property (assign, nonatomic) float *dstPtr;
-@property (strong, nonatomic) CPULayer *firstLayer;
+@property (strong, nonatomic) NSString *firstLayerName;
 @property (strong, nonatomic) NSString *lastLayerName;
 @property (strong, nonatomic) NSArray *labels;
 @property (strong, nonatomic) NSMutableDictionary *layersDict;

@@ -66,18 +66,11 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         
         // create input id and output image
         _input_id = [MPSImageDescriptor imageDescriptorWithChannelFormat:textureFormat
-                                                                   width:[(NSNumber *)inoutInfo[@"input_size"] intValue]
-                                                                  height:[(NSNumber *)inoutInfo[@"input_size"] intValue]
-                                                         featureChannels:[(NSNumber *)inoutInfo[@"input_channel"] intValue]];
+                                                                   width:[(NSNumber *)inoutInfo[@"input_size"] unsignedIntegerValue]
+                                                                  height:[(NSNumber *)inoutInfo[@"input_size"] unsignedIntegerValue]
+                                                         featureChannels:[(NSNumber *)inoutInfo[@"input_channel"] unsignedIntegerValue]];
         [_prefetchList addObject:_input_id];    // for srcImage
         [_prefetchList addObject:_input_id];    // for preImage
-        
-        _dstImage = [[MPSImage alloc] initWithDevice:_device
-                                     imageDescriptor:[MPSImageDescriptor
-                                                      imageDescriptorWithChannelFormat:textureFormat
-                                                      width:1
-                                                      height:1
-                                                      featureChannels:[(NSNumber *)inoutInfo[@"output_channel"] intValue]]];
         
         // read parameters
         _fd = open([dataFile UTF8String], O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
@@ -88,8 +81,8 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         
         // construct layers and encode sequence
         _lastLayerName = inoutInfo[@"last_layer"];
+        _firstLayerName = inoutInfo[@"first_layer"];
         [self constructLayersFromInfo:layerInfo];
-        _firstLayer = _layersDict[inoutInfo[@"first_layer"]];
         for (NSArray *triplet in encodeSeq) {
             [_encodeSequence addObject:@[_layersDict[triplet[0]], _layersDict[triplet[1]], _layersDict[triplet[2]]]];
         }
@@ -113,45 +106,45 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         MPSCNNNeuronReLU *relu = [[MPSCNNNeuronReLU alloc] initWithDevice:_device a:0];
         
         if ([layerType isEqualToString:@"Convolution"]) {
-            kernel = [[SlimMPSCNNConvolution alloc] initWithKernelSize:[(NSNumber *)layer[@"kernel_size"] intValue]
-                                                  inputFeatureChannels:[(NSNumber *)layer[@"input_channel"] intValue]
-                                                 outputFeatureChannels:[(NSNumber *)layer[@"output_channel"] intValue]
+            kernel = [[SlimMPSCNNConvolution alloc] initWithKernelSize:[(NSNumber *)layer[@"kernel_size"] unsignedIntegerValue]
+                                                  inputFeatureChannels:[(NSNumber *)layer[@"input_channel"] unsignedIntegerValue]
+                                                 outputFeatureChannels:[(NSNumber *)layer[@"output_channel"] unsignedIntegerValue]
                                                                 neuron:[(NSString *)layer[@"activation"] isEqualToString:@"ReLU"]? relu : nil
                                                                 device:_device
-                                                               weights:_basePtr + [(NSNumber *)layer[@"weight_offset"] intValue]
-                                                                  bias:_basePtr + [(NSNumber *)layer[@"bias_offset"] intValue]
-                                                               willPad:[(NSNumber *)layer[@"pad"] intValue] != 0? YES : NO
-                                                                stride:[(NSNumber *)layer[@"stride"] intValue]
-                                       destinationFeatureChannelOffset:[(NSNumber *)layer[@"destination_channel_offset"] intValue]
-                                                                 group:[(NSNumber *)layer[@"group"] intValue]];
+                                                               weights:_basePtr + [(NSNumber *)layer[@"weight_offset"] unsignedIntegerValue]
+                                                                  bias:_basePtr + [(NSNumber *)layer[@"bias_offset"] unsignedIntegerValue]
+                                                               willPad:[(NSNumber *)layer[@"pad"] unsignedIntegerValue] != 0? YES : NO
+                                                                stride:[(NSNumber *)layer[@"stride"] unsignedIntegerValue]
+                                       destinationFeatureChannelOffset:[(NSNumber *)layer[@"destination_channel_offset"] unsignedIntegerValue]
+                                                                 group:[(NSNumber *)layer[@"group"] unsignedIntegerValue]];
         } else if ([layerType isEqualToString:@"FullyConnected"]) {
-            kernel = [[SlimMPSCNNFullyConnected alloc] initWithKernelSize:[(NSNumber *)layer[@"kernel_size"] intValue]
-                                                     inputFeatureChannels:[(NSNumber *)layer[@"input_channel"] intValue]
-                                                    outputFeatureChannels:[(NSNumber *)layer[@"output_channel"] intValue]
+            kernel = [[SlimMPSCNNFullyConnected alloc] initWithKernelSize:[(NSNumber *)layer[@"kernel_size"] unsignedIntegerValue]
+                                                     inputFeatureChannels:[(NSNumber *)layer[@"input_channel"] unsignedIntegerValue]
+                                                    outputFeatureChannels:[(NSNumber *)layer[@"output_channel"] unsignedIntegerValue]
                                                                    neuron:[(NSString *)layer[@"activation"] isEqualToString:@"ReLU"]? relu : nil
                                                                    device:_device
-                                                                  weights:_basePtr + [(NSNumber *)layer[@"weight_offset"] intValue]
-                                                                     bias:_basePtr + [(NSNumber *)layer[@"bias_offset"] intValue]
-                                          destinationFeatureChannelOffset:[(NSNumber *)layer[@"destination_channel_offset"] intValue]];
+                                                                  weights:_basePtr + [(NSNumber *)layer[@"weight_offset"] unsignedIntegerValue]
+                                                                     bias:_basePtr + [(NSNumber *)layer[@"bias_offset"] unsignedIntegerValue]
+                                          destinationFeatureChannelOffset:[(NSNumber *)layer[@"destination_channel_offset"] unsignedIntegerValue]];
         } else if ([layerType isEqualToString:@"PoolingMax"]) {
             kernel = [[SlimMPSCNNPoolingMax alloc] initWithDevice:_device
-                                                       kernelSize:[(NSNumber *)layer[@"kernel_size"] intValue]
-                                                           stride:[(NSNumber *)layer[@"stride"] intValue]
-                                                          willPad:[(NSNumber *)layer[@"pad"] intValue] != 0? YES : NO];
+                                                       kernelSize:[(NSNumber *)layer[@"kernel_size"] unsignedIntegerValue]
+                                                           stride:[(NSNumber *)layer[@"stride"] unsignedIntegerValue]
+                                                          willPad:[(NSNumber *)layer[@"pad"] unsignedIntegerValue]? YES : NO];
         } else if ([layerType isEqualToString:@"PoolingAverage"]) {
             if ((BOOL)layer[@"global"]) {
                 kernel = [[SlimMPSCNNPoolingGlobalAverage alloc] initWithDevice:_device
-                                                                      inputSize:[(NSNumber *)layer[@"input_size"] intValue]];
+                                                                      inputSize:[(NSNumber *)layer[@"input_size"] unsignedIntegerValue]];
             } else {
                 kernel = [[MPSCNNPoolingAverage alloc] initWithDevice:_device
-                                                          kernelWidth:[(NSNumber *)layer[@"kernel_size"] intValue]
-                                                         kernelHeight:[(NSNumber *)layer[@"kernel_size"] intValue]
-                                                      strideInPixelsX:[(NSNumber *)layer[@"stride"] intValue]
-                                                      strideInPixelsY:[(NSNumber *)layer[@"stride"] intValue]];
+                                                          kernelWidth:[(NSNumber *)layer[@"kernel_size"] unsignedIntegerValue]
+                                                         kernelHeight:[(NSNumber *)layer[@"kernel_size"] unsignedIntegerValue]
+                                                      strideInPixelsX:[(NSNumber *)layer[@"stride"] unsignedIntegerValue]
+                                                      strideInPixelsY:[(NSNumber *)layer[@"stride"] unsignedIntegerValue]];
             }
         } else if ([layerType isEqualToString:@"LocalResponseNormalization"]) {
             kernel = [[SlimMPSCNNLocalResponseNormalization alloc] initWithDevice:_device
-                                                                        localSize:[(NSNumber *)layer[@"local_size"] intValue]
+                                                                        localSize:[(NSNumber *)layer[@"local_size"] unsignedIntegerValue]
                                                                             alpha:[(NSNumber *)layer[@"alpha"] floatValue]
                                                                              beta:[(NSNumber *)layer[@"beta"] floatValue]];
         } else if ([layerType isEqualToString:@"SoftMax"]) {
@@ -164,25 +157,21 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         
         // construct output image
         MPSImageDescriptor *imageDescriptor = [MPSImageDescriptor imageDescriptorWithChannelFormat:textureFormat
-                                                                                             width:[(NSNumber *)layer[@"output_size"] intValue]
-                                                                                            height:[(NSNumber *)layer[@"output_size"] intValue]
-                                                                                   featureChannels:[(NSNumber *)layer[@"output_channel"] intValue]];
-        MPSImage *outputImage;
+                                                                                             width:[(NSNumber *)layer[@"output_size"] unsignedIntegerValue]
+                                                                                            height:[(NSNumber *)layer[@"output_size"] unsignedIntegerValue]
+                                                                                   featureChannels:[(NSNumber *)layer[@"output_channel"] unsignedIntegerValue]];
         
-        if ([layerName isEqualToString:_lastLayerName]) {
-            outputImage = _dstImage;
-        } else {
-            if ([imageType isEqualToString:@"Permanent"]) {
-                outputImage = [[MPSImage alloc] initWithDevice:_device imageDescriptor:imageDescriptor];
-            } else if ([imageType isEqualToString:@"Temporary"]) {
-                [_prefetchList addObject:imageDescriptor];
-            }
+        MPSImage *outputImage;
+        if ([imageType isEqualToString:@"Permanent"]) {
+            outputImage = [[MPSImage alloc] initWithDevice:_device imageDescriptor:imageDescriptor];
+        } else if ([imageType isEqualToString:@"Temporary"]) {
+            [_prefetchList addObject:imageDescriptor];
         }
         
         // construct layer
         GeneralLayer *newLayer = [[GeneralLayer alloc] initWithName:layerName
                                                     ImageDescriptor:imageDescriptor
-                                                          readCount:[imageType isEqualToString:@"Temporary"]? [(NSNumber *)layer[@"read_count"] intValue] : 0
+                                                          readCount:[imageType isEqualToString:@"Temporary"]? [(NSNumber *)layer[@"read_count"] unsignedIntegerValue] : 0
                                                         outputImage:outputImage
                                                              kernel:kernel];
         if ([imageType isEqualToString:@"Temporary"]) [_tempImageList addObject:newLayer];
@@ -239,9 +228,9 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         srcImage.readCount -= 1;
         
         // run following layers
-        [_firstLayer.kernel encodeToCommandBuffer:commandBuffer
-                                      sourceImage:preImage
-                                 destinationImage:_firstLayer.outputImage];
+        [((GeneralLayer *)_layersDict[_firstLayerName]).kernel encodeToCommandBuffer:commandBuffer
+                                                                         sourceImage:preImage
+                                                                    destinationImage:((GeneralLayer *)_layersDict[_firstLayerName]).outputImage];
         
         for (NSArray *triplet in _encodeSequence) {
             [((GeneralLayer *)triplet[0]).kernel encodeToCommandBuffer:commandBuffer
@@ -266,11 +255,13 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
 }
 
 - (NSString *)getTopProbs {
+    
     // gather measurements of MPSImage to use to get out probabilities
-    NSUInteger width = _dstImage.width;
-    NSUInteger height = _dstImage.height;
-    NSUInteger numSlices = (_dstImage.featureChannels + 3) / 4;
-    NSUInteger count = _dstImage.texture.width * _dstImage.texture.height * _dstImage.featureChannels;
+    MPSImage *outputImage = ((GeneralLayer *)_layersDict[_lastLayerName]).outputImage;
+    NSUInteger width = outputImage.width;
+    NSUInteger height = outputImage.height;
+    NSUInteger numSlices = (outputImage.featureChannels + 3) / 4;
+    NSUInteger count = outputImage.texture.width * outputImage.texture.height * outputImage.featureChannels;
     NSUInteger channelsPerSlice = 4;    // textures are in RGBA format
     
     uint16_t *output = calloc(count, sizeof(uint16_t));
@@ -278,12 +269,12 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
     
     // get probabilities of each label in UIn16 array we use this to contain float16s
     for (int i = 0; i < numSlices; i++) {
-        [_dstImage.texture getBytes:&output[height * width * channelsPerSlice * i]
-                        bytesPerRow:sizeof(uint16_t) * width * channelsPerSlice
-                      bytesPerImage:0
-                         fromRegion:MTLRegionMake3D(0, 0, 0, width, height, 1)
-                        mipmapLevel:0
-                              slice:i];
+        [outputImage.texture getBytes:&output[height * width * channelsPerSlice * i]
+                          bytesPerRow:sizeof(uint16_t) * width * channelsPerSlice
+                        bytesPerImage:0
+                           fromRegion:MTLRegionMake3D(0, 0, 0, width, height, 1)
+                          mipmapLevel:0
+                                slice:i];
     }
     
     // use VImage to convert Float16 to Float32 so we can use them
@@ -311,7 +302,7 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
     NSString *returnString = @"";
     for (int i = 0; i < 5; i++) {
         NSArray* probAndIndex = sortedIndexedProbabilities[i];
-        returnString = [NSString stringWithFormat:@"%@%3.2f%%: %@\n", returnString, [(NSNumber *)probAndIndex[0] floatValue] * 100, _labels[[(NSNumber *)probAndIndex[1] intValue]]];
+        returnString = [NSString stringWithFormat:@"%@%3.2f%%: %@\n", returnString, [(NSNumber *)probAndIndex[0] floatValue] * 100, _labels[[(NSNumber *)probAndIndex[1] unsignedIntegerValue]]];
     }
     
     free(output);
@@ -386,24 +377,28 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         // read JSON file
         NSData *jsonData = [NSData dataWithContentsOfFile:descriptionFile];
         NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:NULL];
-        
         NSDictionary *inoutInfo = jsonDict[@"inout_info"];
         NSArray *layerInfo = jsonDict[@"layer_info"];
         NSArray *encodeSeq = jsonDict[@"encode_seq"];
+        
+        _fileSize = [(NSNumber *)inoutInfo[@"file_size"] unsignedIntegerValue];
+        _inputSize = [(NSNumber *)inoutInfo[@"input_size"] intValue];
+        _imageRawData = (unsigned char *)calloc(_inputSize * _inputSize * 4, sizeof(unsigned char));
+        _imageData = malloc(sizeof(float) * _inputSize * _inputSize * 3);
         
         // read parameters
         _fd = open([dataFile UTF8String], O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
         NSAssert(_fd != -1, @"Error: failed to open params file with errno = %d", errno);
         
-        _basePtr = mmap(nil, [(NSNumber *)inoutInfo[@"file_size"] unsignedIntegerValue], PROT_READ, MAP_FILE | MAP_SHARED, _fd, 0);
+        _basePtr = mmap(nil, _fileSize, PROT_READ, MAP_FILE | MAP_SHARED, _fd, 0);
         NSAssert(_basePtr, @"Error: mmap failed with errno = %d", errno);
         
         // construct layers and encode sequence
         _lastLayerName = inoutInfo[@"last_layer"];
+        _firstLayerName = inoutInfo[@"first_layer"];
         [self constructLayersFromInfo:layerInfo];
-        _firstLayer = _layersDict[inoutInfo[@"first_layer"]];
         for (NSArray *triplet in encodeSeq) {
-            [_encodeSequence addObject:_layersDict[triplet[0]]];
+            [_encodeSequence addObject:@[_layersDict[triplet[0]], _layersDict[triplet[1]], _layersDict[triplet[2]]]];
         }
     }
     
@@ -416,11 +411,11 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         NSString *layerType = layer[@"layer_type"];
         NSString *imageType = layer[@"image_type"];
         
-        CPULayer *cpuLayer;
+        CPULayer *newLayer;
         
         // construct forward method
         if ([layerType isEqualToString:@"Convolution"]) {
-            cpuLayer = [[CPUConvolutionLayer alloc] initWithName:layerName
+            newLayer = [[CPUConvolutionLayer alloc] initWithName:layerName
                                                           weight:_basePtr + [(NSNumber *)layer[@"weight_offset"] intValue]
                                                             bias:_basePtr + [(NSNumber *)layer[@"bias_offset"] intValue]
                                                            group:[(NSNumber *)layer[@"group"] intValue]
@@ -433,21 +428,117 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
                                                           stride:[(NSNumber *)layer[@"stride"] intValue]
                                                           doReLU:[(NSString *)layer[@"activation"] isEqualToString:@"ReLU"]? YES : NO];
         } else if ([layerType isEqualToString:@"FullyConnected"]) {
-            cpuLayer = [[CPUFullyConnectedLayer alloc] initWithName:layerName
+            newLayer = [[CPUFullyConnectedLayer alloc] initWithName:layerName
                                                              weight:_basePtr + [(NSNumber *)layer[@"weight_offset"] intValue]
                                                                bias:_basePtr + [(NSNumber *)layer[@"bias_offset"] intValue]
                                                        inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]
                                                       outputChannel:[(NSNumber *)layer[@"output_channel"] intValue]
                                                           inputSize:[(NSNumber *)layer[@"input_size"] intValue]
                                                              doReLU:[(NSString *)layer[@"activation"] isEqualToString:@"ReLU"]? YES : NO];
+        } else if ([layerType isEqualToString:@"PoolingMax"]) {
+            newLayer = [[CPUPoolingLayer alloc]initWithName:layerName
+                                                poolingType:ePoolingMax
+                                               inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]
+                                              outputChannel:[(NSNumber *)layer[@"output_channel"] intValue]
+                                                  inputSize:[(NSNumber *)layer[@"input_size"] intValue]
+                                                 outputSize:[(NSNumber *)layer[@"output_size"] intValue]
+                                                 kernelSize:[(NSNumber *)layer[@"kernel_size"] intValue]
+                                                        pad:[(NSNumber *)layer[@"pad"] intValue]
+                                                     stride:[(NSNumber *)layer[@"stride"] intValue]];
+        } else if ([layerType isEqualToString:@"PoolingAverage"]) {
+            if ((BOOL)layer[@"global"]) {
+                newLayer = [[CPUPoolingLayer alloc]initWithName:layerName
+                                                    poolingType:ePoolingGlobalAverage
+                                                   inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]
+                                                  outputChannel:[(NSNumber *)layer[@"output_channel"] intValue]
+                                                      inputSize:[(NSNumber *)layer[@"input_size"] intValue]
+                                                     outputSize:[(NSNumber *)layer[@"output_size"] intValue]
+                                                     kernelSize:[(NSNumber *)layer[@"input_size"] intValue]
+                                                            pad:0
+                                                         stride:[(NSNumber *)layer[@"input_size"] intValue]];
+            } else {
+                newLayer = [[CPUPoolingLayer alloc]initWithName:layerName
+                                                    poolingType:ePoolingAverage
+                                                   inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]
+                                                  outputChannel:[(NSNumber *)layer[@"output_channel"] intValue]
+                                                      inputSize:[(NSNumber *)layer[@"input_size"] intValue]
+                                                     outputSize:[(NSNumber *)layer[@"output_size"] intValue]
+                                                     kernelSize:[(NSNumber *)layer[@"kernel_size"] intValue]
+                                                            pad:0
+                                                         stride:[(NSNumber *)layer[@"stride"] intValue]];
+            }
+        } else if ([layerType isEqualToString:@"LocalResponseNormalization"]) {
+            newLayer = [[CPULocalResponseNormalizationLayer alloc] initWithName:layerName
+                                                                   inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]
+                                                                      inputSize:[(NSNumber *)layer[@"input_size"] intValue]
+                                                                          alpha:[(NSNumber *)layer[@"alpha"] intValue]
+                                                                           beta:[(NSNumber *)layer[@"beta"] intValue]
+                                                                      localSize:[(NSNumber *)layer[@"local_size"] intValue]];
+        } else if ([layerType isEqualToString:@"SoftMax"]) {
+            newLayer = [[CPUSoftMaxLayer alloc] initWithName:layerName
+                                                inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]];
+        } else if ([layerType isEqualToString:@"Concat"]) {
+            // does not need init and forward method
+        } else {
+            assert("Unsupported layer!");
         }
+        
+        if (![imageType isEqualToString:@"None"]) {
+            newLayer.outputNum = [(NSNumber *)layer[@"output_size"] intValue] * [(NSNumber *)layer[@"output_size"] intValue] *
+            [(NSNumber *)layer[@"output_channel"] intValue];
+            newLayer.output = malloc(newLayer.outputNum * sizeof(float));
+        }
+        
+        [_layersDict setObject:newLayer forKey:layerName];
     }
 }
 
 - (NSString *)forwardWithImage:(UIImage *)image {
-    for (CPULayer *layer in _encodeSequence) {
-        [layer forward];
+    
+    // scale the input image
+    UIGraphicsBeginImageContext(CGSizeMake(_inputSize, _inputSize));
+    [image drawInRect:CGRectMake(0, 0, _inputSize, _inputSize)];
+    UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    // get the image into data buffer
+    CGImageRef imageRef = [scaledImage CGImage];
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    NSUInteger bytesPerPixel = 4;
+    NSUInteger bytesPerRow = bytesPerPixel * _inputSize;
+    NSUInteger bitsPerComponent = 8;
+    CGContextRef context = CGBitmapContextCreate(_imageRawData, _inputSize, _inputSize, bitsPerComponent, bytesPerRow, colorSpace,
+                                                 kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big);
+    CGColorSpaceRelease(colorSpace);
+    
+    CGContextDrawImage(context, CGRectMake(0, 0, _inputSize, _inputSize), imageRef);
+    CGContextRelease(context);
+    
+    // imageRawData contains the image data in the RGBA8888 pixel format
+    // substract mean RGB and flip to GBR
+    for (int i = 0 ; i < _inputSize * _inputSize; i++) {
+        _imageData[i+227*227*0] = (float)_imageRawData[i*4+2] - 120.0f;
+        _imageData[i+227*227*1] = (float)_imageRawData[i*4+1] - 120.0f;
+        _imageData[i+227*227*2] = (float)_imageRawData[i*4+0] - 120.0f;
     }
+    
+    [(CPULayer *)_layersDict[_firstLayerName] forwardWithInput:_imageData
+                                                        output:((CPULayer *)_layersDict[_firstLayerName]).output];
+    
+    for (NSArray *triplet in _encodeSequence) {
+        [(CPULayer *)triplet[0] forwardWithInput:((CPULayer *)triplet[1]).output
+                                          output:((CPULayer *)triplet[2]).output];
+    }
+    
+#if ALLOW_PRINT
+    for (NSArray *triplet in _encodeSequence) {
+        if (((CPULayer *)triplet[2]).output) {
+            [self printOutput:((CPULayer *)triplet[2]).output
+                      ofLayer:((CPULayer *)triplet[2]).name
+                       length:((CPULayer *)triplet[2]).outputNum];
+        }
+    }
+#endif
     
     return [self getTopProbs];
 }
@@ -457,7 +548,7 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
     // copy output probabilities into an array of touples of (probability, index)
     NSMutableArray *indexedProbabilities = [[NSMutableArray alloc] initWithCapacity:_labels.count];
     for (int i = 0; i < _labels.count; i++) {
-        [indexedProbabilities addObject:@[@(_dstPtr[i]), @(i)]];
+        [indexedProbabilities addObject:@[@(((CPULayer *)_layersDict[_lastLayerName]).output[i]), @(i)]];
     }
     
     // sort the touple array to have top5 guesses in the front
@@ -477,11 +568,39 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
     return returnString;
 }
 
+#if ALLOW_PRINT
+- (void)printOutput:(float *)output
+            ofLayer:(NSString *)layer
+             length:(size_t)length {
+    NSLog(@"Now comes %@",layer);
+    
+    for (int i = 0; i < 8; i++) {
+        printf("%d: %f\n", i, output[i]);
+    }
+    
+    float sum = 0.0f;
+    for (int i = 0; i < length; i++) {
+        sum += fabsf(output[i]);
+    }
+    printf("sum: %f\n",sum);
+    
+    float sqr = 0.0f;
+    for (int i = 0; i < length; i++) {
+        sqr += powf(output[i], 2);
+    }
+    printf("square: %f\n",sqr);
+}
+#endif
+
 - (void)dealloc {
     
     // close file
-    NSAssert(munmap(_basePtr, [(NSNumber *)inoutInfo[@"file_size"] unsignedIntegerValue]) == 0, @"Error: munmap failed with errno = %d", errno);
+    NSAssert(munmap(_basePtr, _fileSize) == 0, @"Error: munmap failed with errno = %d", errno);
     close(_fd);
+    
+    // release pointers
+    free(_imageRawData);
+    free(_imageData);
 }
 
 @end

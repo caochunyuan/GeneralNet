@@ -12,10 +12,13 @@
 @interface CPULayer : NSObject
 
 @property (strong, nonatomic) NSString *name;
-@property (assign, nonatomic) float *srcPtr;
-@property (assign, nonatomic) float *dstPtr;
+@property (assign, nonatomic) float *output;
+@property (assign, nonatomic) int destinationFeatureChannelOffset;
+@property (assign, nonatomic) int outputNum;
 
-- (void)forward;
+- (instancetype)initWithName:(NSString *)name;
+- (void)forwardWithInput:(float *)input
+                  output:(float *)output;
 
 @end
 
@@ -78,11 +81,18 @@
 
 @end
 
-@interface CPUPoolingMaxLayer : CPULayer
+typedef NS_ENUM (NSInteger, PoolingLayerTypes) {
+    ePoolingMax = 0,
+    ePoolingAverage,
+    ePoolingGlobalAverage
+};
+
+@interface CPUPoolingLayer : CPULayer
 
 @property (assign, nonatomic) BNNSFilter filter;
 
 - (instancetype)initWithName:(NSString *)name
+                 poolingType:(PoolingLayerTypes)poolingType
                 inputChannel:(int)inputChannel
                outputChannel:(int)outputChannel
                    inputSize:(int)inputSize
@@ -90,5 +100,38 @@
                   kernelSize:(int)kernelSize
                          pad:(int)pad
                       stride:(int)stride;
+
+@end
+
+@interface CPULocalResponseNormalizationLayer : CPULayer
+
+@property (assign, nonatomic) int inputChannel;
+@property (assign, nonatomic) int inputSize;
+@property (assign, nonatomic) float alpha;
+@property (assign, nonatomic) float *beta;
+@property (assign, nonatomic) int localSize;
+@property (assign, nonatomic) int pad;
+@property (assign, nonatomic) float one;
+@property (assign, nonatomic) int inputPerChannel;
+@property (assign, nonatomic) int paddedPerChannel;
+@property (assign, nonatomic) float *midShort;
+@property (assign, nonatomic) float *midLong;
+
+- (instancetype)initWithName:(NSString *)name
+                inputChannel:(int)inputChannel
+                   inputSize:(int)inputSize
+                       alpha:(float)alpha
+                        beta:(float)beta
+                   localSize:(int)localSize;
+
+@end
+
+@interface CPUSoftMaxLayer : CPULayer
+
+@property (assign, nonatomic) int inputChannel;
+@property (assign, nonatomic) float *mid;
+
+- (instancetype)initWithName:(NSString *)name
+                inputChannel:(int)inputChannel;
 
 @end
