@@ -13,7 +13,7 @@
 
 @property (strong, nonatomic) NSString *name;
 @property (assign, nonatomic) float *output;
-@property (assign, nonatomic) int destinationFeatureChannelOffset;
+@property (assign, nonatomic) int destinationOffset;
 @property (assign, nonatomic) int outputNum;
 
 - (instancetype)initWithName:(NSString *)name;

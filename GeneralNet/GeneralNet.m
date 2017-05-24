@@ -489,6 +489,10 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
             newLayer.output = malloc(newLayer.outputNum * sizeof(float));
         }
         
+        if ([layer objectForKey:@"destination_channel_offset"]) {
+            newLayer.destinationOffset = [((NSNumber *)layer[@"destination_channel_offset"]) intValue];
+        }
+        
         [_layersDict setObject:newLayer forKey:layerName];
     }
 }
@@ -523,11 +527,13 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
     }
     
     [(CPULayer *)_layersDict[_firstLayerName] forwardWithInput:_imageData
-                                                        output:((CPULayer *)_layersDict[_firstLayerName]).output];
+                                                        output:((CPULayer *)_layersDict[_firstLayerName]).output +
+                                                               ((CPULayer *)_layersDict[_firstLayerName]).destinationOffset];
     
     for (NSArray *triplet in _encodeSequence) {
         [(CPULayer *)triplet[0] forwardWithInput:((CPULayer *)triplet[1]).output
-                                          output:((CPULayer *)triplet[2]).output];
+                                          output:((CPULayer *)triplet[2]).output +
+                                                 ((CPULayer *)triplet[0]).destinationOffset];
     }
     
 #if ALLOW_PRINT
