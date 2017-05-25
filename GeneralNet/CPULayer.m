@@ -18,7 +18,7 @@
     return self;
 }
 
-- (void)forwardWithInput:(float *)input
+- (void)forwardWithInput:(const float *)input
                   output:(float *)output {
     // subclass of CPULayer should overwrite this method
 }
@@ -63,25 +63,24 @@
         _K = _inputChannel * _kernelSize * _kernelSize;
         _inputPerGroup = _inputChannel * _inputSize * _inputSize;
         _outputPerGroup = _outputChannel * _outputSize * _outputSize;
-        _weightPerGroup = _outputChannel * _inputChannel * _outputSize * _outputSize;
+        _weightPerGroup = _outputChannel * _inputChannel * _kernelSize * _kernelSize;
     }
     
     return self;
 }
 
-- (void)forwardWithInput:(float *)input
+- (void)forwardWithInput:(const float *)input
                   output:(float *)output {
     for (int groupIndex = 0; groupIndex < _group; groupIndex++) {
-        float *src = input + groupIndex * _inputPerGroup;
+        const float *src = input + groupIndex * _inputPerGroup;
         float *dst = output + groupIndex * _outputPerGroup;
         im2col(src, _inputChannel, _inputSize, _inputSize, _kernelSize, _kernelSize, 1, 1,
                _pad, _pad, _pad, _pad, _stride, _stride, _colData);
+        for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
+            memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M);
+        }
         cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, _M, _N, _K, 1,
                     _weight + groupIndex * _weightPerGroup, _K, _colData, _N, 0, dst, _N);
-        for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
-            vDSP_vadd(dst + featureIndex * _M, 1, _bias + groupIndex * _M, 1,
-                      dst + featureIndex * _M, 1, _M);
-        }
     }
     if (_doReLU) vDSP_vthres(output, 1, &_zero, output, 1, _outputPerGroup * _group);
 }
@@ -102,11 +101,9 @@ void im2col (const float* data_im,
              const int stride_w,
              float* data_col) {
     const int output_h =
-    (height + pad_b + pad_t - (dilation_h * (kernel_h - 1) + 1)) / stride_h +
-    1;
+    (height + pad_b + pad_t - (dilation_h * (kernel_h - 1) + 1)) / stride_h + 1;
     const int output_w =
-    (width + pad_l + pad_r - (dilation_w * (kernel_w - 1) + 1)) / stride_w +
-    1;
+    (width + pad_l + pad_r - (dilation_w * (kernel_w - 1) + 1)) / stride_w + 1;
     
     // Fast path for zero padding and no dilation
     // From Torch, THNN_(unfolded_copy)
@@ -231,7 +228,7 @@ void im2col (const float* data_im,
     return self;
 }
 
-- (void)forwardWithInput:(float *)input
+- (void)forwardWithInput:(const float *)input
                   output:(float *)output {
     memcpy(output, _bias, _outputChannel);
     cblas_sgemv(CblasRowMajor, CblasNoTrans, _M, _N, 1, _weight, _N, output, 1, 1,
@@ -305,7 +302,7 @@ void im2col (const float* data_im,
     return self;
 }
 
-- (void)forwardWithInput:(float *)input
+- (void)forwardWithInput:(const float *)input
                   output:(float *)output {
     BNNSFilterApply(_filter, input, output);
 }
@@ -327,14 +324,15 @@ void im2col (const float* data_im,
     if (self = [super initWithName:name]) {
         _inputChannel = inputChannel;
         _inputSize = inputSize;
-        _alpha = alpha;
-        _beta = malloc(_inputPerChannel);
-        vDSP_vfill(_beta, &beta, 1, _inputPerChannel);
+        _alphaOverN = alpha / (localSize * localSize);
+        _delta = 1.0f;
         _localSize = localSize;
         _one = 1.0f;
         _inputPerChannel = inputSize * inputSize;
-        _pad = (localSize - 1) / 2;
-        _paddedPerChannel = _inputPerChannel + 2 * _pad * inputSize;
+        _beta = malloc(_inputPerChannel * sizeof(float));
+        vDSP_vfill(&beta, _beta, 1, _inputPerChannel);
+        _pad =  (_inputSize + 1) * (localSize - 1) / 2;
+        _paddedPerChannel = _inputPerChannel + 2 * _pad;
         _midShort = malloc(_inputPerChannel * sizeof(float));
         _midLong = malloc(_paddedPerChannel * sizeof(float));
     }
@@ -342,21 +340,21 @@ void im2col (const float* data_im,
     return self;
 }
 
-- (void)forwardWithInput:(float *)input
+- (void)forwardWithInput:(const float *)input
                   output:(float *)output {
     for (int channelIndex = 0; channelIndex < _inputChannel; channelIndex++) {
-        float *src = input + channelIndex * _inputPerChannel;
+        const float *src = input + channelIndex * _inputPerChannel;
         float *dst = output + channelIndex * _inputPerChannel;
-        vDSP_vsq(src, 1, _midShort, 1, _inputPerChannel);                                                   // square of each element
+        vDSP_vsq(src, 1, _midShort, 1, _inputPerChannel);                                           // square of each element
         memset(_midLong, 0, _paddedPerChannel * sizeof(float));
-        for (int regionIndex = 0; regionIndex < _localSize; regionIndex++) {                                // sum up nearby channels
-            vDSP_vadd(_midLong + regionIndex * _inputSize, 1, _midShort, 1, _midLong + regionIndex * _inputSize, 1, _inputPerChannel);
+        for (int idxY = -_pad; idxY < _pad; idxY += _inputSize) {                                   // sum up nearby channels
+            for (int idxX = 0; idxX < _localSize; idxX++) {
+                vDSP_vadd(_midLong + idxY + idxX, 1, _midShort, 1, _midLong + idxY + idxX, 1, _inputPerChannel);
+            }
         }
-        float alphaOverN = _alpha / (float)_localSize;
-        float delta = 1.0f;
-        vDSP_vsmsa(_midLong + _pad * _inputSize, 1, &alphaOverN, &delta, _midShort, 1, _inputPerChannel);   // denom = delta + (alpha / N) * sum
-        vvpowf(_midShort, _beta, _midShort, &_inputPerChannel);                                             // denom = denom ^ beta
-        vDSP_vdiv(_midShort, 1, src, 1, dst, 1, _inputPerChannel);                                          // norm_result = origin / denom
+        vDSP_vsmsa(_midLong + _pad, 1, &_alphaOverN, &_delta, _midShort, 1, _inputPerChannel);      // denom = delta + (alpha / N) * sum
+        vvpowf(_midShort, _beta, _midShort, &_inputPerChannel);                                     // denom = denom ^ beta
+        vDSP_vdiv(_midShort, 1, src, 1, dst, 1, _inputPerChannel);                                  // norm_result = origin / denom
     }
 }
 
@@ -379,16 +377,16 @@ void im2col (const float* data_im,
     return self;
 }
 
-- (void)forwardWithInput:(float *)input
+- (void)forwardWithInput:(const float *)input
                   output:(float *)output {
     float max;
     vDSP_maxv(input, 1, &max, _inputChannel);                 // find maximum
     max *= -1;
     vDSP_vsadd(input, 1, &max, _mid, 1, _inputChannel);       // subtract the maximum
-    vvexpf(_mid, _mid, &_inputChannel);                             // exponential of each element
+    vvexpf(_mid, _mid, &_inputChannel);                       // exponential of each element
     float sum;
-    vDSP_sve(_mid, 1, &sum, _inputChannel);                         // sum of exponential of all elements
-    vDSP_vsdiv(_mid, 1, &sum, output, 1, _inputChannel);       // divide by the sum of exponential
+    vDSP_sve(_mid, 1, &sum, _inputChannel);                   // sum of exponential of all elements
+    vDSP_vsdiv(_mid, 1, &sum, output, 1, _inputChannel);      // divide by the sum of exponential
 }
 
 - (void)dealloc {

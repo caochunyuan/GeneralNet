@@ -89,24 +89,25 @@
 }
 
 - (IBAction)runAlex:(id)sender {
-    
-    NSDate *startTime = [NSDate date];
-    _predictLabel.text = [[_alexnet forwardWithImage:self.predictView.image] stringByAppendingFormat:@"\nElapsed time: %.0f millisecs.", -[startTime timeIntervalSinceNow] * 1000];
-    _predictLabel.hidden = NO;
+    [self runNet:_alexnet];
 }
 
 - (IBAction)runGoogle:(id)sender {
-    
-    NSDate *startTime = [NSDate date];
-    _predictLabel.text = [[_googlenet forwardWithImage:self.predictView.image] stringByAppendingFormat:@"\nElapsed time: %.0f millisecs.", -[startTime timeIntervalSinceNow] * 1000];
-    _predictLabel.hidden = NO;
+    [self runNet:_googlenet];
 }
 
 - (IBAction)runSqueeze:(id)sender {
+    [self runNet:_squeezenet];
+}
 
+- (void)runNet:(GeneralNet *)net {
     NSDate *startTime = [NSDate date];
-    _predictLabel.text = [[_squeezenet forwardWithImage:self.predictView.image] stringByAppendingFormat:@"\nElapsed time: %.0f millisecs.", -[startTime timeIntervalSinceNow] * 1000];
-    _predictLabel.hidden = NO;
+    [net forwardWithImage:self.predictView.image
+               completion:^{
+                   float elapsed = -[startTime timeIntervalSinceNow] * 1000;
+                   _predictLabel.text = [[net getTopProbs] stringByAppendingFormat:@"\nElapsed time: %.0f millisecs.", elapsed];
+                   _predictLabel.hidden = NO;
+               }];
 }
 
 @end

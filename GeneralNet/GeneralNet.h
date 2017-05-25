@@ -55,7 +55,9 @@
 
 - (instancetype)initWithDescriptionFile:(NSString *)descriptionFile
                                dataFile:(NSString *)dataFile;
-- (NSString *)forwardWithImage:(UIImage *)image;
+- (void)forwardWithImage:(UIImage *)image
+              completion:(void (^)())completion;
+- (NSString *)getTopProbs;
 
 @end
 
@@ -85,7 +87,9 @@
 
 - (instancetype)initWithDescriptionFile:(NSString *)descriptionFile
                                dataFile:(NSString *)dataFile;
-- (NSString *)forwardWithImage:(UIImage *)image;
+- (void)forwardWithImage:(UIImage *)image
+              completion:(void (^)())completion;
+- (NSString *)getTopProbs;
 
 @end
 

@@ -179,7 +179,8 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
     }
 }
 
-- (NSString *)forwardWithImage:(UIImage *)image {
+- (void)forwardWithImage:(UIImage *)image
+              completion:(void (^)())completion {
     NSError *error = NULL;
     _sourceTexture = [_textureLoader newTextureWithCGImage:image.CGImage options:nil error:&error];
     NSAssert(!error, error.localizedDescription);
@@ -240,8 +241,11 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         
         [commandBuffer commit];
         [commandBuffer waitUntilCompleted];
+        completion();
         
 #if ALLOW_PRINT
+        [self printImage:((GeneralLayer *)_layersDict[_firstLayerName]).outputImage
+                 ofLayer:((GeneralLayer *)_layersDict[_firstLayerName]).name];
         for (NSArray *triplet in _encodeSequence) {
             if (((GeneralLayer *)triplet[2]).outputImage) {
                 [self printImage:((GeneralLayer *)triplet[2]).outputImage
@@ -249,8 +253,6 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
             }
         }
 #endif
-        
-        return [self getTopProbs];
     }
 }
 
@@ -301,7 +303,7 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
     // get top 5 valid guesses and add them to return string with top 5 guesses
     NSString *returnString = @"";
     for (int i = 0; i < 5; i++) {
-        NSArray* probAndIndex = sortedIndexedProbabilities[i];
+        NSArray *probAndIndex = sortedIndexedProbabilities[i];
         returnString = [NSString stringWithFormat:@"%@%3.2f%%: %@\n", returnString, [(NSNumber *)probAndIndex[0] floatValue] * 100, _labels[[(NSNumber *)probAndIndex[1] unsignedIntegerValue]]];
     }
     
@@ -380,6 +382,9 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         NSDictionary *inoutInfo = jsonDict[@"inout_info"];
         NSArray *layerInfo = jsonDict[@"layer_info"];
         NSArray *encodeSeq = jsonDict[@"encode_seq"];
+        _labels = jsonDict[@"labels"];
+        _layersDict = [[NSMutableDictionary alloc] init];
+        _encodeSequence = [[NSMutableArray alloc] init];
         
         _fileSize = [(NSNumber *)inoutInfo[@"file_size"] unsignedIntegerValue];
         _inputSize = [(NSNumber *)inoutInfo[@"input_size"] intValue];
@@ -471,42 +476,44 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
             newLayer = [[CPULocalResponseNormalizationLayer alloc] initWithName:layerName
                                                                    inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]
                                                                       inputSize:[(NSNumber *)layer[@"input_size"] intValue]
-                                                                          alpha:[(NSNumber *)layer[@"alpha"] intValue]
-                                                                           beta:[(NSNumber *)layer[@"beta"] intValue]
+                                                                          alpha:[(NSNumber *)layer[@"alpha"] floatValue]
+                                                                           beta:[(NSNumber *)layer[@"beta"] floatValue]
                                                                       localSize:[(NSNumber *)layer[@"local_size"] intValue]];
         } else if ([layerType isEqualToString:@"SoftMax"]) {
             newLayer = [[CPUSoftMaxLayer alloc] initWithName:layerName
                                                 inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]];
         } else if ([layerType isEqualToString:@"Concat"]) {
-            // does not need init and forward method
+            newLayer = [[CPULayer alloc] initWithName:layerName];
         } else {
             assert("Unsupported layer!");
         }
         
         if (![imageType isEqualToString:@"None"]) {
             newLayer.outputNum = [(NSNumber *)layer[@"output_size"] intValue] * [(NSNumber *)layer[@"output_size"] intValue] *
-            [(NSNumber *)layer[@"output_channel"] intValue];
+                                 [(NSNumber *)layer[@"output_channel"] intValue];
             newLayer.output = malloc(newLayer.outputNum * sizeof(float));
         }
         
         if ([layer objectForKey:@"destination_channel_offset"]) {
-            newLayer.destinationOffset = [((NSNumber *)layer[@"destination_channel_offset"]) intValue];
+            newLayer.destinationOffset = [((NSNumber *)layer[@"destination_channel_offset"]) intValue] *
+                                         [(NSNumber *)layer[@"output_size"] intValue] * [(NSNumber *)layer[@"output_size"] intValue];
         }
         
         [_layersDict setObject:newLayer forKey:layerName];
     }
 }
 
-- (NSString *)forwardWithImage:(UIImage *)image {
+- (void)forwardWithImage:(UIImage *)image
+              completion:(void (^)())completion {
     
-    // scale the input image
-    UIGraphicsBeginImageContext(CGSizeMake(_inputSize, _inputSize));
-    [image drawInRect:CGRectMake(0, 0, _inputSize, _inputSize)];
-    UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
+//    // scale the input image
+//    UIGraphicsBeginImageContext(CGSizeMake(_inputSize, _inputSize));
+//    [image drawInRect:CGRectMake(0, 0, _inputSize, _inputSize)];
+//    UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();
+//    UIGraphicsEndImageContext();
     
     // get the image into data buffer
-    CGImageRef imageRef = [scaledImage CGImage];
+    CGImageRef imageRef = [image CGImage];
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     NSUInteger bytesPerPixel = 4;
     NSUInteger bytesPerRow = bytesPerPixel * _inputSize;
@@ -521,9 +528,9 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
     // imageRawData contains the image data in the RGBA8888 pixel format
     // substract mean RGB and flip to GBR
     for (int i = 0 ; i < _inputSize * _inputSize; i++) {
-        _imageData[i+227*227*0] = (float)_imageRawData[i*4+2] - 120.0f;
-        _imageData[i+227*227*1] = (float)_imageRawData[i*4+1] - 120.0f;
-        _imageData[i+227*227*2] = (float)_imageRawData[i*4+0] - 120.0f;
+        _imageData[i+_inputSize*_inputSize*0] = (float)_imageRawData[i*4+2] - 120.0f;
+        _imageData[i+_inputSize*_inputSize*1] = (float)_imageRawData[i*4+1] - 120.0f;
+        _imageData[i+_inputSize*_inputSize*2] = (float)_imageRawData[i*4+0] - 120.0f;
     }
     
     [(CPULayer *)_layersDict[_firstLayerName] forwardWithInput:_imageData
@@ -536,7 +543,12 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
                                                  ((CPULayer *)triplet[0]).destinationOffset];
     }
     
+    completion();
+    
 #if ALLOW_PRINT
+    [self printOutput:((CPULayer *)_layersDict[_firstLayerName]).output
+              ofLayer:((CPULayer *)_layersDict[_firstLayerName]).name
+               length:((CPULayer *)_layersDict[_firstLayerName]).outputNum];
     for (NSArray *triplet in _encodeSequence) {
         if (((CPULayer *)triplet[2]).output) {
             [self printOutput:((CPULayer *)triplet[2]).output
@@ -545,8 +557,6 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         }
     }
 #endif
-    
-    return [self getTopProbs];
 }
 
 - (NSString *)getTopProbs {
@@ -567,7 +577,7 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
     // get top 5 valid guesses and add them to return string with top 5 guesses
     NSString *returnString = @"";
     for (int i = 0; i < 5; i++) {
-        NSArray* probAndIndex = sortedIndexedProbabilities[i];
+        NSArray *probAndIndex = sortedIndexedProbabilities[i];
         returnString = [NSString stringWithFormat:@"%@%3.2f%%: %@\n", returnString, [(NSNumber *)probAndIndex[0] floatValue] * 100, _labels[[(NSNumber *)probAndIndex[1] intValue]]];
     }
     

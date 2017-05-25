@@ -17,7 +17,7 @@
 @property (assign, nonatomic) int outputNum;
 
 - (instancetype)initWithName:(NSString *)name;
-- (void)forwardWithInput:(float *)input
+- (void)forwardWithInput:(const float *)input
                   output:(float *)output;
 
 @end
@@ -107,8 +107,9 @@ typedef NS_ENUM (NSInteger, PoolingLayerTypes) {
 
 @property (assign, nonatomic) int inputChannel;
 @property (assign, nonatomic) int inputSize;
-@property (assign, nonatomic) float alpha;
+@property (assign, nonatomic) float alphaOverN;
 @property (assign, nonatomic) float *beta;
+@property (assign, nonatomic) float delta;
 @property (assign, nonatomic) int localSize;
 @property (assign, nonatomic) int pad;
 @property (assign, nonatomic) float one;
