@@ -411,6 +411,20 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
 }
 
 - (void)constructLayersFromInfo:(NSArray *)layers {
+    
+    // find out the maximum of size of col_data
+    // col_data will only be created once, and then shared by all convolution layers
+    size_t maxColDataSize = 0;
+    for (NSDictionary *layer in layers) {
+        if ([layer[@"layer_type"] isEqualToString:@"Convolution"]) {
+            size_t colDataSize = [(NSNumber *)layer[@"output_size"] intValue] * [(NSNumber *)layer[@"output_size"] intValue] *
+            [(NSNumber *)layer[@"input_channel"] intValue] * [(NSNumber *)layer[@"kernel_size"] intValue] *
+            [(NSNumber *)layer[@"kernel_size"] intValue];
+            if (colDataSize > maxColDataSize) maxColDataSize = colDataSize;
+        }
+    }
+    _colData = malloc(maxColDataSize * sizeof(float));
+    
     for (NSDictionary *layer in layers) {
         NSString *layerName = layer[@"name"];
         NSString *layerType = layer[@"layer_type"];
@@ -431,7 +445,8 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
                                                       kernelSize:[(NSNumber *)layer[@"kernel_size"] intValue]
                                                              pad:[(NSNumber *)layer[@"pad"] intValue]
                                                           stride:[(NSNumber *)layer[@"stride"] intValue]
-                                                          doReLU:[(NSString *)layer[@"activation"] isEqualToString:@"ReLU"]? YES : NO];
+                                                          doReLU:[(NSString *)layer[@"activation"] isEqualToString:@"ReLU"]? YES : NO
+                                                         colData:_colData];
         } else if ([layerType isEqualToString:@"FullyConnected"]) {
             newLayer = [[CPUFullyConnectedLayer alloc] initWithName:layerName
                                                              weight:_basePtr + [(NSNumber *)layer[@"weight_offset"] intValue]
@@ -506,14 +521,14 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
 - (void)forwardWithImage:(UIImage *)image
               completion:(void (^)())completion {
     
-//    // scale the input image
-//    UIGraphicsBeginImageContext(CGSizeMake(_inputSize, _inputSize));
-//    [image drawInRect:CGRectMake(0, 0, _inputSize, _inputSize)];
-//    UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();
-//    UIGraphicsEndImageContext();
+    // scale the input image
+    UIGraphicsBeginImageContext(CGSizeMake(_inputSize, _inputSize));
+    [image drawInRect:CGRectMake(0, 0, _inputSize, _inputSize)];
+    UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
     
     // get the image into data buffer
-    CGImageRef imageRef = [image CGImage];
+    CGImageRef imageRef = [scaledImage CGImage];
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     NSUInteger bytesPerPixel = 4;
     NSUInteger bytesPerRow = bytesPerPixel * _inputSize;
@@ -594,17 +609,12 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         printf("%d: %f\n", i, output[i]);
     }
     
-    float sum = 0.0f;
+    float sum = 0.0f, sqr = 0.0f;
     for (int i = 0; i < length; i++) {
         sum += fabsf(output[i]);
-    }
-    printf("sum: %f\n",sum);
-    
-    float sqr = 0.0f;
-    for (int i = 0; i < length; i++) {
         sqr += powf(output[i], 2);
     }
-    printf("square: %f\n",sqr);
+    printf("sum: %f\nsquare: %f\n", sum, sqr);
 }
 #endif
 
@@ -617,6 +627,7 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
     // release pointers
     free(_imageRawData);
     free(_imageData);
+    free(_colData);
 }
 
 @end

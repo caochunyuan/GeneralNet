@@ -55,7 +55,8 @@
                   kernelSize:(int)kernelSize
                          pad:(int)pad
                       stride:(int)stride
-                      doReLU:(BOOL)doReLU;
+                      doReLU:(BOOL)doReLU
+                     colData:(float *)colData;
 
 @end
 
@@ -112,6 +113,7 @@ typedef NS_ENUM (NSInteger, PoolingLayerTypes) {
 @property (assign, nonatomic) float delta;
 @property (assign, nonatomic) int localSize;
 @property (assign, nonatomic) int pad;
+@property (assign, nonatomic) int paddedInputSize;
 @property (assign, nonatomic) float one;
 @property (assign, nonatomic) int inputPerChannel;
 @property (assign, nonatomic) int paddedPerChannel;

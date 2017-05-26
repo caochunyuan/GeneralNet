@@ -102,12 +102,17 @@
 
 - (void)runNet:(GeneralNet *)net {
     NSDate *startTime = [NSDate date];
-    [net forwardWithImage:self.predictView.image
-               completion:^{
-                   float elapsed = -[startTime timeIntervalSinceNow] * 1000;
-                   _predictLabel.text = [[net getTopProbs] stringByAppendingFormat:@"\nElapsed time: %.0f millisecs.", elapsed];
-                   _predictLabel.hidden = NO;
-               }];
+    int max_itr = 1;
+    for (int i = 0; i < max_itr; i++) {
+        [net forwardWithImage:self.predictView.image
+                   completion:^{
+                       if (i == max_itr - 1) {
+                           float elapsed = -[startTime timeIntervalSinceNow] * 1000 / (float)max_itr;
+                           _predictLabel.text = [[net getTopProbs] stringByAppendingFormat:@"\nElapsed time: %.0f millisecs.", elapsed];
+                           _predictLabel.hidden = NO;
+                       }
+                   }];
+    }
 }
 
 @end

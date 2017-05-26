@@ -78,6 +78,7 @@
 @property (assign, nonatomic) int inputSize;
 @property (assign, nonatomic) unsigned char *imageRawData;
 @property (assign, nonatomic) float *imageData;
+@property (assign, nonatomic) float *colData;
 
 @property (strong, nonatomic) NSString *firstLayerName;
 @property (strong, nonatomic) NSString *lastLayerName;

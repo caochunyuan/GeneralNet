@@ -23,68 +23,6 @@
     // subclass of CPULayer should overwrite this method
 }
 
-- (void)dealloc {
-    if (self.output) free(_output);
-}
-
-@end
-
-@implementation CPUConvolutionLayer
-
-- (instancetype)initWithName:(NSString *)name
-                      weight:(float *)weight
-                        bias:(float *)bias
-                       group:(int)group
-                inputChannel:(int)inputChannel
-               outputChannel:(int)outputChannel
-                   inputSize:(int)inputSize
-                  outputSize:(int)outputSize
-                  kernelSize:(int)kernelSize
-                         pad:(int)pad
-                      stride:(int)stride
-                      doReLU:(BOOL)doReLU {
-    if (self = [super initWithName:name]) {
-        _weight = weight;
-        _bias = bias;
-        _group = group;
-        _inputChannel = inputChannel / _group;
-        _outputChannel = outputChannel / _group;
-        _inputSize = inputSize;
-        _outputSize = outputSize;
-        _kernelSize = kernelSize;
-        _pad = pad;
-        _stride = stride;
-        _doReLU = doReLU;
-        _zero = 0.0f;
-        _colData = malloc(sizeof(float) * _inputSize * _inputSize * _inputChannel
-                          * _kernelSize * _kernelSize);
-        _M = _outputChannel;
-        _N = _outputSize * _outputSize;
-        _K = _inputChannel * _kernelSize * _kernelSize;
-        _inputPerGroup = _inputChannel * _inputSize * _inputSize;
-        _outputPerGroup = _outputChannel * _outputSize * _outputSize;
-        _weightPerGroup = _outputChannel * _inputChannel * _kernelSize * _kernelSize;
-    }
-    
-    return self;
-}
-
-- (void)forwardWithInput:(const float *)input
-                  output:(float *)output {
-    for (int groupIndex = 0; groupIndex < _group; groupIndex++) {
-        const float *src = input + groupIndex * _inputPerGroup;
-        float *dst = output + groupIndex * _outputPerGroup;
-        im2col(src, _inputChannel, _inputSize, _inputSize, _kernelSize, _kernelSize, 1, 1,
-               _pad, _pad, _pad, _pad, _stride, _stride, _colData);
-        for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
-            memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M);
-        }
-        cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, _M, _N, _K, 1,
-                    _weight + groupIndex * _weightPerGroup, _K, _colData, _N, 0, dst, _N);
-    }
-    if (_doReLU) vDSP_vthres(output, 1, &_zero, output, 1, _outputPerGroup * _group);
-}
-
 void im2col (const float* data_im,
              const int channels,
              const int height,
@@ -199,7 +137,65 @@ void im2col (const float* data_im,
 }
 
 - (void)dealloc {
-    free(_colData);
+    if (self.output) free(_output);
+}
+
+@end
+
+@implementation CPUConvolutionLayer
+
+- (instancetype)initWithName:(NSString *)name
+                      weight:(float *)weight
+                        bias:(float *)bias
+                       group:(int)group
+                inputChannel:(int)inputChannel
+               outputChannel:(int)outputChannel
+                   inputSize:(int)inputSize
+                  outputSize:(int)outputSize
+                  kernelSize:(int)kernelSize
+                         pad:(int)pad
+                      stride:(int)stride
+                      doReLU:(BOOL)doReLU
+                     colData:(float *)colData {
+    if (self = [super initWithName:name]) {
+        _weight = weight;
+        _bias = bias;
+        _group = group;
+        _inputChannel = inputChannel / _group;
+        _outputChannel = outputChannel / _group;
+        _inputSize = inputSize;
+        _outputSize = outputSize;
+        _kernelSize = kernelSize;
+        _pad = pad;
+        _stride = stride;
+        _doReLU = doReLU;
+        _zero = 0.0f;
+        _colData = colData;
+        _M = _outputChannel;
+        _N = _outputSize * _outputSize;
+        _K = _inputChannel * _kernelSize * _kernelSize;
+        _inputPerGroup = _inputChannel * _inputSize * _inputSize;
+        _outputPerGroup = _outputChannel * _outputSize * _outputSize;
+        _weightPerGroup = _outputChannel * _inputChannel * _kernelSize * _kernelSize;
+    }
+    
+    return self;
+}
+
+- (void)forwardWithInput:(const float *)input
+                  output:(float *)output {
+    for (int groupIndex = 0; groupIndex < _group; groupIndex++) {
+        const float *src = input + groupIndex * _inputPerGroup;
+        float *dst = output + groupIndex * _outputPerGroup;
+        im2col(src, _inputChannel, _inputSize, _inputSize, _kernelSize, _kernelSize, 1, 1,
+               _pad, _pad, _pad, _pad, _stride, _stride, _colData);
+        for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
+            memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M * sizeof(float));
+        }
+        cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, _M, _N, _K, 1,
+                    _weight + groupIndex * _weightPerGroup, _K, _colData, _N, 0, dst, _N);
+    }
+    if (_doReLU) vDSP_vthres(output, 1, &_zero, output, 1, _outputPerGroup * _group);
 }
 
 @end
@@ -230,8 +226,8 @@ void im2col (const float* data_im,
 
 - (void)forwardWithInput:(const float *)input
                   output:(float *)output {
-    memcpy(output, _bias, _outputChannel);
-    cblas_sgemv(CblasRowMajor, CblasNoTrans, _M, _N, 1, _weight, _N, output, 1, 1,
+    memcpy(output, _bias, _outputChannel * sizeof(float));
+    cblas_sgemv(CblasRowMajor, CblasNoTrans, _M, _N, 1, _weight, _N, input, 1, 1,
                 output, 1);
     if (_doReLU) vDSP_vthres(output, 1, &_zero, output, 1, _outputChannel);
 }
@@ -331,8 +327,9 @@ void im2col (const float* data_im,
         _inputPerChannel = inputSize * inputSize;
         _beta = malloc(_inputPerChannel * sizeof(float));
         vDSP_vfill(&beta, _beta, 1, _inputPerChannel);
-        _pad =  (_inputSize + 1) * (localSize - 1) / 2;
-        _paddedPerChannel = _inputPerChannel + 2 * _pad;
+        _pad =  (localSize - 1) / 2;
+        _paddedInputSize = _inputSize + 2 * _pad;
+        _paddedPerChannel = powf(_paddedInputSize, 2);
         _midShort = malloc(_inputPerChannel * sizeof(float));
         _midLong = malloc(_paddedPerChannel * sizeof(float));
     }
@@ -345,16 +342,21 @@ void im2col (const float* data_im,
     for (int channelIndex = 0; channelIndex < _inputChannel; channelIndex++) {
         const float *src = input + channelIndex * _inputPerChannel;
         float *dst = output + channelIndex * _inputPerChannel;
-        vDSP_vsq(src, 1, _midShort, 1, _inputPerChannel);                                           // square of each element
+        vDSP_vsq(src, 1, _midShort, 1, _inputPerChannel);               // square of each element
         memset(_midLong, 0, _paddedPerChannel * sizeof(float));
-        for (int idxY = -_pad; idxY < _pad; idxY += _inputSize) {                                   // sum up nearby channels
+        for (int rowIndex = 0; rowIndex < _inputSize; rowIndex++) {
+            memcpy(_midLong + (_inputSize + 1) * _pad + rowIndex * _paddedInputSize, _midShort + rowIndex * _inputSize, _inputSize * sizeof(float));
+        }
+        for (int idxY = 0; idxY < _localSize; idxY++) {                 // sum up nearby channels
             for (int idxX = 0; idxX < _localSize; idxX++) {
-                vDSP_vadd(_midLong + idxY + idxX, 1, _midShort, 1, _midLong + idxY + idxX, 1, _inputPerChannel);
+                vDSP_vadd(_midLong + idxY * _inputSize + idxX, 1, _midShort, 1, _midLong + idxY * _inputSize + idxX, 1, _inputPerChannel);
             }
         }
-        vDSP_vsmsa(_midLong + _pad, 1, &_alphaOverN, &_delta, _midShort, 1, _inputPerChannel);      // denom = delta + (alpha / N) * sum
-        vvpowf(_midShort, _beta, _midShort, &_inputPerChannel);                                     // denom = denom ^ beta
-        vDSP_vdiv(_midShort, 1, src, 1, dst, 1, _inputPerChannel);                                  // norm_result = origin / denom
+        for (int rowIndex = 0; rowIndex < _inputSize; rowIndex++) {     // denom = delta + (alpha / N) * sum
+            vDSP_vsmsa(_midLong + (_inputSize + 1) * _pad + rowIndex * _paddedInputSize, 1, &_alphaOverN, &_delta, _midShort + rowIndex * _inputSize, 1, _inputSize);
+        }
+        vvpowf(_midShort, _beta, _midShort, &_inputPerChannel);         // denom = denom ^ beta
+        vDSP_vdiv(_midShort, 1, src, 1, dst, 1, _inputPerChannel);      // norm_result = origin / denom
     }
 }
 
