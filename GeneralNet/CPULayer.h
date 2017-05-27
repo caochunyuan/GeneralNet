@@ -113,7 +113,6 @@ typedef NS_ENUM (NSInteger, PoolingLayerTypes) {
 @property (assign, nonatomic) float delta;
 @property (assign, nonatomic) int localSize;
 @property (assign, nonatomic) int pad;
-@property (assign, nonatomic) int paddedInputSize;
 @property (assign, nonatomic) float one;
 @property (assign, nonatomic) int inputPerChannel;
 @property (assign, nonatomic) int paddedPerChannel;
@@ -125,6 +124,7 @@ typedef NS_ENUM (NSInteger, PoolingLayerTypes) {
                    inputSize:(int)inputSize
                        alpha:(float)alpha
                         beta:(float)beta
+                       delta:(float)delta
                    localSize:(int)localSize;
 
 @end

@@ -487,12 +487,13 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
                                                             pad:0
                                                          stride:[(NSNumber *)layer[@"stride"] intValue]];
             }
-        } else if ([layerType isEqualToString:@"LocalResponseNormalization"]) {
+        } else if ([layerType isEqualToString:@"LocalResponseNormalization"]) {     // only support within-channel normalization for now
             newLayer = [[CPULocalResponseNormalizationLayer alloc] initWithName:layerName
                                                                    inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]
                                                                       inputSize:[(NSNumber *)layer[@"input_size"] intValue]
                                                                           alpha:[(NSNumber *)layer[@"alpha"] floatValue]
                                                                            beta:[(NSNumber *)layer[@"beta"] floatValue]
+                                                                          delta:1.0f
                                                                       localSize:[(NSNumber *)layer[@"local_size"] intValue]];
         } else if ([layerType isEqualToString:@"SoftMax"]) {
             newLayer = [[CPUSoftMaxLayer alloc] initWithName:layerName
