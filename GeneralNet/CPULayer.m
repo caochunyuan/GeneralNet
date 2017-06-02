@@ -193,7 +193,7 @@ void im2col (const float* data_im,
             memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M * sizeof(float));
         }
         cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, _M, _N, _K, 1,
-                    _weight + groupIndex * _weightPerGroup, _K, _colData, _N, 0, dst, _N);
+                    _weight + groupIndex * _weightPerGroup, _K, _colData, _N, 1, dst, _N);
     }
     if (_doReLU) vDSP_vthres(output, 1, &_zero, output, 1, _outputPerGroup * _group);
 }
