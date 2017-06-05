@@ -9,6 +9,22 @@
 #import <Foundation/Foundation.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
 
+@interface MPSLayer : NSObject
+
+@property (strong, nonatomic) NSString *name;
+@property (strong, nonatomic) MPSImageDescriptor *imageDescriptor;
+@property (strong, nonatomic) MPSImage *outputImage;
+@property (assign, nonatomic) NSUInteger readCount;
+@property (strong, nonatomic) MPSCNNKernel *kernel;
+
+- (instancetype)initWithName:(NSString *)name
+             ImageDescriptor:(MPSImageDescriptor *)imageDescritor
+                   readCount:(NSUInteger)readCount
+                 outputImage:(MPSImage *)outputImage
+                      kernel:(MPSCNNKernel *)kernel;
+
+@end
+
 @interface SlimMPSCNNConvolution : MPSCNNConvolution
 
 @property (nonatomic) BOOL padding;

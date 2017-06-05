@@ -8,6 +8,26 @@
 
 #import "SlimMPSCNN.h"
 
+@implementation MPSLayer
+
+- (instancetype)initWithName:(NSString *)name
+             ImageDescriptor:(MPSImageDescriptor *)imageDescritor
+                   readCount:(NSUInteger)readCount
+                 outputImage:(MPSImage *)outputImage
+                      kernel:(MPSCNNKernel *)kernel {
+    if (self = [super init]) {
+        _name = name;
+        _imageDescriptor = imageDescritor;
+        _outputImage = outputImage;
+        _readCount = readCount;
+        _kernel = kernel;
+    }
+    
+    return self;
+}
+
+@end
+
 @implementation SlimMPSCNNConvolution {
 @private
     BOOL _padding;

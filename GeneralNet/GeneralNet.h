@@ -6,33 +6,28 @@
 //  Copyright © 2017年 Lun. All rights reserved.
 //
 
-#pragma mark - if use Metal
-#if USE_METAL
-
 #import <Foundation/Foundation.h>
-#import <MetalKit/MetalKit.h>
-#import <MetalPerformanceShaders/MetalPerformanceShaders.h>
-#import <Accelerate/Accelerate.h>
+#import <UIKit/UIKit.h>
 #import <sys/mman.h>
-#import "SlimMPSCNN.h"
 
-@interface GeneralLayer : NSObject
+#pragma mark - protocol for both GPU and CPU
+@protocol GeneralNetProtocol
 
-@property (strong, nonatomic) NSString *name;
-@property (strong, nonatomic) MPSImageDescriptor *imageDescriptor;
-@property (strong, nonatomic) MPSImage *outputImage;
-@property (assign, nonatomic) NSUInteger readCount;
-@property (strong, nonatomic) MPSCNNKernel *kernel;
-
-- (instancetype)initWithName:(NSString *)name
-             ImageDescriptor:(MPSImageDescriptor *)imageDescritor
-                   readCount:(NSUInteger)readCount
-                 outputImage:(MPSImage *)outputImage
-                      kernel:(MPSCNNKernel *)kernel;
+- (instancetype)initWithDescriptionFile:(NSString *)descriptionFile
+                               dataFile:(NSString *)dataFile;
+- (void)forwardWithImage:(UIImage *)image
+              completion:(void (^)())completion;
+- (NSString *)getTopProbs;
 
 @end
 
-@interface GeneralNet : NSObject
+#pragma mark - if use Metal
+#if USE_METAL
+
+#import <MetalKit/MetalKit.h>
+#import <MetalPerformanceShaders/MetalPerformanceShaders.h>
+
+@interface GeneralNet : NSObject <GeneralNetProtocol>
 
 @property (assign, nonatomic) float *basePtr;
 @property (assign, nonatomic) int fd;
@@ -53,24 +48,12 @@
 @property (strong, nonatomic) NSMutableArray *prefetchList;
 @property (strong, nonatomic) NSMutableArray *tempImageList;
 
-- (instancetype)initWithDescriptionFile:(NSString *)descriptionFile
-                               dataFile:(NSString *)dataFile;
-- (void)forwardWithImage:(UIImage *)image
-              completion:(void (^)())completion;
-- (NSString *)getTopProbs;
-
 @end
 
 #pragma mark - if not use Metal
 #else
 
-#import <Foundation/Foundation.h>
-#import <UIKit/UIKit.h>
-#import <Accelerate/Accelerate.h>
-#import <sys/mman.h>
-#import "CPULayer.h"
-
-@interface GeneralNet : NSObject
+@interface GeneralNet : NSObject <GeneralNetProtocol>
 
 @property (assign, nonatomic) float *basePtr;
 @property (assign, nonatomic) int fd;
@@ -85,12 +68,6 @@
 @property (strong, nonatomic) NSArray *labels;
 @property (strong, nonatomic) NSMutableDictionary *layersDict;
 @property (strong, nonatomic) NSMutableArray *encodeSequence;
-
-- (instancetype)initWithDescriptionFile:(NSString *)descriptionFile
-                               dataFile:(NSString *)dataFile;
-- (void)forwardWithImage:(UIImage *)image
-              completion:(void (^)())completion;
-- (NSString *)getTopProbs;
 
 @end
 

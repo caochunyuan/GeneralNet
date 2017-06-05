@@ -11,25 +11,8 @@
 #pragma mark - if use Metal
 #if USE_METAL
 
-@implementation GeneralLayer
-
-- (instancetype)initWithName:(NSString *)name
-             ImageDescriptor:(MPSImageDescriptor *)imageDescritor
-                   readCount:(NSUInteger)readCount
-                 outputImage:(MPSImage *)outputImage
-                      kernel:(MPSCNNKernel *)kernel {
-    if (self = [super init]) {
-        _name = name;
-        _imageDescriptor = imageDescritor;
-        _outputImage = outputImage;
-        _readCount = readCount;
-        _kernel = kernel;
-    }
-    
-    return self;
-}
-
-@end
+#import <Accelerate/Accelerate.h>
+#import "SlimMPSCNN.h"
 
 @implementation GeneralNet
 
@@ -169,11 +152,11 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         }
         
         // construct layer
-        GeneralLayer *newLayer = [[GeneralLayer alloc] initWithName:layerName
-                                                    ImageDescriptor:imageDescriptor
-                                                          readCount:[imageType isEqualToString:@"Temporary"]? [(NSNumber *)layer[@"read_count"] unsignedIntegerValue] : 0
-                                                        outputImage:outputImage
-                                                             kernel:kernel];
+        MPSLayer *newLayer = [[MPSLayer alloc] initWithName:layerName
+                                            ImageDescriptor:imageDescriptor
+                                                  readCount:[imageType isEqualToString:@"Temporary"]? [(NSNumber *)layer[@"read_count"] unsignedIntegerValue] : 0
+                                                outputImage:outputImage
+                                                     kernel:kernel];
         if ([imageType isEqualToString:@"Temporary"]) [_tempImageList addObject:newLayer];
         [_layersDict setObject:newLayer forKey:layerName];
     }
@@ -198,7 +181,7 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         MPSTemporaryImage *preImage = [MPSTemporaryImage temporaryImageWithCommandBuffer:commandBuffer imageDescriptor:_input_id];
         
         // create MPSTemporaryImage for inside layers
-        for (GeneralLayer *layer in _tempImageList) {
+        for (MPSLayer *layer in _tempImageList) {
 #if ALLOW_PRINT
             if (!layer.outputImage) {
                 layer.outputImage = [[MPSImage alloc] initWithDevice:_device
@@ -229,14 +212,14 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         srcImage.readCount -= 1;
         
         // run following layers
-        [((GeneralLayer *)_layersDict[_firstLayerName]).kernel encodeToCommandBuffer:commandBuffer
-                                                                         sourceImage:preImage
-                                                                    destinationImage:((GeneralLayer *)_layersDict[_firstLayerName]).outputImage];
+        [((MPSLayer *)_layersDict[_firstLayerName]).kernel encodeToCommandBuffer:commandBuffer
+                                                                     sourceImage:preImage
+                                                                destinationImage:((MPSLayer *)_layersDict[_firstLayerName]).outputImage];
         
         for (NSArray *triplet in _encodeSequence) {
-            [((GeneralLayer *)triplet[0]).kernel encodeToCommandBuffer:commandBuffer
-                                                           sourceImage:((GeneralLayer *)triplet[1]).outputImage
-                                                      destinationImage:((GeneralLayer *)triplet[2]).outputImage];
+            [((MPSLayer *)triplet[0]).kernel encodeToCommandBuffer:commandBuffer
+                                                       sourceImage:((MPSLayer *)triplet[1]).outputImage
+                                                  destinationImage:((MPSLayer *)triplet[2]).outputImage];
         }
         
         [commandBuffer commit];
@@ -244,12 +227,12 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         completion();
         
 #if ALLOW_PRINT
-        [self printImage:((GeneralLayer *)_layersDict[_firstLayerName]).outputImage
-                 ofLayer:((GeneralLayer *)_layersDict[_firstLayerName]).name];
+        [self printImage:((MPSLayer *)_layersDict[_firstLayerName]).outputImage
+                 ofLayer:((MPSLayer *)_layersDict[_firstLayerName]).name];
         for (NSArray *triplet in _encodeSequence) {
-            if (((GeneralLayer *)triplet[2]).outputImage) {
-                [self printImage:((GeneralLayer *)triplet[2]).outputImage
-                         ofLayer:((GeneralLayer *)triplet[2]).name];
+            if (((MPSLayer *)triplet[2]).outputImage) {
+                [self printImage:((MPSLayer *)triplet[2]).outputImage
+                         ofLayer:((MPSLayer *)triplet[2]).name];
             }
         }
 #endif
@@ -259,7 +242,7 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
 - (NSString *)getTopProbs {
     
     // gather measurements of MPSImage to use to get out probabilities
-    MPSImage *outputImage = ((GeneralLayer *)_layersDict[_lastLayerName]).outputImage;
+    MPSImage *outputImage = ((MPSLayer *)_layersDict[_lastLayerName]).outputImage;
     NSUInteger width = outputImage.width;
     NSUInteger height = outputImage.height;
     NSUInteger numSlices = (outputImage.featureChannels + 3) / 4;
@@ -369,6 +352,8 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
 
 #pragma mark - if not use Metal
 #else
+
+#import "CPULayer.h"
 
 @implementation GeneralNet
 

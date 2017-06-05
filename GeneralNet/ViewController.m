@@ -34,8 +34,8 @@
 #else
     _alexnet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"alexnet" ofType:@"json"]
                                                   dataFile:[[NSBundle mainBundle] pathForResource:@"cpu_alexnet" ofType:@"dat"]];
-//    _googlenet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"googlenet" ofType:@"json"]
-//                                                    dataFile:[[NSBundle mainBundle] pathForResource:@"cpu_googlenet" ofType:@"dat"]];
+    _googlenet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"googlenet" ofType:@"json"]
+                                                    dataFile:[[NSBundle mainBundle] pathForResource:@"cpu_googlenet" ofType:@"dat"]];
     _squeezenet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"squeezenet" ofType:@"json"]
                                                      dataFile:[[NSBundle mainBundle] pathForResource:@"cpu_squeezenet" ofType:@"dat"]];
 #endif

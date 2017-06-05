@@ -23,6 +23,68 @@
     // subclass of CPULayer should overwrite this method
 }
 
+- (void)dealloc {
+    if (self.output) free(_output);
+}
+
+@end
+
+@implementation CPUConvolutionLayer
+
+- (instancetype)initWithName:(NSString *)name
+                      weight:(float *)weight
+                        bias:(float *)bias
+                       group:(int)group
+                inputChannel:(int)inputChannel
+               outputChannel:(int)outputChannel
+                   inputSize:(int)inputSize
+                  outputSize:(int)outputSize
+                  kernelSize:(int)kernelSize
+                         pad:(int)pad
+                      stride:(int)stride
+                      doReLU:(BOOL)doReLU
+                     colData:(float *)colData {
+    if (self = [super initWithName:name]) {
+        _weight = weight;
+        _bias = bias;
+        _group = group;
+        _inputChannel = inputChannel / _group;
+        _outputChannel = outputChannel / _group;
+        _inputSize = inputSize;
+        _outputSize = outputSize;
+        _kernelSize = kernelSize;
+        _pad = pad;
+        _stride = stride;
+        _doReLU = doReLU;
+        _zero = 0.0f;
+        _colData = colData;
+        _M = _outputChannel;
+        _N = _outputSize * _outputSize;
+        _K = _inputChannel * _kernelSize * _kernelSize;
+        _inputPerGroup = _inputChannel * _inputSize * _inputSize;
+        _outputPerGroup = _outputChannel * _outputSize * _outputSize;
+        _weightPerGroup = _outputChannel * _inputChannel * _kernelSize * _kernelSize;
+    }
+    
+    return self;
+}
+
+- (void)forwardWithInput:(const float *)input
+                  output:(float *)output {
+    for (int groupIndex = 0; groupIndex < _group; groupIndex++) {
+        const float *src = input + groupIndex * _inputPerGroup;
+        float *dst = output + groupIndex * _outputPerGroup;
+        im2col(src, _inputChannel, _inputSize, _inputSize, _kernelSize, _kernelSize, 1, 1,
+               _pad, _pad, _pad, _pad, _stride, _stride, _colData);
+        for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
+            memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M * sizeof(float));
+        }
+        cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, _M, _N, _K, 1,
+                    _weight + groupIndex * _weightPerGroup, _K, _colData, _N, 1, dst, _N);
+    }
+    if (_doReLU) vDSP_vthres(output, 1, &_zero, output, 1, _outputPerGroup * _group);
+}
+
 void im2col (const float* data_im,
              const int channels,
              const int height,
@@ -134,68 +196,6 @@ void im2col (const float* data_im,
             }
         }
     }
-}
-
-- (void)dealloc {
-    if (self.output) free(_output);
-}
-
-@end
-
-@implementation CPUConvolutionLayer
-
-- (instancetype)initWithName:(NSString *)name
-                      weight:(float *)weight
-                        bias:(float *)bias
-                       group:(int)group
-                inputChannel:(int)inputChannel
-               outputChannel:(int)outputChannel
-                   inputSize:(int)inputSize
-                  outputSize:(int)outputSize
-                  kernelSize:(int)kernelSize
-                         pad:(int)pad
-                      stride:(int)stride
-                      doReLU:(BOOL)doReLU
-                     colData:(float *)colData {
-    if (self = [super initWithName:name]) {
-        _weight = weight;
-        _bias = bias;
-        _group = group;
-        _inputChannel = inputChannel / _group;
-        _outputChannel = outputChannel / _group;
-        _inputSize = inputSize;
-        _outputSize = outputSize;
-        _kernelSize = kernelSize;
-        _pad = pad;
-        _stride = stride;
-        _doReLU = doReLU;
-        _zero = 0.0f;
-        _colData = colData;
-        _M = _outputChannel;
-        _N = _outputSize * _outputSize;
-        _K = _inputChannel * _kernelSize * _kernelSize;
-        _inputPerGroup = _inputChannel * _inputSize * _inputSize;
-        _outputPerGroup = _outputChannel * _outputSize * _outputSize;
-        _weightPerGroup = _outputChannel * _inputChannel * _kernelSize * _kernelSize;
-    }
-    
-    return self;
-}
-
-- (void)forwardWithInput:(const float *)input
-                  output:(float *)output {
-    for (int groupIndex = 0; groupIndex < _group; groupIndex++) {
-        const float *src = input + groupIndex * _inputPerGroup;
-        float *dst = output + groupIndex * _outputPerGroup;
-        im2col(src, _inputChannel, _inputSize, _inputSize, _kernelSize, _kernelSize, 1, 1,
-               _pad, _pad, _pad, _pad, _stride, _stride, _colData);
-        for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
-            memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M * sizeof(float));
-        }
-        cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, _M, _N, _K, 1,
-                    _weight + groupIndex * _weightPerGroup, _K, _colData, _N, 1, dst, _N);
-    }
-    if (_doReLU) vDSP_vthres(output, 1, &_zero, output, 1, _outputPerGroup * _group);
 }
 
 @end
