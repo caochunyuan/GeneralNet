@@ -31,7 +31,7 @@ GeneralNet *anyNet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle main
 
 需要额外注意的是转换GoogLeNet的时候，`weight_offset`和`bias_offset`的设置需要额外处理（如果我们有一个卷积层或全连接层，就需要到`.dat`文件里去找这一层的权重和偏置，文件的头指针加上`weight_offset`／`bias_offset`，就得到指向权重／偏置的指针）。`weight_offset`和`bias_offset`在`convert_prototxt.py`里是通过一层一层地累加权重和偏置的数据长度的到的，与众不同的是，GoogLeNet的`.caffemodel`文件里有一个叫`loss1/classifier`和一个叫`loss2/classifier`的全连接层（[在此](https://github.com/BVLC/caffe/blob/master/models/bvlc_googlenet/train_val.prototxt#L904)可以看到），它们是**训练**神经网络的时候用到的参数，`deploy.txt`里面没有他们，我们转换出的JSON文件里也没有它们，iOS上也用不着。于是我们通过累加来得到`weight_offset`和`bias_offset`的时候，就漏加了它们的权重和偏置的数据长度，于是就乱了。
 
-所以这是**`.caffemodel`和`.prototxt`不一致**引起的混乱，必需手动修改其中一个。一种解决方案是在`convert_caffemodel.py`里，让它遇到`loss1/classifier`和`loss2/classifier`的参数时直接跳过，不保存；另一个解决方案是用Convert文件夹里的`get_size.py`，它只需要一个参数，即`.caffemodel`的路径，比如：
+所以这是**caffemodel和prototxt不一致**引起的混乱，必需手动修改其中一个。一种解决方案是在`convert_caffemodel.py`里，让它遇到`loss1/classifier`和`loss2/classifier`的参数时直接跳过，不保存；另一个解决方案是用Convert文件夹里的`get_size.py`，它只需要一个参数，即`.caffemodel`的路径，比如：
 
 ```
 python get_size.py googlenet.caffemodel
