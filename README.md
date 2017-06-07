@@ -41,14 +41,14 @@ python get_size.py googlenet.caffemodel
 
 首先把JSON文件读进来
 
-```
+```python
 f = open('offset_googlenet.json','r')
 offsetDict = json.load(f)
 ```
 
 然后把原来的第229、230行改成：
 
-```
+```python
 'weight_offset': offsetDict[layer.name]['weight'],
 'bias_offset': offsetDict[layer.name]['bias'],
 ```
@@ -61,7 +61,7 @@ offsetDict = json.load(f)
 
 首先`.caffemodel`是把权重按[outputChannels][inputChannels][kernelHeight][kernelWidth]的顺序存成四维数组，但GPU版`Metal`需要的顺序是[outputChannels][kernelHeight][kernelWidth][inputChannels]，也就是需要转置一下。那么首先需要把outputChannels、inputChannels、inputChannels和kernelWidth这四个参数读出来，见34到37行。麻烦的是各个net的`.caffemodel`存的可能不太一样，对于alexnet和googlenet，这几行是：
 
-```
+```python
 c_o = blob.num
 c_i = blob.channels
 h   = blob.height
@@ -73,7 +73,7 @@ data = arr.reshape(c_o, c_i, h, w)
 
 但是对于squeezenet，应该写成：
 
-```
+```python
 if idx == 1:
     data = np.array(blob.data, dtype=np.float32)
 elif idx == 0:
@@ -88,7 +88,7 @@ elif idx == 0:
 
 另外alexnet的全连接层需要特殊照顾，`data = arr.reshape(c_o, c_i, h, w)`得换成这一段：
 
-```
+```python
 if layer.name == "fc6" and idx == 0:
     data = arr.reshape(4096, 256, 6, 6)
 elif layer.name == "fc7" and idx == 0:
