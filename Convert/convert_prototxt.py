@@ -1,4 +1,4 @@
-def generate_param_txt(prototxt_path, labels_path, json_file_name):
+def generate_param_txt(prototxt_path, labels_path, json_filename):
     import caffe_pb2
     from google.protobuf.text_format import Merge
     from enum import Enum
@@ -355,7 +355,7 @@ def generate_param_txt(prototxt_path, labels_path, json_file_name):
     json_dict['inout_info'] = inout_info
 
     # dump into JSON file
-    with open(json_file_name+'.json', 'wb') as s:
+    with open(json_filename+'.json', 'wb') as s:
         s.write(json.dumps(json_dict))
 
     print 'Finished.'
