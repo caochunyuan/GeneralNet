@@ -173,6 +173,6 @@ CPU版结构比较简单，每一层的操作都写在`-forwardWithInput:output:
 
 权重和偏置同样需要从`.dat`里面读取，但要注意**CPU版和GPU版不共用`.dat`文件**，因为CPU版需要的权重和偏执的存储顺序是与caffe一致的，也就是说运行`convert_caffemodel.py`时**不需要那一步转置**。要生成CPU版的dat文件，应该把`convert_caffemodel.py`第51行改成：
 
-```
+```python
 pass
 ```
