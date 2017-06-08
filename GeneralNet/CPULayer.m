@@ -7,6 +7,13 @@
 //
 
 #import "CPULayer.h"
+#import <Accelerate/Accelerate.h>
+
+#if USE_NNPACK_FOR_GEMM
+#import "nnpackGemm.h"
+#elif USE_EIGEN_FOR_GEMM
+#import "eigenGemm.hpp"
+#endif
 
 @implementation CPULayer
 
@@ -29,7 +36,11 @@
 
 @end
 
-@implementation CPUConvolutionLayer
+@implementation CPUConvolutionLayer {
+#if USE_NNPACK_FOR_GEMM
+    pthreadpool_t threadpool;
+#endif
+}
 
 - (instancetype)initWithName:(NSString *)name
                       weight:(float *)weight
@@ -64,6 +75,9 @@
         _inputPerGroup = _inputChannel * _inputSize * _inputSize;
         _outputPerGroup = _outputChannel * _outputSize * _outputSize;
         _weightPerGroup = _outputChannel * _inputChannel * _kernelSize * _kernelSize;
+#if USE_NNPACK_FOR_GEMM
+        threadpool = pthreadpool_create(0);
+#endif
     }
     
     return self;
@@ -76,11 +90,24 @@
         float *dst = output + groupIndex * _outputPerGroup;
         im2col(src, _inputChannel, _inputSize, _inputSize, _kernelSize, _kernelSize, 1, 1,
                _pad, _pad, _pad, _pad, _stride, _stride, _colData);
+#if USE_NNPACK_FOR_GEMM
+        nnpack_gemm(_M, _N, _K, _weight + groupIndex * _weightPerGroup, _colData, dst, threadpool);
+        for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
+            vDSP_vadd(dst + featureIndex * _M, 1, _bias + groupIndex * _M, 1, dst + featureIndex * _M, 1, _M);
+        }
+#elif USE_EIGEN_FOR_GEMM
+        for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
+            memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M * sizeof(float));
+        }
+        eigen_gemm(blasNoTrans, blasNoTrans, _M, _N, _K, 1,
+                   _weight + groupIndex * _weightPerGroup, _colData, 1, dst);
+#else
         for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
             memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M * sizeof(float));
         }
         cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, _M, _N, _K, 1,
                     _weight + groupIndex * _weightPerGroup, _K, _colData, _N, 1, dst, _N);
+#endif
     }
     if (_doReLU) vDSP_vthres(output, 1, &_zero, output, 1, _outputPerGroup * _group);
 }
@@ -324,13 +351,13 @@ void im2col (const float* data_im,
         _inputPerChannel = inputSize * inputSize;
         _localSize = localSize;
         _alphaOverN = alpha / _localSize;
-        _beta = malloc(_inputPerChannel * sizeof(float));
+        _beta = (float *)malloc(_inputPerChannel * sizeof(float));
         vDSP_vfill(&beta, _beta, 1, _inputPerChannel);
         _delta = delta;
         _pad =  (localSize - 1) / 2;
         _paddedPerChannel = _inputPerChannel + 2 * _pad;
-        _midShort = malloc(_inputPerChannel * sizeof(float));
-        _midLong = malloc(_paddedPerChannel * sizeof(float));
+        _midShort = (float *)malloc(_inputPerChannel * sizeof(float));
+        _midLong = (float *)malloc(_paddedPerChannel * sizeof(float));
         _one = 1.0f;
     }
     
@@ -366,7 +393,7 @@ void im2col (const float* data_im,
                 inputChannel:(int)inputChannel{
     if (self = [super initWithName:name]) {
         _inputChannel = inputChannel;
-        _mid = malloc(_inputChannel * sizeof(float));
+        _mid = (float *)malloc(_inputChannel * sizeof(float));
     }
     
     return self;

@@ -188,9 +188,9 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
                                                      imageDescriptor:layer.imageDescriptor];
             }
 #else
-            MPSTemporaryImage *tempImage = [MPSTemporaryImage temporaryImageWithCommandBuffer:commandBuffer imageDescriptor:layer.imageDescriptor];
-            tempImage.readCount = layer.readCount;
-            layer.outputImage = tempImage;
+            MPSTemporaryImage *tempImg = [MPSTemporaryImage temporaryImageWithCommandBuffer:commandBuffer imageDescriptor:layer.imageDescriptor];
+            tempImg.readCount = layer.readCount;
+            layer.outputImage = tempImg;
 #endif
         }
         

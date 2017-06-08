@@ -80,17 +80,17 @@ MPS_SWIFT_NAME(encode(commandBuffer:sourceImage:destinationImage:)) {
         NSUInteger pad_top = pad_along_height / 2;
         NSUInteger pad_left = pad_along_width / 2;
         
-        MPSOffset offset;
-        offset.x = self.kernelWidth / 2 - pad_left;
-        offset.y = self.kernelHeight / 2 - pad_top;
-        offset.z = 0;
-        self.offset = offset;
+        self.offset = (MPSOffset) {
+            .x = self.kernelWidth / 2 - pad_left,
+            .y = self.kernelHeight / 2 - pad_top,
+            .z = 0
+        };
     } else {
-        MPSOffset offset;
-        offset.x = self.kernelWidth / 2;
-        offset.y = self.kernelHeight / 2;
-        offset.z = 0;
-        self.offset = offset;
+        self.offset = (MPSOffset) {
+            .x = self.kernelWidth / 2,
+            .y = self.kernelHeight / 2,
+            .z = 0
+        };
     }
 
     [super encodeToCommandBuffer:commandBuffer
@@ -161,17 +161,17 @@ MPS_SWIFT_NAME(encode(commandBuffer:sourceImage:destinationImage:)) {
         NSUInteger pad_top = pad_along_height / 2;
         NSUInteger pad_left = pad_along_width / 2;
         
-        MPSOffset offset;
-        offset.x = self.kernelWidth / 2 - pad_left;
-        offset.y = self.kernelHeight / 2 - pad_top;
-        offset.z = 0;
-        self.offset = offset;
+        self.offset = (MPSOffset) {
+            .x = self.kernelWidth / 2 - pad_left,
+            .y = self.kernelHeight / 2 - pad_top,
+            .z = 0
+        };
     } else {
-        MPSOffset offset;
-        offset.x = self.kernelWidth / 2;
-        offset.y = self.kernelHeight / 2;
-        offset.z = 0;
-        self.offset = offset;
+        self.offset = (MPSOffset) {
+            .x = self.kernelWidth / 2,
+            .y = self.kernelHeight / 2,
+            .z = 0
+        };
     }
     
     [super encodeToCommandBuffer:commandBuffer
@@ -190,11 +190,11 @@ MPS_SWIFT_NAME(encode(commandBuffer:sourceImage:destinationImage:)) {
                         kernelHeight:inputSize
                      strideInPixelsX:0
                      strideInPixelsY:0]) {
-        MPSOffset offset;
-        offset.x = self.kernelWidth / 2;
-        offset.y = self.kernelHeight / 2;
-        offset.z = 0;
-        self.offset = offset;
+        self.offset = (MPSOffset) {
+            .x = self.kernelWidth / 2,
+            .y = self.kernelHeight / 2,
+            .z = 0
+        };
         
         self.edgeMode = MPSImageEdgeModeClamp;
     }

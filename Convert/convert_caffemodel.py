@@ -10,9 +10,10 @@ import sys
 import numpy as np
 
 class CaffeDataReader(object):
-    def __init__(self, def_path, data_path):
+    def __init__(self, def_path, data_path, dat_filename):
         self.def_path = def_path
         self.data_path = data_path
+        self.dat_filename = dat_filename
         self.load_using_pb()
 
     def load_using_pb(self):
@@ -53,33 +54,29 @@ class CaffeDataReader(object):
             return data
 
         offset = 0
-        s = ""
         all = np.array([], dtype=np.float32)
         for key, data_pair in self.parameters:
             print(key)
             ext = ["weights", "bias"]
             for i, data in enumerate(map(convert, data_pair)):
-                s += ("- (float *) %s_%s {\n    return _basePtr + %s;\n}\n\n" % (ext[i], key, offset))
                 print("  ", data.shape)
                 offset += data.size
                 all = np.append(all, data.ravel())
 
-        f = open(os.getcwd() + "/params.dat", "wb")        
+        f = open(os.getcwd() + "/" + self.dat_filename + ".dat", "wb")        
         all.tofile(f)
         f.close()
 
-        print("\nCopy this code into Net.m:")
-        print(s[:-1])
-        print("static const uint fileSize = " + str(all.shape[0] * 4) + ";\n")
+        print("file size = " + str(all.shape[0] * 4) + ";\n")
         print("Done!")
 
 def main():
     args = sys.argv[1:]
-    if len(args) != 2:
-        print("usage: %s path.prototxt path.caffemodel" % os.path.basename(__file__))
+    if len(args) != 3:
+        print("usage: %s path.prototxt path.caffemodel dat_filename" % os.path.basename(__file__))
         exit(-1)
-    def_path, data_path = args
-    CaffeDataReader(def_path, data_path).dump()
+    def_path, data_path, dat_filename = args
+    CaffeDataReader(def_path, data_path, dat_filename).dump()
 
 if __name__ == '__main__':
     main()
