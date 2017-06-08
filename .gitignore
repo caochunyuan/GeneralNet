@@ -124,3 +124,6 @@ ENV/
 
 # converted models
 *.dat
+
+# Eigen source files
+/Eigen/
