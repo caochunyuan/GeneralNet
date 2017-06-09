@@ -14,7 +14,7 @@
 
 #define ALLOW_PRINT             0
 #define USE_METAL               0
-#define USE_NNPACK_FOR_GEMM     1
+#define USE_NNPACK_FOR_GEMM     0
 #define USE_EIGEN_FOR_GEMM      0
 
 #endif /* GlobalHeader_pch */

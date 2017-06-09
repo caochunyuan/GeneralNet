@@ -669,9 +669,9 @@ static const size_t cache_elements_l3 = blocking_l3 / sizeof(float);
 static const size_t row_subblock_max = 4;
 static const size_t col_subblock_max = 12;
 
-static const size_t reduction_block_max = cache_elements_l1 / (row_subblock_max + col_subblock_max) / (2 * 2);
-static const size_t row_block_max = cache_elements_l2 / reduction_block_max / (row_subblock_max * row_subblock_max);
-static const size_t col_block_max = cache_elements_l3 / reduction_block_max / (col_subblock_max * col_subblock_max);
+static const size_t reduction_block_max = cache_elements_l1 / (row_subblock_max + col_subblock_max) / 2 * 2;
+static const size_t row_block_max = cache_elements_l2 / reduction_block_max / row_subblock_max * row_subblock_max;
+static const size_t col_block_max = cache_elements_l3 / reduction_block_max / col_subblock_max * col_subblock_max;
 
 typedef struct nnpack_context {
     bool initialized;
