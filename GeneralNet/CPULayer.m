@@ -36,11 +36,7 @@
 
 @end
 
-@implementation CPUConvolutionLayer {
-#if USE_NNPACK_FOR_GEMM
-    pthreadpool_t threadpool;
-#endif
-}
+@implementation CPUConvolutionLayer
 
 - (instancetype)initWithName:(NSString *)name
                       weight:(float *)weight
@@ -75,9 +71,6 @@
         _inputPerGroup = _inputChannel * _inputSize * _inputSize;
         _outputPerGroup = _outputChannel * _outputSize * _outputSize;
         _weightPerGroup = _outputChannel * _inputChannel * _kernelSize * _kernelSize;
-#if USE_NNPACK_FOR_GEMM
-        threadpool = pthreadpool_create(0);
-#endif
     }
     
     return self;
@@ -91,7 +84,12 @@
         im2col(src, _inputChannel, _inputSize, _inputSize, _kernelSize, _kernelSize, 1, 1,
                _pad, _pad, _pad, _pad, _stride, _stride, _colData);
 #if USE_NNPACK_FOR_GEMM
-        nnpack_gemm(_M, _N, _K, _weight + groupIndex * _weightPerGroup, _colData, dst, threadpool);
+//        for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
+//            memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M * sizeof(float));
+//        }
+//        nnpack_gemm(_M, _N, _K, 1, 1, NNPACKNoTrans, NNPACKNoTrans, _weight + groupIndex * _weightPerGroup, _colData, dst);
+        
+        nnpack_gemm(_M, _N, _K, 1, 0, NNPACKNoTrans, NNPACKNoTrans, _weight + groupIndex * _weightPerGroup, _colData, dst);
         for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
             vDSP_vadd(dst + featureIndex * _M, 1, _bias + groupIndex * _M, 1, dst + featureIndex * _M, 1, _M);
         }

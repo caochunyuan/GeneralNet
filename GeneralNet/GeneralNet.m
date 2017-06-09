@@ -14,9 +14,9 @@
 #import <Accelerate/Accelerate.h>
 #import "SlimMPSCNN.h"
 
-@implementation GeneralNet
+static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
 
-static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
+@implementation GeneralNet
 
 - (instancetype)initWithDescriptionFile:(NSString *)descriptionFile
                                dataFile:(NSString *)dataFile {
@@ -48,7 +48,7 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         _tempImageList = [[NSMutableArray alloc] init];
         
         // create input id and output image
-        _input_id = [MPSImageDescriptor imageDescriptorWithChannelFormat:textureFormat
+        _input_id = [MPSImageDescriptor imageDescriptorWithChannelFormat:kTextureFormat
                                                                    width:[(NSNumber *)inoutInfo[@"input_size"] unsignedIntegerValue]
                                                                   height:[(NSNumber *)inoutInfo[@"input_size"] unsignedIntegerValue]
                                                          featureChannels:[(NSNumber *)inoutInfo[@"input_channel"] unsignedIntegerValue]];
@@ -139,7 +139,7 @@ static const uint textureFormat = MPSImageFeatureChannelFormatFloat16;
         }
         
         // construct output image
-        MPSImageDescriptor *imageDescriptor = [MPSImageDescriptor imageDescriptorWithChannelFormat:textureFormat
+        MPSImageDescriptor *imageDescriptor = [MPSImageDescriptor imageDescriptorWithChannelFormat:kTextureFormat
                                                                                              width:[(NSNumber *)layer[@"output_size"] unsignedIntegerValue]
                                                                                             height:[(NSNumber *)layer[@"output_size"] unsignedIntegerValue]
                                                                                    featureChannels:[(NSNumber *)layer[@"output_channel"] unsignedIntegerValue]];
