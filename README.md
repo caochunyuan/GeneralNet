@@ -179,7 +179,7 @@ pass
 
 ### Gemm方法
 
-卷积层是用caffe2的`ìm2col`加上一个`Gemm`实现的。后者可以是Accelerate的`cblas_sgemm`，也可以是自己实现的`nnpack_gemm`或者`eigen_gemm`。`.pch`的宏定义有`USE_NNPACK_FOR_GEMM`和`USE_EIGEN_FOR_GEMM`，选一个定义为1即可；都为0则默认用Accelerate。注意如果用的是Eigen，必需把`CPULayer.m`的后缀改成`.mm`；如果用的是NNPACK，后缀必须是`.m`。
+卷积层是用caffe2的`ìm2col`加上一个`Gemm`实现的。后者可以是Accelerate的`cblas_sgemm`，也可以是自己实现的`nnpack_gemm`或者`eigen_gemm`。`.pch`的宏定义有`USE_NNPACK_FOR_GEMM`和`USE_EIGEN_FOR_GEMM`，选一个定义为1即可；都为0则默认用Accelerate。注意如果用的是Eigen，必需把`CPULayer.m`的后缀改成`.mm`。如果用的是NNPACK，`CPULayer.m`后缀必须是`.m`；也可以把`nnpackGemm.c`后缀改成`.cpp`，`CPULayer.m`改成`.mm`。
 
 Eigen的使用和SDK里面、caffe2里面都是一样的，只是要注意，已经发现用Debug版时Eigen极其慢，跑一张图片用了5秒多，用Release版的时候才比较正常，原因未知。
 

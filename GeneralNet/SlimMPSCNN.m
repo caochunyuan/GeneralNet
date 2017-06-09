@@ -11,16 +11,16 @@
 @implementation MPSLayer
 
 - (instancetype)initWithName:(NSString *)name
+                      kernel:(MPSCNNKernel *)kernel
              ImageDescriptor:(MPSImageDescriptor *)imageDescritor
                    readCount:(NSUInteger)readCount
-                 outputImage:(MPSImage *)outputImage
-                      kernel:(MPSCNNKernel *)kernel {
+                 outputImage:(MPSImage *)outputImage {
     if (self = [super init]) {
         _name = name;
-        _imageDescriptor = imageDescritor;
-        _outputImage = outputImage;
-        _readCount = readCount;
         _kernel = kernel;
+        _imageDescriptor = imageDescritor;
+        _readCount = readCount;
+        _outputImage = outputImage;
     }
     
     return self;
@@ -29,7 +29,7 @@
 @end
 
 @implementation SlimMPSCNNConvolution {
-@private
+    @private
     BOOL _padding;
 }
 
@@ -63,7 +63,7 @@
                            biasTerms:bias
                                flags:MPSCNNConvolutionFlagsNone]) {
         self.destinationFeatureChannelOffset = offset;
-        self.padding = willPad;
+        _padding = willPad;
     }
     
     return self;
@@ -131,7 +131,7 @@ MPS_SWIFT_NAME(encode(commandBuffer:sourceImage:destinationImage:)) {
 @end
 
 @implementation SlimMPSCNNPoolingMax {
-@private
+    @private
     BOOL _padding;
 }
 

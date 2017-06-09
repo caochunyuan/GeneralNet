@@ -474,11 +474,10 @@
 			children = (
 				BDCFC6001EEA7E5E00E1DA0E /* nnpackGemm.h */,
 				BDCFC6011EEA7E5E00E1DA0E /* nnpackGemm.c */,
-				BD5887E31EE92F8E00BD47E6 /* pthreadpool.h */,
-				BD5887E41EE92F8E00BD47E6 /* libPthreadpool.a */,
-				BD5887EB1EE9388600BD47E6 /* Eigen */,
 				BD5889661EE9395100BD47E6 /* eigenGemm.hpp */,
 				BD5889651EE9395100BD47E6 /* eigenGemm.cpp */,
+				BD978D601EEAD8FB00303E31 /* pthreadpool */,
+				BD5887EB1EE9388600BD47E6 /* Eigen */,
 			);
 			name = third_party;
 			sourceTree = "<group>";
@@ -1215,6 +1214,15 @@
 				BDB3DE071ECF04FF00F9B865 /* final9.jpg */,
 			);
 			name = images;
+			sourceTree = "<group>";
+		};
+		BD978D601EEAD8FB00303E31 /* pthreadpool */ = {
+			isa = PBXGroup;
+			children = (
+				BD5887E31EE92F8E00BD47E6 /* pthreadpool.h */,
+				BD5887E41EE92F8E00BD47E6 /* libPthreadpool.a */,
+			);
+			name = pthreadpool;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

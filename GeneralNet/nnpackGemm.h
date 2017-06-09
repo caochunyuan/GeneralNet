@@ -12,19 +12,19 @@
 #define USE_ACCELERATE_FOR_TRANSPOSE 1
 
 enum NNPACK_TRANSPOSE {
-    NNPACKNoTrans = 111,
-    NNPACKTrans   = 112
+    nnpackNoTrans = 111,
+    nnpackTrans   = 112
 };
 
-void nnpack_gemm(const int m,
-                 const int n,
-                 const int k,
+void nnpack_gemm(const enum NNPACK_TRANSPOSE transA,
+                 const enum NNPACK_TRANSPOSE transB,
+                 const int M,
+                 const int N,
+                 const int K,
                  const float alpha,
-                 const float beta,
-                 enum NNPACK_TRANSPOSE transA,
-                 enum NNPACK_TRANSPOSE transB,
                  const float* A,
                  const float* B,
+                 const float beta,
                  float* C);
 
 #endif /* nnpackGemm_h */

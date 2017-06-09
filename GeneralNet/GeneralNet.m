@@ -153,10 +153,10 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         
         // construct layer
         MPSLayer *newLayer = [[MPSLayer alloc] initWithName:layerName
+                                                     kernel:kernel
                                             ImageDescriptor:imageDescriptor
                                                   readCount:[imageType isEqualToString:@"Temporary"]? [(NSNumber *)layer[@"read_count"] unsignedIntegerValue] : 0
-                                                outputImage:outputImage
-                                                     kernel:kernel];
+                                                outputImage:outputImage];
         if ([imageType isEqualToString:@"Temporary"]) [_tempImageList addObject:newLayer];
         [_layersDict setObject:newLayer forKey:layerName];
     }

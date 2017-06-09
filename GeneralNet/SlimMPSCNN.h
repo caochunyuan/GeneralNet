@@ -11,23 +11,21 @@
 
 @interface MPSLayer : NSObject
 
-@property (strong, nonatomic) NSString *name;
-@property (strong, nonatomic) MPSImageDescriptor *imageDescriptor;
-@property (strong, nonatomic) MPSImage *outputImage;
-@property (assign, nonatomic) NSUInteger readCount;
-@property (strong, nonatomic) MPSCNNKernel *kernel;
+@property (readonly, nonatomic) NSString *name;
+@property (readonly, nonatomic) MPSCNNKernel *kernel;
+@property (readonly, nonatomic) MPSImageDescriptor *imageDescriptor;
+@property (readonly, nonatomic) NSUInteger readCount;
+@property (nonatomic) MPSImage *outputImage;
 
 - (instancetype)initWithName:(NSString *)name
+                      kernel:(MPSCNNKernel *)kernel
              ImageDescriptor:(MPSImageDescriptor *)imageDescritor
                    readCount:(NSUInteger)readCount
-                 outputImage:(MPSImage *)outputImage
-                      kernel:(MPSCNNKernel *)kernel;
+                 outputImage:(MPSImage *)outputImage;
 
 @end
 
 @interface SlimMPSCNNConvolution : MPSCNNConvolution
-
-@property (nonatomic) BOOL padding;
 
 - (SlimMPSCNNConvolution *) initWithKernelSize:(NSUInteger)kernelSize
                           inputFeatureChannels:(NSUInteger)inChannels
@@ -57,8 +55,6 @@
 @end
 
 @interface SlimMPSCNNPoolingMax : MPSCNNPoolingMax
-
-@property (nonatomic) BOOL padding;
 
 - (SlimMPSCNNPoolingMax *) initWithDevice:(id <MTLDevice>)device
                                kernelSize:(NSUInteger)kernelSize

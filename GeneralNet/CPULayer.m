@@ -7,8 +7,6 @@
 //
 
 #import "CPULayer.h"
-#import <Accelerate/Accelerate.h>
-
 #if USE_NNPACK_FOR_GEMM
 #import "nnpackGemm.h"
 #elif USE_EIGEN_FOR_GEMM
@@ -83,21 +81,15 @@
         float *dst = output + groupIndex * _outputPerGroup;
         im2col(src, _inputChannel, _inputSize, _inputSize, _kernelSize, _kernelSize, 1, 1,
                _pad, _pad, _pad, _pad, _stride, _stride, _colData);
+        for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
+            memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M * sizeof(float));
+        }
+        
 #if USE_NNPACK_FOR_GEMM
-        for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
-            memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M * sizeof(float));
-        }
-        nnpack_gemm(_M, _N, _K, 1, 1, NNPACKNoTrans, NNPACKNoTrans, _weight + groupIndex * _weightPerGroup, _colData, dst);
+        nnpack_gemm(nnpackNoTrans, nnpackNoTrans, _M, _N, _K, 1, _weight + groupIndex * _weightPerGroup, _colData, 1, dst);
 #elif USE_EIGEN_FOR_GEMM
-        for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
-            memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M * sizeof(float));
-        }
-        eigen_gemm(blasNoTrans, blasNoTrans, _M, _N, _K, 1,
-                   _weight + groupIndex * _weightPerGroup, _colData, 1, dst);
+        eigen_gemm(eigenNoTrans, eigenNoTrans, _M, _N, _K, 1, _weight + groupIndex * _weightPerGroup, _colData, 1, dst);
 #else
-        for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
-            memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M * sizeof(float));
-        }
         cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, _M, _N, _K, 1,
                     _weight + groupIndex * _weightPerGroup, _K, _colData, _N, 1, dst, _N);
 #endif

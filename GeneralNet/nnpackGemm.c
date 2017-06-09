@@ -686,15 +686,15 @@ static nnpack_context global_context = {
     .initialized = false
 };
 
-void nnpack_gemm(const int m,
-                 const int n,
-                 const int k,
+void nnpack_gemm(const enum NNPACK_TRANSPOSE transA,
+                 const enum NNPACK_TRANSPOSE transB,
+                 const int M,
+                 const int N,
+                 const int K,
                  const float alpha,
-                 const float beta,
-                 enum NNPACK_TRANSPOSE transA,
-                 enum NNPACK_TRANSPOSE transB,
                  const float* A,
                  const float* B,
+                 const float beta,
                  float* C)
 {
     // initialization
@@ -709,27 +709,27 @@ void nnpack_gemm(const int m,
     //    printf("NNPACK is using %zu threads\n",
     //           pthreadpool_get_threads_count(global_context.threadpool));
     
-    if (transA == NNPACKNoTrans) {
-        if (m * k > global_context.size_a) {
+    if (transA == nnpackNoTrans) {
+        if (K * M > global_context.size_a) {
             if (global_context.ptr_a) free(global_context.ptr_a);
-            global_context.ptr_a = malloc(m * k * sizeof(float));
-            global_context.size_a = m * k;
+            global_context.ptr_a = malloc(K * M * sizeof(float));
+            global_context.size_a = K * M;
         }
-        transpose(A, global_context.ptr_a, k, m);
+        transpose(A, global_context.ptr_a, K, M);
     }
     
-    if (transB == NNPACKTrans) {
-        if (k * n > global_context.size_b) {
+    if (transB == nnpackTrans) {
+        if (K * N > global_context.size_b) {
             if (global_context.ptr_b) free(global_context.ptr_b);
-            global_context.ptr_b = malloc(k * n * sizeof(float));
-            global_context.size_b = k * n;
+            global_context.ptr_b = malloc(K * N * sizeof(float));
+            global_context.size_b = K * N;
         }
-        transpose(B, global_context.ptr_b, k, n);
+        transpose(B, global_context.ptr_b, K, N);
     }
     
-    const size_t output_row = m;
-    const size_t output_col = n;
-    const size_t reduction_size = k;
+    const size_t output_row = M;
+    const size_t output_col = N;
+    const size_t reduction_size = K;
     
     for (size_t reduction_block_start = 0; reduction_block_start < reduction_size; reduction_block_start += reduction_block_max) {
         const size_t reduction_block_size = min(reduction_size - reduction_block_start, reduction_block_max);
@@ -740,8 +740,8 @@ void nnpack_gemm(const int m,
             struct gemm_context gemm_context = {
                 .alpha = alpha,
                 .beta = beta,
-                .matrix_A = transA == NNPACKTrans ? A : global_context.ptr_a,
-                .matrix_B = transB == NNPACKNoTrans ? B : global_context.ptr_b,
+                .matrix_A = transA == nnpackTrans ? A : global_context.ptr_a,
+                .matrix_B = transB == nnpackNoTrans ? B : global_context.ptr_b,
                 .matrix_C = C,
                 .reduction_block_start = reduction_block_start,
                 .reduction_block_size = reduction_block_size,
