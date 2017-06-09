@@ -176,3 +176,24 @@ CPU版结构比较简单，每一层的操作都写在`-forwardWithInput:output:
 ```python
 pass
 ```
+
+### Gemm方法
+
+卷积层是用caffe2的`ìm2col`加上一个`Gemm`实现的。后者可以是Accelerate的`cblas_sgemm`，也可以是自己实现的`nnpack_gemm`或者`eigen_gemm`。`.pch`的宏定义有`USE_NNPACK_FOR_GEMM`和`USE_EIGEN_FOR_GEMM`，选一个定义为1即可；都为0则默认用Accelerate。注意如果用的是Eigen，必需把`CPULayer.m`的后缀改成`.mm`；如果用的是NNPACK，后缀必须是`.m`。
+
+Eigen的使用和SDK里面、caffe2里面都是一样的，只是要注意，已经发现用Debug版时Eigen极其慢，跑一张图片用了5秒多，用Release版的时候才比较正常，原因未知。
+
+`nnpackGemm.c`是从NNPACK的源代码里面抽出来修改而成的，里面有一些静态定义，如：
+
+```c
+static const size_t cache_l1_size = 16 * 1024;
+static const size_t cache_l2_size = 128 * 1024;
+static const size_t cache_l3_size = 2 * 1024 * 1024;
+
+static const size_t row_subblock_max = 4;
+static const size_t col_subblock_max = 12;
+```
+
+还包括矩阵相乘的时候是分成4x12的小块来乘。这些参数都是从NNPACK的`init.c`文件里面抽出来的，按原文件的宏定义来看，应该同样适用于Android的CPU。他的本意仿佛是按照CPU的L1、L2、L3级缓存的大小来安排每次运算的数据量，但又并没有真的去读取硬件信息，或许有问题，或许可以优化，目前只能确保在iPhone6P上没问题。如果对参数有疑问，可以到`init.c`文件去核查。
+
+总的来说，NNPACK算`C = A * B`就是每次取A矩阵的4行，取B矩阵的12列，用`nnp_sgemm_only_4x12__neon`算出C矩阵的一个4x12的块（原来的算法可以在`NNPACK\src\neon\blas\sgemm.c`里面找到），然后对A矩阵最后不足4行、B矩阵不足12列的用`nnp_sgemm_upto_4x12__neon`来计算，也存到C矩阵里。原来的算法因为是和im2col紧密结合的，直接分离出来是用不了的，所以我对算法做了小的改动，目前是要求先对A矩阵转置，再调用`nnp_sgemm_only_4x12__neon`和`nnp_sgemm_upto_4x12__neon`。转置这一步时间开销也不小，如果能结合到`im2col`里面去，肯定还能更快。

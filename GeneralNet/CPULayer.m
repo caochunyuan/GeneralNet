@@ -84,15 +84,10 @@
         im2col(src, _inputChannel, _inputSize, _inputSize, _kernelSize, _kernelSize, 1, 1,
                _pad, _pad, _pad, _pad, _stride, _stride, _colData);
 #if USE_NNPACK_FOR_GEMM
-//        for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
-//            memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M * sizeof(float));
-//        }
-//        nnpack_gemm(_M, _N, _K, 1, 1, NNPACKNoTrans, NNPACKNoTrans, _weight + groupIndex * _weightPerGroup, _colData, dst);
-        
-        nnpack_gemm(_M, _N, _K, 1, 0, NNPACKNoTrans, NNPACKNoTrans, _weight + groupIndex * _weightPerGroup, _colData, dst);
         for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
-            vDSP_vadd(dst + featureIndex * _M, 1, _bias + groupIndex * _M, 1, dst + featureIndex * _M, 1, _M);
+            memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M * sizeof(float));
         }
+        nnpack_gemm(_M, _N, _K, 1, 1, NNPACKNoTrans, NNPACKNoTrans, _weight + groupIndex * _weightPerGroup, _colData, dst);
 #elif USE_EIGEN_FOR_GEMM
         for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
             memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M * sizeof(float));
