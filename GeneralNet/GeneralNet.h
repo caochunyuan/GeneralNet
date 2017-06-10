@@ -44,10 +44,10 @@
     NSString *m_FirstLayerName;
     NSString *m_LastLayerName;
     NSArray *m_Labels;
-    NSMutableDictionary *m_LayersDict;
-    NSMutableArray *m_EncodeSequence;
-    NSMutableArray *m_PrefetchList;
-    NSMutableArray *m_TempImageList;
+    NSDictionary *m_LayersDict;
+    NSArray *m_EncodeSequence;
+    NSArray *m_PrefetchList;
+    NSArray *m_TempImageList;
 }
 
 @end
@@ -69,8 +69,8 @@
     NSString *m_FirstLayerName;
     NSString *m_LastLayerName;
     NSArray *m_Labels;
-    NSMutableDictionary *m_LayersDict;
-    NSMutableArray *m_EncodeSequence;
+    NSDictionary *m_LayersDict;
+    NSArray *m_EncodeSequence;
 }
 
 @end

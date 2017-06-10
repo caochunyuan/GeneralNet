@@ -41,19 +41,18 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         NSDictionary *inoutInfo = jsonDict[@"inout_info"];
         NSArray *layerInfo = jsonDict[@"layer_info"];
         NSArray *encodeSeq = jsonDict[@"encode_seq"];
-        m_Labels = jsonDict[@"labels"];
-        m_LayersDict = [[NSMutableDictionary alloc] init];
-        m_EncodeSequence = [[NSMutableArray alloc] init];
-        m_PrefetchList = [[NSMutableArray alloc] init];
-        m_TempImageList = [[NSMutableArray alloc] init];
+        NSMutableDictionary *layersDict = [[NSMutableDictionary alloc] init];
+        NSMutableArray *encodeSequence = [[NSMutableArray alloc] init];
+        NSMutableArray *prefetchList = [[NSMutableArray alloc] init];
+        NSMutableArray *tempImageList = [[NSMutableArray alloc] init];
         
         // create input id and output image
         m_InputImageDescriptor = [MPSImageDescriptor imageDescriptorWithChannelFormat:kTextureFormat
                                                                     width:[(NSNumber *)inoutInfo[@"input_size"] unsignedIntegerValue]
                                                                    height:[(NSNumber *)inoutInfo[@"input_size"] unsignedIntegerValue]
                                                           featureChannels:[(NSNumber *)inoutInfo[@"input_channel"] unsignedIntegerValue]];
-        [m_PrefetchList addObject:m_InputImageDescriptor];    // for srcImage
-        [m_PrefetchList addObject:m_InputImageDescriptor];    // for preImage
+        [prefetchList addObject:m_InputImageDescriptor];    // for srcImage
+        [prefetchList addObject:m_InputImageDescriptor];    // for preImage
         
         // read parameters
         m_Fd = open([dataFile UTF8String], O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
@@ -65,10 +64,20 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         // construct layers and encode sequence
         m_LastLayerName = inoutInfo[@"last_layer"];
         m_FirstLayerName = inoutInfo[@"first_layer"];
-        [self constructLayersFromInfo:layerInfo];
+        [self constructLayersFromInfo:layerInfo
+                     withPrefetchList:prefetchList
+                        tempImageList:tempImageList
+                           layersDict:layersDict];
         for (NSArray *triplet in encodeSeq) {
-            [m_EncodeSequence addObject:@[m_LayersDict[triplet[0]], m_LayersDict[triplet[1]], m_LayersDict[triplet[2]]]];
+            [encodeSequence addObject:@[layersDict[triplet[0]], layersDict[triplet[1]], layersDict[triplet[2]]]];
         }
+        
+        // they should not be changed after initialization
+        m_Labels = jsonDict[@"labels"];
+        m_LayersDict = [layersDict copy];
+        m_EncodeSequence = [encodeSequence copy];
+        m_PrefetchList = [prefetchList copy];
+        m_TempImageList = [tempImageList copy];
         
         // close file after initialization
         NSAssert(munmap(_basePtr, [(NSNumber *)inoutInfo[@"file_size"] unsignedIntegerValue]) == 0, @"Error: munmap failed with errno = %d", errno);
@@ -78,7 +87,10 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
     return self;
 }
 
-- (void)constructLayersFromInfo:(NSArray *)layers {
+- (void)constructLayersFromInfo:(NSArray *)layers
+               withPrefetchList:(NSMutableArray *)prefetchList
+                  tempImageList:(NSMutableArray *)tempImageList
+                     layersDict:(NSMutableDictionary *)layersDict {
     for (NSDictionary *layer in layers) {
         NSString *layerName = layer[@"name"];
         NSString *layerType = layer[@"layer_type"];
@@ -148,7 +160,7 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         if ([imageType isEqualToString:@"Permanent"]) {
             outputImage = [[MPSImage alloc] initWithDevice: m_Device imageDescriptor:imageDescriptor];
         } else if ([imageType isEqualToString:@"Temporary"]) {
-            [m_PrefetchList addObject:imageDescriptor];
+            [prefetchList addObject:imageDescriptor];
         }
         
         // construct layer
@@ -157,8 +169,8 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
                                             ImageDescriptor:imageDescriptor
                                                   readCount:[imageType isEqualToString:@"Temporary"]? [(NSNumber *)layer[@"read_count"] unsignedIntegerValue] : 0
                                                 outputImage:outputImage];
-        if ([imageType isEqualToString:@"Temporary"]) [m_TempImageList addObject:newLayer];
-        [m_LayersDict setObject:newLayer forKey:layerName];
+        if ([imageType isEqualToString:@"Temporary"]) [tempImageList addObject:newLayer];
+        [layersDict setObject:newLayer forKey:layerName];
     }
 }
 
@@ -367,9 +379,8 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         NSDictionary *inoutInfo = jsonDict[@"inout_info"];
         NSArray *layerInfo = jsonDict[@"layer_info"];
         NSArray *encodeSeq = jsonDict[@"encode_seq"];
-        m_Labels = jsonDict[@"labels"];
-        m_LayersDict = [[NSMutableDictionary alloc] init];
-        m_EncodeSequence = [[NSMutableArray alloc] init];
+        NSMutableDictionary *layersDict = [[NSMutableDictionary alloc] init];
+        NSMutableArray *encodeSequence = [[NSMutableArray alloc] init];
         
         m_FileSize = [(NSNumber *)inoutInfo[@"file_size"] unsignedIntegerValue];
         m_InputSize = [(NSNumber *)inoutInfo[@"input_size"] intValue];
@@ -386,16 +397,22 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         // construct layers and encode sequence
         m_LastLayerName = inoutInfo[@"last_layer"];
         m_FirstLayerName = inoutInfo[@"first_layer"];
-        [self constructLayersFromInfo:layerInfo];
+        [self constructLayersFromInfo:layerInfo withLayersDict:layersDict];
         for (NSArray *triplet in encodeSeq) {
-            [m_EncodeSequence addObject:@[m_LayersDict[triplet[0]], m_LayersDict[triplet[1]], m_LayersDict[triplet[2]]]];
+            [encodeSequence addObject:@[layersDict[triplet[0]], layersDict[triplet[1]], layersDict[triplet[2]]]];
         }
+        
+        // they should not be changed after initialization
+        m_Labels = jsonDict[@"labels"];
+        m_LayersDict = [layersDict copy];
+        m_EncodeSequence = [encodeSequence copy];
     }
     
     return self;
 }
 
-- (void)constructLayersFromInfo:(NSArray *)layers {
+- (void)constructLayersFromInfo:(NSArray *)layers
+                 withLayersDict:(NSMutableDictionary *)layersDict {
     
     // find out the maximum of size of col_data
     // col_data will only be created once, and then shared by all convolution layers
@@ -500,7 +517,7 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
                                          [(NSNumber *)layer[@"output_size"] intValue] * [(NSNumber *)layer[@"output_size"] intValue];
         }
         
-        [m_LayersDict setObject:newLayer forKey:layerName];
+        [layersDict setObject:newLayer forKey:layerName];
     }
 }
 
