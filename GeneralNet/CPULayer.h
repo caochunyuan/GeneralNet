@@ -7,42 +7,44 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <Accelerate/Accelerate.h>
 
 @interface CPULayer : NSObject
 
-@property (strong, nonatomic) NSString *name;
+@property (readonly, nonatomic) NSString *name;
 @property (assign, nonatomic) float *output;
 @property (assign, nonatomic) int destinationOffset;
 @property (assign, nonatomic) int outputNum;
 
 - (instancetype)initWithName:(NSString *)name;
+
+// subclass of CPULayer should overwrite this method
 - (void)forwardWithInput:(const float *)input
                   output:(float *)output;
 
 @end
 
-@interface CPUConvolutionLayer : CPULayer
-
-@property (assign, nonatomic) float *weight;
-@property (assign, nonatomic) float *bias;
-@property (assign, nonatomic) int inputChannel;
-@property (assign, nonatomic) int outputChannel;
-@property (assign, nonatomic) int inputSize;
-@property (assign, nonatomic) int outputSize;
-@property (assign, nonatomic) int kernelSize;
-@property (assign, nonatomic) int pad;
-@property (assign, nonatomic) int stride;
-@property (assign, nonatomic) int group;
-@property (assign, nonatomic) BOOL doReLU;
-@property (assign, nonatomic) float zero;
-@property (assign, nonatomic) float *colData;
-@property (assign, nonatomic) int M;
-@property (assign, nonatomic) int N;
-@property (assign, nonatomic) int K;
-@property (assign, nonatomic) int inputPerGroup;
-@property (assign, nonatomic) int outputPerGroup;
-@property (assign, nonatomic) int weightPerGroup;
+@interface CPUConvolutionLayer : CPULayer {
+@protected
+    float *m_Weight;
+    float *m_Biases;
+    int m_InputChannel;
+    int m_OutputChannel;
+    int m_InputSize;
+    int m_OutputSize;
+    int m_KernelSize;
+    int m_Pad;
+    int m_Stride;
+    int m_Group;
+    BOOL m_ReLU;
+    float m_Zero;
+    float *m_ColData;
+    int m_M;
+    int m_N;
+    int m_K;
+    int m_InputPerGroup;
+    int m_OutputPerGroup;
+    int m_WeightPerGroup;
+}
 
 - (instancetype)initWithName:(NSString *)name
                       weight:(float *)weight
@@ -60,17 +62,18 @@
 
 @end
 
-@interface CPUFullyConnectedLayer : CPULayer
-
-@property (assign, nonatomic) float *weight;
-@property (assign, nonatomic) float *bias;
-@property (assign, nonatomic) int inputChannel;
-@property (assign, nonatomic) int outputChannel;
-@property (assign, nonatomic) int inputSize;
-@property (assign, nonatomic) BOOL doReLU;
-@property (assign, nonatomic) float zero;
-@property (assign, nonatomic) int M;
-@property (assign, nonatomic) int N;
+@interface CPUFullyConnectedLayer : CPULayer {
+@protected
+    float *m_Weight;
+    float *m_Biases;
+    int m_InputChannel;
+    int m_OutputChannel;
+    int m_InputSize;
+    BOOL m_ReLU;
+    float m_Zero;
+    int m_M;
+    int m_N;
+}
 
 - (instancetype)initWithName:(NSString *)name
                       weight:(float *)weight
@@ -82,15 +85,13 @@
 
 @end
 
+@interface CPUPoolingLayer : CPULayer
+
 typedef NS_ENUM (NSInteger, PoolingLayerTypes) {
     ePoolingMax = 0,
     ePoolingAverage,
     ePoolingGlobalAverage
 };
-
-@interface CPUPoolingLayer : CPULayer
-
-@property (assign, nonatomic) BNNSFilter filter;
 
 - (instancetype)initWithName:(NSString *)name
                  poolingType:(PoolingLayerTypes)poolingType
@@ -104,20 +105,21 @@ typedef NS_ENUM (NSInteger, PoolingLayerTypes) {
 
 @end
 
-@interface CPULocalResponseNormalizationLayer : CPULayer
-
-@property (assign, nonatomic) int inputChannel;
-@property (assign, nonatomic) int inputSize;
-@property (assign, nonatomic) float alphaOverN;
-@property (assign, nonatomic) float *beta;
-@property (assign, nonatomic) float delta;
-@property (assign, nonatomic) int localSize;
-@property (assign, nonatomic) int pad;
-@property (assign, nonatomic) float one;
-@property (assign, nonatomic) int inputPerChannel;
-@property (assign, nonatomic) int paddedPerChannel;
-@property (assign, nonatomic) float *midShort;
-@property (assign, nonatomic) float *midLong;
+@interface CPULocalResponseNormalizationLayer : CPULayer {
+@protected
+    int m_InputChannel;
+    int m_InputSize;
+    float m_AlphaOverN;
+    float *m_Beta;
+    float m_Delta;
+    int m_LocalSize;
+    int m_Pad;
+    float m_One;
+    int m_InputPerChannel;
+    int m_PaddedPerChannel;
+    float *m_MidShort;
+    float *m_MidLong;
+}
 
 - (instancetype)initWithName:(NSString *)name
                 inputChannel:(int)inputChannel
@@ -129,10 +131,11 @@ typedef NS_ENUM (NSInteger, PoolingLayerTypes) {
 
 @end
 
-@interface CPUSoftMaxLayer : CPULayer
-
-@property (assign, nonatomic) int inputChannel;
-@property (assign, nonatomic) float *mid;
+@interface CPUSoftMaxLayer : CPULayer {
+@protected
+    int m_InputChannel;
+    float *m_Mid;
+}
 
 - (instancetype)initWithName:(NSString *)name
                 inputChannel:(int)inputChannel;

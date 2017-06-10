@@ -25,7 +25,10 @@
 
 @end
 
-@interface SlimMPSCNNConvolution : MPSCNNConvolution
+@interface SlimMPSCNNConvolution : MPSCNNConvolution {
+@protected
+    BOOL m_Padding;
+}
 
 - (SlimMPSCNNConvolution *) initWithKernelSize:(NSUInteger)kernelSize
                           inputFeatureChannels:(NSUInteger)inChannels
@@ -54,7 +57,10 @@
 
 @end
 
-@interface SlimMPSCNNPoolingMax : MPSCNNPoolingMax
+@interface SlimMPSCNNPoolingMax : MPSCNNPoolingMax {
+@protected
+    BOOL m_Padding;
+}
 
 - (SlimMPSCNNPoolingMax *) initWithDevice:(id <MTLDevice>)device
                                kernelSize:(NSUInteger)kernelSize

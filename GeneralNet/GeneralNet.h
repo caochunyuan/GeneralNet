@@ -27,47 +27,51 @@
 #import <MetalKit/MetalKit.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
 
-@interface GeneralNet : NSObject <GeneralNetProtocol>
-
-@property (assign, nonatomic) float *basePtr;
-@property (assign, nonatomic) int fd;
-
-@property (strong, nonatomic) id <MTLDevice> device;
-@property (strong, nonatomic) id <MTLCommandQueue> commandQueue;
-@property (strong, nonatomic) id <MTLTexture> sourceTexture;
-@property (strong, nonatomic) id <MTLComputePipelineState> pipelineRGB;
-@property (strong, nonatomic) MTKTextureLoader *textureLoader;
-@property (strong, nonatomic) MPSImageLanczosScale *lanczos;
-@property (strong, nonatomic) MPSImageDescriptor *input_id;
-
-@property (strong, nonatomic) NSString *firstLayerName;
-@property (strong, nonatomic) NSString *lastLayerName;
-@property (strong, nonatomic) NSArray *labels;
-@property (strong, nonatomic) NSMutableDictionary *layersDict;
-@property (strong, nonatomic) NSMutableArray *encodeSequence;
-@property (strong, nonatomic) NSMutableArray *prefetchList;
-@property (strong, nonatomic) NSMutableArray *tempImageList;
+@interface GeneralNet : NSObject <GeneralNetProtocol> {
+@protected
+    
+    float *m_BasePtr;
+    int m_Fd;
+    
+    id <MTLDevice>  m_Device;
+    id <MTLCommandQueue> m_CommandQueue;
+    id <MTLTexture> m_SourceTexture;
+    id <MTLComputePipelineState> m_PipelineRGB;
+    MTKTextureLoader *m_TextureLoader;
+    MPSImageLanczosScale *m_Lanczos;
+    MPSImageDescriptor *m_InputImageDescriptor;
+    
+    NSString *m_FirstLayerName;
+    NSString *m_LastLayerName;
+    NSArray *m_Labels;
+    NSMutableDictionary *m_LayersDict;
+    NSMutableArray *m_EncodeSequence;
+    NSMutableArray *m_PrefetchList;
+    NSMutableArray *m_TempImageList;
+}
 
 @end
 
 #pragma mark - if not use Metal
 #else
 
-@interface GeneralNet : NSObject <GeneralNetProtocol>
-
-@property (assign, nonatomic) float *basePtr;
-@property (assign, nonatomic) int fd;
-@property (assign, nonatomic) size_t fileSize;
-@property (assign, nonatomic) int inputSize;
-@property (assign, nonatomic) unsigned char *imageRawData;
-@property (assign, nonatomic) float *imageData;
-@property (assign, nonatomic) float *colData;
-
-@property (strong, nonatomic) NSString *firstLayerName;
-@property (strong, nonatomic) NSString *lastLayerName;
-@property (strong, nonatomic) NSArray *labels;
-@property (strong, nonatomic) NSMutableDictionary *layersDict;
-@property (strong, nonatomic) NSMutableArray *encodeSequence;
+@interface GeneralNet : NSObject <GeneralNetProtocol> {
+@protected
+    
+    float *m_BasePtr;
+    int m_Fd;
+    size_t m_FileSize;
+    int m_InputSize;
+    unsigned char *m_ImageRawData;
+    float *m_ImageData;
+    float *m_ColData;
+    
+    NSString *m_FirstLayerName;
+    NSString *m_LastLayerName;
+    NSArray *m_Labels;
+    NSMutableDictionary *m_LayersDict;
+    NSMutableArray *m_EncodeSequence;
+}
 
 @end
 

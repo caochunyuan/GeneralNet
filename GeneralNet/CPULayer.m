@@ -7,6 +7,7 @@
 //
 
 #import "CPULayer.h"
+#import <Accelerate/Accelerate.h>
 #if USE_NNPACK_FOR_GEMM
 #import "nnpackGemm.h"
 #elif USE_EIGEN_FOR_GEMM
@@ -29,7 +30,7 @@
 }
 
 - (void)dealloc {
-    if (self.output) free(_output);
+    if (_output) free(_output);
 }
 
 @end
@@ -50,25 +51,25 @@
                       doReLU:(BOOL)doReLU
                      colData:(float *)colData {
     if (self = [super initWithName:name]) {
-        _weight = weight;
-        _bias = bias;
-        _group = group;
-        _inputChannel = inputChannel / _group;
-        _outputChannel = outputChannel / _group;
-        _inputSize = inputSize;
-        _outputSize = outputSize;
-        _kernelSize = kernelSize;
-        _pad = pad;
-        _stride = stride;
-        _doReLU = doReLU;
-        _zero = 0.0f;
-        _colData = colData;
-        _M = _outputChannel;
-        _N = _outputSize * _outputSize;
-        _K = _inputChannel * _kernelSize * _kernelSize;
-        _inputPerGroup = _inputChannel * _inputSize * _inputSize;
-        _outputPerGroup = _outputChannel * _outputSize * _outputSize;
-        _weightPerGroup = _outputChannel * _inputChannel * _kernelSize * _kernelSize;
+        m_Weight = weight;
+        m_Biases = bias;
+        m_Group = group;
+        m_InputChannel = inputChannel / m_Group;
+        m_OutputChannel = outputChannel / m_Group;
+        m_InputSize = inputSize;
+        m_OutputSize = outputSize;
+        m_KernelSize = kernelSize;
+        m_Pad = pad;
+        m_Stride = stride;
+        m_ReLU = doReLU;
+        m_Zero = 0.0f;
+        m_ColData = colData;
+        m_M = m_OutputChannel;
+        m_N = m_OutputSize * m_OutputSize;
+        m_K = m_InputChannel * m_KernelSize * m_KernelSize;
+        m_InputPerGroup = m_InputChannel * m_InputSize * m_InputSize;
+        m_OutputPerGroup = m_OutputChannel * m_OutputSize * m_OutputSize;
+        m_WeightPerGroup = m_OutputChannel * m_InputChannel * m_KernelSize * m_KernelSize;
     }
     
     return self;
@@ -76,25 +77,25 @@
 
 - (void)forwardWithInput:(const float *)input
                   output:(float *)output {
-    for (int groupIndex = 0; groupIndex < _group; groupIndex++) {
-        const float *src = input + groupIndex * _inputPerGroup;
-        float *dst = output + groupIndex * _outputPerGroup;
-        im2col(src, _inputChannel, _inputSize, _inputSize, _kernelSize, _kernelSize, 1, 1,
-               _pad, _pad, _pad, _pad, _stride, _stride, _colData);
-        for (int featureIndex = 0; featureIndex < _N; featureIndex++) {
-            memcpy(dst + featureIndex * _M, _bias + groupIndex * _M, _M * sizeof(float));
+    for (int groupIndex = 0; groupIndex < m_Group; groupIndex++) {
+        const float *src = input + groupIndex * m_InputPerGroup;
+        float *dst = output + groupIndex * m_OutputPerGroup;
+        im2col(src, m_InputChannel, m_InputSize, m_InputSize, m_KernelSize, m_KernelSize, 1, 1,
+               m_Pad, m_Pad, m_Pad, m_Pad, m_Stride, m_Stride, m_ColData);
+        for (int featureIndex = 0; featureIndex < m_N; featureIndex++) {
+            memcpy(dst + featureIndex * m_M, m_Biases + groupIndex * m_M, m_M * sizeof(float));
         }
         
 #if USE_NNPACK_FOR_GEMM
-        nnpack_gemm(nnpackNoTrans, nnpackNoTrans, _M, _N, _K, 1, _weight + groupIndex * _weightPerGroup, _colData, 1, dst);
+        nnpack_gemm(nnpackNoTrans, nnpackNoTrans, m_M, m_N, m_K, 1, m_Weight + groupIndex * m_WeightPerGroup, m_ColData, 1, dst);
 #elif USE_EIGEN_FOR_GEMM
-        eigen_gemm(eigenNoTrans, eigenNoTrans, _M, _N, _K, 1, _weight + groupIndex * _weightPerGroup, _colData, 1, dst);
+        eigen_gemm(eigenNoTrans, eigenNoTrans, m_M, m_N, m_K, 1, m_Weight + groupIndex * m_WeightPerGroup, m_ColData, 1, dst);
 #else
-        cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, _M, _N, _K, 1,
-                    _weight + groupIndex * _weightPerGroup, _K, _colData, _N, 1, dst, _N);
+        cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m_M, m_N, m_K, 1,
+                    m_Weight + groupIndex * m_WeightPerGroup, m_K, m_ColData, m_N, 1, dst, m_N);
 #endif
     }
-    if (_doReLU) vDSP_vthres(output, 1, &_zero, output, 1, _outputPerGroup * _group);
+    if (m_ReLU) vDSP_vthres(output, 1, &m_Zero, output, 1, m_OutputPerGroup * m_Group);
 }
 
 void im2col (const float* data_im,
@@ -222,15 +223,15 @@ void im2col (const float* data_im,
                    inputSize:(int)inputSize
                       doReLU:(BOOL)doReLU {
     if (self = [super initWithName:name]) {
-        _weight = weight;
-        _bias = bias;
-        _inputChannel = inputChannel;
-        _outputChannel = outputChannel;
-        _inputSize = inputSize;
-        _doReLU = doReLU;
-        _zero = 0.0f;
-        _M = _outputChannel;
-        _N = _inputSize * _inputSize * _inputChannel;
+        m_Weight = weight;
+        m_Biases = bias;
+        m_InputChannel = inputChannel;
+        m_OutputChannel = outputChannel;
+        m_InputSize = inputSize;
+        m_ReLU = doReLU;
+        m_Zero = 0.0f;
+        m_M = m_OutputChannel;
+        m_N = m_InputSize * m_InputSize * m_InputChannel;
     }
     
     return self;
@@ -238,15 +239,18 @@ void im2col (const float* data_im,
 
 - (void)forwardWithInput:(const float *)input
                   output:(float *)output {
-    memcpy(output, _bias, _outputChannel * sizeof(float));
-    cblas_sgemv(CblasRowMajor, CblasNoTrans, _M, _N, 1, _weight, _N, input, 1, 1,
+    memcpy(output, m_Biases, m_OutputChannel * sizeof(float));
+    cblas_sgemv(CblasRowMajor, CblasNoTrans, m_M, m_N, 1, m_Weight, m_N, input, 1, 1,
                 output, 1);
-    if (_doReLU) vDSP_vthres(output, 1, &_zero, output, 1, _outputChannel);
+    if (m_ReLU) vDSP_vthres(output, 1, &m_Zero, output, 1, m_OutputChannel);
 }
 
 @end
 
-@implementation CPUPoolingLayer
+@implementation CPUPoolingLayer {
+@protected
+    BNNSFilter m_filter;
+}
 
 - (instancetype)initWithName:(NSString *)name
                  poolingType:(PoolingLayerTypes)poolingType
@@ -303,7 +307,7 @@ void im2col (const float* data_im,
         BNNSFilterParameters filter_params;
         bzero(&filter_params, sizeof(filter_params));
         
-        _filter = BNNSFilterCreatePoolingLayer(&input_desc, &output_desc,
+        m_filter = BNNSFilterCreatePoolingLayer(&input_desc, &output_desc,
                                                &params, &filter_params);
     }
     
@@ -312,11 +316,11 @@ void im2col (const float* data_im,
 
 - (void)forwardWithInput:(const float *)input
                   output:(float *)output {
-    BNNSFilterApply(_filter, input, output);
+    BNNSFilterApply(m_filter, input, output);
 }
 
 - (void)dealloc {
-    BNNSFilterDestroy(_filter);
+    BNNSFilterDestroy(m_filter);
 }
 
 @end
@@ -331,19 +335,19 @@ void im2col (const float* data_im,
                        delta:(float)delta
                    localSize:(int)localSize {
     if (self = [super initWithName:name]) {
-        _inputChannel = inputChannel;
-        _inputSize = inputSize;
-        _inputPerChannel = inputSize * inputSize;
-        _localSize = localSize;
-        _alphaOverN = alpha / _localSize;
-        _beta = (float *)malloc(_inputPerChannel * sizeof(float));
-        vDSP_vfill(&beta, _beta, 1, _inputPerChannel);
-        _delta = delta;
-        _pad =  (localSize - 1) / 2;
-        _paddedPerChannel = _inputPerChannel + 2 * _pad;
-        _midShort = (float *)malloc(_inputPerChannel * sizeof(float));
-        _midLong = (float *)malloc(_paddedPerChannel * sizeof(float));
-        _one = 1.0f;
+        m_InputChannel = inputChannel;
+        m_InputSize = inputSize;
+        m_InputPerChannel = inputSize * inputSize;
+        m_LocalSize = localSize;
+        m_AlphaOverN = alpha / m_LocalSize;
+        m_Beta = (float *)malloc(m_InputPerChannel * sizeof(float));
+        vDSP_vfill(&beta, m_Beta, 1, m_InputPerChannel);
+        m_Delta = delta;
+        m_Pad =  (localSize - 1) / 2;
+        m_PaddedPerChannel = m_InputPerChannel + 2 * m_Pad;
+        m_MidShort = (float *)malloc(m_InputPerChannel * sizeof(float));
+        m_MidLong = (float *)malloc(m_PaddedPerChannel * sizeof(float));
+        m_One = 1.0f;
     }
     
     return self;
@@ -351,23 +355,23 @@ void im2col (const float* data_im,
 
 - (void)forwardWithInput:(const float *)input
                   output:(float *)output {
-    for (int channelIndex = 0; channelIndex < _inputChannel; channelIndex++) {
-        const float *src = input + channelIndex * _inputPerChannel;
-        float *dst = output + channelIndex * _inputPerChannel;
-        vDSP_vsq(src, 1, _midShort, 1, _inputPerChannel);                                           // square of each element
-        memset(_midLong, 0, _paddedPerChannel * sizeof(float));
-        for (int regionIndex = 0; regionIndex < _localSize; regionIndex++) {                        // sum up nearby channels
-            vDSP_vadd(_midLong + regionIndex, 1, _midShort, 1, _midLong + regionIndex, 1, _inputPerChannel);
+    for (int channelIndex = 0; channelIndex < m_InputChannel; channelIndex++) {
+        const float *src = input + channelIndex * m_InputPerChannel;
+        float *dst = output + channelIndex * m_InputPerChannel;
+        vDSP_vsq(src, 1, m_MidShort, 1, m_InputPerChannel);                                           // square of each element
+        memset(m_MidLong, 0, m_PaddedPerChannel * sizeof(float));
+        for (int regionIndex = 0; regionIndex < m_LocalSize; regionIndex++) {                        // sum up nearby channels
+            vDSP_vadd(m_MidLong + regionIndex, 1, m_MidShort, 1, m_MidLong + regionIndex, 1, m_InputPerChannel);
         }
-        vDSP_vsmsa(_midLong + _pad, 1, &_alphaOverN, &_delta, _midShort, 1, _inputPerChannel);      // denom = delta + (alpha / N) * sum
-        vvpowf(_midShort, _beta, _midShort, &_inputPerChannel);                                     // denom = denom ^ beta
-        vDSP_vdiv(_midShort, 1, src, 1, dst, 1, _inputPerChannel);                                  // norm_result = origin / denom
+        vDSP_vsmsa(m_MidLong + m_Pad, 1, &m_AlphaOverN, &m_Delta, m_MidShort, 1, m_InputPerChannel);      // denom = delta + (alpha / N) * sum
+        vvpowf(m_MidShort, m_Beta, m_MidShort, &m_InputPerChannel);                                     // denom = denom ^ beta
+        vDSP_vdiv(m_MidShort, 1, src, 1, dst, 1, m_InputPerChannel);                                  // norm_result = origin / denom
     }
 }
 
 - (void)dealloc {
-    free(_midShort);
-    free(_midLong);
+    free(m_MidShort);
+    free(m_MidLong);
 }
 
 @end
@@ -377,8 +381,8 @@ void im2col (const float* data_im,
 - (instancetype)initWithName:(NSString *)name
                 inputChannel:(int)inputChannel{
     if (self = [super initWithName:name]) {
-        _inputChannel = inputChannel;
-        _mid = (float *)malloc(_inputChannel * sizeof(float));
+        m_InputChannel = inputChannel;
+        m_Mid = (float *)malloc(m_InputChannel * sizeof(float));
     }
     
     return self;
@@ -387,17 +391,17 @@ void im2col (const float* data_im,
 - (void)forwardWithInput:(const float *)input
                   output:(float *)output {
     float max;
-    vDSP_maxv(input, 1, &max, _inputChannel);                 // find maximum
+    vDSP_maxv(input, 1, &max, m_InputChannel);                 // find maximum
     max *= -1;
-    vDSP_vsadd(input, 1, &max, _mid, 1, _inputChannel);       // subtract the maximum
-    vvexpf(_mid, _mid, &_inputChannel);                       // exponential of each element
+    vDSP_vsadd(input, 1, &max, m_Mid, 1, m_InputChannel);       // subtract the maximum
+    vvexpf(m_Mid, m_Mid, &m_InputChannel);                       // exponential of each element
     float sum;
-    vDSP_sve(_mid, 1, &sum, _inputChannel);                   // sum of exponential of all elements
-    vDSP_vsdiv(_mid, 1, &sum, output, 1, _inputChannel);      // divide by the sum of exponential
+    vDSP_sve(m_Mid, 1, &sum, m_InputChannel);                   // sum of exponential of all elements
+    vDSP_vsdiv(m_Mid, 1, &sum, output, 1, m_InputChannel);      // divide by the sum of exponential
 }
 
 - (void)dealloc {
-    free(_mid);
+    free(m_Mid);
 }
 
 @end

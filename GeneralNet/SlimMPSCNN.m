@@ -28,10 +28,7 @@
 
 @end
 
-@implementation SlimMPSCNNConvolution {
-    @private
-    BOOL _padding;
-}
+@implementation SlimMPSCNNConvolution
 
 - (SlimMPSCNNConvolution *) initWithKernelSize:(NSUInteger)kernelSize
                           inputFeatureChannels:(NSUInteger)inChannels
@@ -63,7 +60,7 @@
                            biasTerms:bias
                                flags:MPSCNNConvolutionFlagsNone]) {
         self.destinationFeatureChannelOffset = offset;
-        _padding = willPad;
+        m_Padding = willPad;
     }
     
     return self;
@@ -74,7 +71,7 @@
               destinationImage:(MPSImage * __nonnull) destinationImage
 MPS_SWIFT_NAME(encode(commandBuffer:sourceImage:destinationImage:)) {
     
-    if (_padding) {
+    if (m_Padding) {
         NSUInteger pad_along_height = ((destinationImage.height - 1) * self.strideInPixelsY + self.kernelHeight - sourceImage.height);
         NSUInteger pad_along_width = ((destinationImage.width - 1) * self.strideInPixelsX + self.kernelWidth - sourceImage.width);
         NSUInteger pad_top = pad_along_height / 2;
@@ -130,10 +127,7 @@ MPS_SWIFT_NAME(encode(commandBuffer:sourceImage:destinationImage:)) {
 
 @end
 
-@implementation SlimMPSCNNPoolingMax {
-    @private
-    BOOL _padding;
-}
+@implementation SlimMPSCNNPoolingMax
 
 - (SlimMPSCNNPoolingMax *) initWithDevice:(id <MTLDevice>)device
                                kernelSize:(NSUInteger)kernelSize
@@ -144,7 +138,7 @@ MPS_SWIFT_NAME(encode(commandBuffer:sourceImage:destinationImage:)) {
                         kernelHeight:kernelSize
                      strideInPixelsX:stride
                      strideInPixelsY:stride]) {
-        _padding = willPad;
+        m_Padding = willPad;
     }
     
     return self;
@@ -155,7 +149,7 @@ MPS_SWIFT_NAME(encode(commandBuffer:sourceImage:destinationImage:)) {
               destinationImage:(MPSImage * __nonnull) destinationImage
 MPS_SWIFT_NAME(encode(commandBuffer:sourceImage:destinationImage:)) {
     
-    if (_padding) {
+    if (m_Padding) {
         NSUInteger pad_along_height = ((destinationImage.height - 1) * self.strideInPixelsY + self.kernelHeight - sourceImage.height);
         NSUInteger pad_along_width = ((destinationImage.width - 1) * self.strideInPixelsX + self.kernelWidth - sourceImage.width);
         NSUInteger pad_top = pad_along_height / 2;
