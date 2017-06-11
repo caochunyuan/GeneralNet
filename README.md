@@ -194,6 +194,7 @@ static const size_t row_subblock_max = 4;
 static const size_t col_subblock_max = 12;
 ```
 
-还包括矩阵相乘的时候是分成4x12的小块来乘。这些参数都是从NNPACK的`init.c`文件里面抽出来的，按原文件的宏定义来看，应该同样适用于Android的CPU。他的本意仿佛是按照CPU的L1、L2、L3级缓存的大小来安排每次运算的数据量，但又并没有真的去读取硬件信息，或许有问题，或许可以优化，目前只能确保在iPhone6P上没问题。如果对参数有疑问，可以到`init.c`文件去核查。
+这些参数都是从NNPACK的`init.c`文件里面抽出来的，如有疑问可以到`init.c`核查。
+按原文件的宏定义来看，应该同样适用于Android的CPU。他的本意仿佛是按照CPU的L1、L2、L3级缓存的大小来安排每次运算的数据量，但又并没有真的去读取硬件信息；然后每次计算一个4x12的小块，这个大小的选择也没有提供理由。这些参数或许有问题，或许可以优化，目前只能确保在iPhone6P上没问题。
 
 总的来说，NNPACK算`C = A * B`就是每次取A矩阵的4行，取B矩阵的12列，用`nnp_sgemm_only_4x12__neon`算出C矩阵的一个4x12的块（原来的算法可以在`NNPACK\src\neon\blas\sgemm.c`里面找到），然后对A矩阵最后不足4行、B矩阵不足12列的用`nnp_sgemm_upto_4x12__neon`来计算，也存到C矩阵里。原来的算法因为是和im2col紧密结合的，直接分离出来是用不了的，所以我对算法做了小的改动，目前是要求先对A矩阵转置，再调用`nnp_sgemm_only_4x12__neon`和`nnp_sgemm_upto_4x12__neon`。转置这一步时间开销也不小，如果能结合到`im2col`里面去，肯定还能更快。

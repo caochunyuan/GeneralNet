@@ -27,6 +27,8 @@
 #import <MetalKit/MetalKit.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
 
+@class MPSLayer;
+
 @interface GeneralNet : NSObject <GeneralNetProtocol> {
 @protected
     
@@ -41,19 +43,21 @@
     MPSImageLanczosScale *m_Lanczos;
     MPSImageDescriptor *m_InputImageDescriptor;
     
-    NSString *m_FirstLayerName;
-    NSString *m_LastLayerName;
-    NSArray *m_Labels;
+    MPSLayer *m_FirstLayer;
+    MPSLayer *m_LastLayer;
     NSDictionary *m_LayersDict;
     NSArray *m_EncodeSequence;
     NSArray *m_PrefetchList;
     NSArray *m_TempImageList;
+    NSArray *m_Labels;
 }
 
 @end
 
 #pragma mark - if not use Metal
 #else
+
+@class CPULayer;
 
 @interface GeneralNet : NSObject <GeneralNetProtocol> {
 @protected
@@ -66,11 +70,11 @@
     float *m_ImageData;
     float *m_ColData;
     
-    NSString *m_FirstLayerName;
-    NSString *m_LastLayerName;
-    NSArray *m_Labels;
+    CPULayer *m_FirstLayer;
+    CPULayer *m_LastLayer;
     NSDictionary *m_LayersDict;
     NSArray *m_EncodeSequence;
+    NSArray *m_Labels;
 }
 
 @end

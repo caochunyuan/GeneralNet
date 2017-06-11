@@ -62,8 +62,6 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         NSAssert(_basePtr, @"Error: mmap failed with errno = %d", errno);
         
         // construct layers and encode sequence
-        m_LastLayerName = inoutInfo[@"last_layer"];
-        m_FirstLayerName = inoutInfo[@"first_layer"];
         [self constructLayersFromInfo:layerInfo
                      withPrefetchList:prefetchList
                         tempImageList:tempImageList
@@ -73,11 +71,13 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         }
         
         // they should not be changed after initialization
-        m_Labels = jsonDict[@"labels"];
+        m_FirstLayer = layersDict[inoutInfo[@"first_layer"]];
+        m_LastLayer = layersDict[inoutInfo[@"last_layer"]];
         m_LayersDict = [layersDict copy];
         m_EncodeSequence = [encodeSequence copy];
         m_PrefetchList = [prefetchList copy];
         m_TempImageList = [tempImageList copy];
+        m_Labels = jsonDict[@"labels"];
         
         // close file after initialization
         NSAssert(munmap(_basePtr, [(NSNumber *)inoutInfo[@"file_size"] unsignedIntegerValue]) == 0, @"Error: munmap failed with errno = %d", errno);
@@ -224,14 +224,14 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         srcImage.readCount -= 1;
         
         // run following layers
-        [((MPSLayer *)m_LayersDict[m_FirstLayerName]).kernel encodeToCommandBuffer:commandBuffer
-                                                                       sourceImage:preImage
-                                                                  destinationImage:((MPSLayer *)m_LayersDict[m_FirstLayerName]).outputImage];
+        [m_FirstLayer.kernel encodeToCommandBuffer:commandBuffer
+                                       sourceImage:preImage
+                                  destinationImage:m_FirstLayer.outputImage];
         
-        for (NSArray *triplet in m_EncodeSequence) {
-            [((MPSLayer *)triplet[0]).kernel encodeToCommandBuffer:commandBuffer
-                                                       sourceImage:((MPSLayer *)triplet[1]).outputImage
-                                                  destinationImage:((MPSLayer *)triplet[2]).outputImage];
+        for (NSArray<MPSLayer *> *triplet in m_EncodeSequence) {
+            [triplet[0].kernel encodeToCommandBuffer:commandBuffer
+                                         sourceImage:(triplet[1]).outputImage
+                                    destinationImage:(triplet[2]).outputImage];
         }
         
         [commandBuffer commit];
@@ -239,12 +239,12 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         completion();
         
 #if ALLOW_PRINT
-        [self printImage:((MPSLayer *)m_LayersDict[m_FirstLayerName]).outputImage
-                 ofLayer:((MPSLayer *)m_LayersDict[m_FirstLayerName]).name];
-        for (NSArray *triplet in m_EncodeSequence) {
-            if (((MPSLayer *)triplet[2]).outputImage) {
-                [self printImage:((MPSLayer *)triplet[2]).outputImage
-                         ofLayer:((MPSLayer *)triplet[2]).name];
+        [self printImage:m_FirstLayer.outputImage
+                 ofLayer:m_FirstLayer.name];
+        for (NSArray<MPSLayer *> *triplet in m_EncodeSequence) {
+            if (triplet[2].outputImage) {
+                [self printImage:triplet[2].outputImage
+                         ofLayer:triplet[2].name];
             }
         }
 #endif
@@ -254,7 +254,7 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
 - (NSString *)getTopProbs {
     
     // gather measurements of MPSImage to use to get out probabilities
-    MPSImage *outputImage = ((MPSLayer *)m_LayersDict[m_LastLayerName]).outputImage;
+    MPSImage *outputImage = m_LastLayer.outputImage;
     NSUInteger width = outputImage.width;
     NSUInteger height = outputImage.height;
     NSUInteger numSlices = (outputImage.featureChannels + 3) / 4;
@@ -395,17 +395,17 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         NSAssert(_basePtr, @"Error: mmap failed with errno = %d", errno);
         
         // construct layers and encode sequence
-        m_LastLayerName = inoutInfo[@"last_layer"];
-        m_FirstLayerName = inoutInfo[@"first_layer"];
         [self constructLayersFromInfo:layerInfo withLayersDict:layersDict];
         for (NSArray *triplet in encodeSeq) {
             [encodeSequence addObject:@[layersDict[triplet[0]], layersDict[triplet[1]], layersDict[triplet[2]]]];
         }
         
         // they should not be changed after initialization
-        m_Labels = jsonDict[@"labels"];
+        m_FirstLayer = layersDict[inoutInfo[@"first_layer"]];
+        m_LastLayer = layersDict[inoutInfo[@"last_layer"]];
         m_LayersDict = [layersDict copy];
         m_EncodeSequence = [encodeSequence copy];
+        m_Labels = jsonDict[@"labels"];
     }
     
     return self;
@@ -551,27 +551,25 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         m_ImageData[i+m_InputSize*m_InputSize*2] = (float)m_ImageRawData[i*4+0] - 120.0f;
     }
     
-    [(CPULayer *)m_LayersDict[m_FirstLayerName] forwardWithInput:m_ImageData
-                                                          output:((CPULayer *)m_LayersDict[m_FirstLayerName]).output +
-                                                                 ((CPULayer *)m_LayersDict[m_FirstLayerName]).destinationOffset];
+    [m_FirstLayer forwardWithInput:m_ImageData
+                            output:m_FirstLayer.output + m_FirstLayer.destinationOffset];
     
-    for (NSArray *triplet in m_EncodeSequence) {
-        [(CPULayer *)triplet[0] forwardWithInput:((CPULayer *)triplet[1]).output
-                                          output:((CPULayer *)triplet[2]).output +
-                                                 ((CPULayer *)triplet[0]).destinationOffset];
+    for (NSArray<CPULayer *> *triplet in m_EncodeSequence) {
+        [triplet[0] forwardWithInput:triplet[1].output
+                              output:triplet[2].output + triplet[0].destinationOffset];
     }
     
     completion();
     
 #if ALLOW_PRINT
-    [self printOutput:((CPULayer *)m_LayersDict[m_FirstLayerName]).output
-              ofLayer:((CPULayer *)m_LayersDict[m_FirstLayerName]).name
-               length:((CPULayer *)m_LayersDict[m_FirstLayerName]).outputNum];
-    for (NSArray *triplet in m_EncodeSequence) {
-        if (((CPULayer *)triplet[2]).output) {
-            [self printOutput:((CPULayer *)triplet[2]).output
-                      ofLayer:((CPULayer *)triplet[2]).name
-                       length:((CPULayer *)triplet[2]).outputNum];
+    [self printOutput:m_FirstLayer.output
+              ofLayer:m_FirstLayer.name
+               length:m_FirstLayer.outputNum];
+    for (NSArray<CPULayer *> *triplet in m_EncodeSequence) {
+        if (triplet[2].output) {
+            [self printOutput:triplet[2].output
+                      ofLayer:triplet[2].name
+                       length:triplet[2].outputNum];
         }
     }
 #endif
@@ -582,7 +580,7 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
     // copy output probabilities into an array of touples of (probability, index)
     NSMutableArray *indexedProbabilities = [[NSMutableArray alloc] initWithCapacity:m_Labels.count];
     for (int i = 0; i < m_Labels.count; i++) {
-        [indexedProbabilities addObject:@[@(((CPULayer *)m_LayersDict[m_LastLayerName]).output[i]), @(i)]];
+        [indexedProbabilities addObject:@[@(m_LastLayer.output[i]), @(i)]];
     }
     
     // sort the touple array to have top5 guesses in the front
@@ -628,9 +626,9 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
     close(m_Fd);
     
     // release pointers
-    free(m_ImageRawData);
-    free(m_ImageData);
-    free(m_ColData);
+    if (m_ImageRawData) free(m_ImageRawData);
+    if (m_ImageData)    free(m_ImageData);
+    if (m_ColData)      free(m_ColData);
 }
 
 @end
