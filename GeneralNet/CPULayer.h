@@ -85,13 +85,22 @@
 
 @end
 
-@interface CPUPoolingLayer : CPULayer
-
 typedef NS_ENUM (NSInteger, PoolingLayerTypes) {
-    ePoolingMax = 0,
-    ePoolingAverage,
-    ePoolingGlobalAverage
+    ePoolingMax             = 1,
+    ePoolingAverage         = 2,
+    ePoolingGlobalAverage   = 3,
 };
+
+@interface CPUPoolingLayer : CPULayer {
+@protected
+    PoolingLayerTypes m_PoolingType;
+    int m_InputSize;
+    int m_OutputSize;
+    int m_InputChannel;
+    int m_KernelSize;
+    int m_Pad;
+    int m_Stride;
+}
 
 - (instancetype)initWithName:(NSString *)name
                  poolingType:(PoolingLayerTypes)poolingType

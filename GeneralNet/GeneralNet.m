@@ -56,10 +56,10 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         
         // read parameters
         m_Fd = open([dataFile UTF8String], O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
-        NSAssert(_fd != -1, @"Error: failed to open params file with errno = %d", errno);
+        NSAssert(m_Fd != -1, @"Error: failed to open params file with errno = %d", errno);
         
         m_BasePtr = mmap(nil, [(NSNumber *)inoutInfo[@"file_size"] unsignedIntegerValue], PROT_READ, MAP_FILE | MAP_SHARED, m_Fd, 0);
-        NSAssert(_basePtr, @"Error: mmap failed with errno = %d", errno);
+        NSAssert(m_BasePtr, @"Error: mmap failed with errno = %d", errno);
         
         // construct layers and encode sequence
         [self constructLayersWithInfo:layersInfo
@@ -389,10 +389,10 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         
         // read parameters
         m_Fd = open([dataFile UTF8String], O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
-        NSAssert(_fd != -1, @"Error: failed to open params file with errno = %d", errno);
+        NSAssert(m_Fd != -1, @"Error: failed to open params file with errno = %d", errno);
         
         m_BasePtr = mmap(nil, m_FileSize, PROT_READ, MAP_FILE | MAP_SHARED, m_Fd, 0);
-        NSAssert(_basePtr, @"Error: mmap failed with errno = %d", errno);
+        NSAssert(m_BasePtr, @"Error: mmap failed with errno = %d", errno);
         
         // construct layers and encode sequence
         [self constructLayersWithInfo:layersInfo layersDict:layersDict];

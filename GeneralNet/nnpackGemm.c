@@ -60,15 +60,15 @@ struct NNP_CACHE_ALIGN gemm_context
     size_t row_subblock_max;
 };
 
-void nnp_sgemm_only_4x12(size_t k,
-                         size_t update,
-                         size_t output_row,
-                         size_t output_col,
-                         const float alpha,
-                         const float beta,
-                         const float* a,
-                         const float* b,
-                         float* c)
+static void nnp_sgemm_only_4x12(size_t k,
+                                size_t update,
+                                size_t output_row,
+                                size_t output_col,
+                                const float alpha,
+                                const float beta,
+                                const float* a,
+                                const float* b,
+                                float* c)
 {
     float32x4_t vc00 = vdupq_n_f32(0.0f), vc01 = vdupq_n_f32(0.0f), vc02 = vdupq_n_f32(0.0f);
     float32x4_t vc10 = vdupq_n_f32(0.0f), vc11 = vdupq_n_f32(0.0f), vc12 = vdupq_n_f32(0.0f);
@@ -272,17 +272,17 @@ void nnp_sgemm_only_4x12(size_t k,
     }
 }
 
-void nnp_sgemm_upto_4x12(size_t mr,
-                         size_t nr,
-                         size_t k,
-                         size_t update,
-                         size_t output_row,
-                         size_t output_col,
-                         const float alpha,
-                         const float beta,
-                         const float* a,
-                         const float* b,
-                         float* c)
+static void nnp_sgemm_upto_4x12(size_t mr,
+                                size_t nr,
+                                size_t k,
+                                size_t update,
+                                size_t output_row,
+                                size_t output_col,
+                                const float alpha,
+                                const float beta,
+                                const float* a,
+                                const float* b,
+                                float* c)
 {
     float32x4_t vc00 = vdupq_n_f32(0.0f), vc01 = vdupq_n_f32(0.0f), vc02 = vdupq_n_f32(0.0f);
     float32x4_t vc10 = vdupq_n_f32(0.0f), vc11 = vdupq_n_f32(0.0f), vc12 = vdupq_n_f32(0.0f);
@@ -602,9 +602,9 @@ void nnp_sgemm_upto_4x12(size_t mr,
     }
 }
 
-void compute_gemm(const struct gemm_context context[1],
-                  size_t row_block_start, size_t col_subblock_start,
-                  size_t row_block_size,  size_t col_subblock_size)
+static void compute_gemm(const struct gemm_context context[1],
+                         size_t row_block_start, size_t col_subblock_start,
+                         size_t row_block_size,  size_t col_subblock_size)
 {
     const float  alpha                  = context->alpha;
     const float  beta                   = context->beta;

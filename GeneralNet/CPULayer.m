@@ -98,21 +98,21 @@
     if (m_ReLU) vDSP_vthres(output, 1, &m_Zero, output, 1, m_OutputPerGroup * m_Group);
 }
 
-void im2col (const float* data_im,
-             const int channels,
-             const int height,
-             const int width,
-             const int kernel_h,
-             const int kernel_w,
-             const int dilation_h,
-             const int dilation_w,
-             const int pad_t,
-             const int pad_l,
-             const int pad_b,
-             const int pad_r,
-             const int stride_h,
-             const int stride_w,
-             float* data_col) {
+static void im2col (const float* data_im,
+                    const int channels,
+                    const int height,
+                    const int width,
+                    const int kernel_h,
+                    const int kernel_w,
+                    const int dilation_h,
+                    const int dilation_w,
+                    const int pad_t,
+                    const int pad_l,
+                    const int pad_b,
+                    const int pad_r,
+                    const int stride_h,
+                    const int stride_w,
+                    float* data_col) {
     const int output_h =
     (height + pad_b + pad_t - (dilation_h * (kernel_h - 1) + 1)) / stride_h + 1;
     const int output_w =
@@ -247,10 +247,7 @@ void im2col (const float* data_im,
 
 @end
 
-@implementation CPUPoolingLayer {
-@protected
-    BNNSFilter m_filter;
-}
+@implementation CPUPoolingLayer
 
 - (instancetype)initWithName:(NSString *)name
                  poolingType:(PoolingLayerTypes)poolingType
@@ -262,53 +259,26 @@ void im2col (const float* data_im,
                          pad:(int)pad
                       stride:(int)stride {
     if (self = [super initWithName:name]) {
-        BNNSImageStackDescriptor input_desc;
-        bzero(&input_desc, sizeof(input_desc));
-        input_desc.width = inputSize;
-        input_desc.height = inputSize;
-        input_desc.channels = inputChannel;
-        input_desc.row_stride = inputSize;
-        input_desc.image_stride = inputSize * inputSize;
-        input_desc.data_type = BNNSDataTypeFloat32;
+        m_PoolingType = poolingType;
         
-        BNNSImageStackDescriptor output_desc;
-        bzero(&output_desc, sizeof(output_desc));
-        output_desc.width = outputSize;
-        output_desc.height = outputSize;
-        output_desc.channels = outputChannel;
-        output_desc.row_stride = outputSize;
-        output_desc.image_stride = outputSize * outputSize;
-        output_desc.data_type = BNNSDataTypeFloat32;
-        
-        BNNSPoolingLayerParameters params;
-        bzero(&params, sizeof(params));
-        params.x_stride = stride;
-        params.y_stride = stride;
-        params.x_padding = pad;
-        params.y_padding = pad;
-        params.k_width = kernelSize;
-        params.k_height = kernelSize;
-        params.in_channels = inputChannel;
-        params.out_channels = outputChannel;
-        
-        switch (poolingType) {
+        switch (m_PoolingType) {
             case ePoolingMax:
-                params.pooling_function = BNNSPoolingFunctionMax;
-                break;
             case ePoolingAverage:
+                m_InputSize = inputSize;
+                m_OutputSize = outputSize;
+                m_InputChannel = inputChannel;
+                m_KernelSize = kernelSize;
+                m_Pad = pad;
+                m_Stride = stride;
+                break;
             case ePoolingGlobalAverage:
-                params.pooling_function = BNNSPoolingFunctionAverage;
+                m_InputChannel = inputChannel;
+                m_InputSize = inputSize;
                 break;
             default:
                 assert("Unknown pooling layer type!");
                 break;
         }
-        
-        BNNSFilterParameters filter_params;
-        bzero(&filter_params, sizeof(filter_params));
-        
-        m_filter = BNNSFilterCreatePoolingLayer(&input_desc, &output_desc,
-                                               &params, &filter_params);
     }
     
     return self;
@@ -316,11 +286,104 @@ void im2col (const float* data_im,
 
 - (void)forwardWithInput:(const float *)input
                   output:(float *)output {
-    BNNSFilterApply(m_filter, input, output);
+    switch (m_PoolingType) {
+        case ePoolingMax:
+            for (int channelIndex = 0; channelIndex < m_InputChannel; channelIndex++) {
+                computeMaxPooling(input + channelIndex * m_InputSize * m_InputSize, output + channelIndex * m_OutputSize * m_OutputSize, m_InputSize, m_InputSize, m_Pad, m_Pad, m_OutputSize, m_OutputSize, m_Stride, m_Stride, m_KernelSize, m_KernelSize);
+            }
+            break;
+        case ePoolingAverage:
+            for (int channelIndex = 0; channelIndex < m_InputChannel; channelIndex++) {
+                computeAveragePooling(input + channelIndex * m_InputSize * m_InputSize, output + channelIndex * m_OutputSize * m_OutputSize, m_InputSize, m_InputSize, m_Pad, m_Pad, m_OutputSize, m_OutputSize, m_Stride, m_Stride, m_KernelSize, m_KernelSize);
+            }
+            break;
+        case ePoolingGlobalAverage:
+            computeGlobalAveragePooling(input, output, m_InputSize, m_InputSize, m_InputChannel);
+            break;
+        default:
+            break;
+    }
 }
 
-- (void)dealloc {
-    BNNSFilterDestroy(m_filter);
+static void computeMaxPooling(const float *input_pointer,
+                              float *output_pointer,
+                              size_t input_height,
+                              size_t input_width,
+                              size_t padding_top,
+                              size_t padding_left,
+                              size_t output_height,
+                              size_t output_width,
+                              uint32_t stride_height,
+                              uint32_t stride_width,
+                              uint32_t pooling_height,
+                              uint32_t pooling_width) {
+    const float (*input)[input_width] = (const float(*)[input_width]) input_pointer;
+    float (*output)[output_width] = (float(*)[output_width]) output_pointer;
+    
+    for (size_t y = 0; y < output_height; y++) {
+        for (size_t x = 0; x < output_width; x++) {
+            float v = -__builtin_inff();
+            for (size_t i = 0; i < pooling_height; i++) {
+                const size_t s = y * stride_height + i - padding_top;
+                if (s < input_height) {
+                    for (size_t j = 0; j < pooling_width; j++) {
+                        const size_t t = x * stride_width + j - padding_left;
+                        if (t < input_width) {
+                            v = fmaxf(input[s][t], v);
+                        }
+                    }
+                }
+            }
+            output[y][x] = v;
+        }
+    }
+}
+
+static void computeAveragePooling(const float *input_pointer,
+                                  float *output_pointer,
+                                  size_t input_height,
+                                  size_t input_width,
+                                  size_t padding_top,
+                                  size_t padding_left,
+                                  size_t output_height,
+                                  size_t output_width,
+                                  uint32_t stride_height,
+                                  uint32_t stride_width,
+                                  uint32_t pooling_height,
+                                  uint32_t pooling_width) {
+    const float (*input)[input_width] = (const float(*)[input_width]) input_pointer;
+    float (*output)[output_width] = (float(*)[output_width]) output_pointer;
+    
+    for (size_t y = 0; y < output_height; y++) {
+        for (size_t x = 0; x < output_width; x++) {
+            float sum = 0;
+            for (size_t i = 0; i < pooling_height; i++) {
+                const size_t s = y * stride_height + i - padding_top;
+                if (s < input_height) {
+                    for (size_t j = 0; j < pooling_width; j++) {
+                        const size_t t = x * stride_width + j - padding_left;
+                        if (t < input_width) {
+                            sum += input[s][t];
+                        }
+                    }
+                }
+            }
+            output[y][x] = sum / (float)(pooling_width * pooling_height);
+        }
+    }
+}
+
+static void computeGlobalAveragePooling(const float *input_pointer,
+                                        float *output_pointer,
+                                        size_t input_height,
+                                        size_t input_width,
+                                        size_t input_channel) {
+    for (int channelIndex = 0; channelIndex < input_channel; channelIndex++) {
+        vDSP_sve(input_pointer + channelIndex * input_width * input_height, 1,
+                 output_pointer + channelIndex, input_width * input_height);
+    }
+    float denom = input_width * input_height;
+    vDSP_vsdiv(output_pointer, 1, &denom, output_pointer, 1, input_channel);
 }
 
 @end
