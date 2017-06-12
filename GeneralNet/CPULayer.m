@@ -80,8 +80,7 @@
     for (int groupIndex = 0; groupIndex < m_Group; groupIndex++) {
         const float *src = input + groupIndex * m_InputPerGroup;
         float *dst = output + groupIndex * m_OutputPerGroup;
-        im2col(src, m_InputChannel, m_InputSize, m_InputSize, m_KernelSize, m_KernelSize, 1, 1,
-               m_Pad, m_Pad, m_Pad, m_Pad, m_Stride, m_Stride, m_ColData);
+        im2col(src, m_InputChannel, m_InputSize, m_InputSize, m_OutputSize, m_OutputSize, m_KernelSize, m_KernelSize, 1, 1, m_Pad, m_Pad, m_Pad, m_Pad, m_Stride, m_Stride, m_ColData);
         for (int featureIndex = 0; featureIndex < m_N; featureIndex++) {
             memcpy(dst + featureIndex * m_M, m_Biases + groupIndex * m_M, m_M * sizeof(float));
         }
@@ -100,8 +99,10 @@
 
 static void im2col (const float* data_im,
                     const int channels,
-                    const int height,
-                    const int width,
+                    const int input_h,
+                    const int input_w,
+                    const int output_h,
+                    const int output_w,
                     const int kernel_h,
                     const int kernel_w,
                     const int dilation_h,
@@ -113,10 +114,6 @@ static void im2col (const float* data_im,
                     const int stride_h,
                     const int stride_w,
                     float* data_col) {
-    const int output_h =
-    (height + pad_b + pad_t - (dilation_h * (kernel_h - 1) + 1)) / stride_h + 1;
-    const int output_w =
-    (width + pad_l + pad_r - (dilation_w * (kernel_w - 1) + 1)) / stride_w + 1;
     
     // Fast path for zero padding and no dilation
     // From Torch, THNN_(unfolded_copy)
@@ -129,20 +126,20 @@ static void im2col (const float* data_im,
             const int kw = rest % kernel_w;
             float* dst = data_col + nip * (kernel_h * kernel_w * output_h * output_w) +
             kh * (kernel_w * output_h * output_w) + kw * (output_h * output_w);
-            const float* src = data_im + nip * (height * width);
+            const float* src = data_im + nip * (input_h * input_w);
             for (int y = 0; y < output_h; y++) {
                 const int iy = y * stride_h + kh;
                 const int ix = kw;
                 if (stride_w == 1) {
                     memcpy(
                            dst + (y * output_w),
-                           src + (iy * width + ix),
+                           src + (iy * input_w + ix),
                            sizeof(float) * output_w);
                 } else {
                     for (int x = 0; x < output_w; x++) {
                         memcpy(
                                dst + (y * output_w + x),
-                               src + (iy * width + ix + x * stride_w),
+                               src + (iy * input_w + ix + x * stride_w),
                                sizeof(float));
                     }
                 }
@@ -156,21 +153,21 @@ static void im2col (const float* data_im,
         // From Intel, https://github.com/BVLC/caffe/pull/3536
         const int pad_h = pad_t;
         const int pad_w = pad_l;
-        const int channel_size = height * width;
+        const int channel_size = input_h * input_w;
         for (int channel = channels; channel--; data_im += channel_size) {
             for (int kernel_row = 0; kernel_row < kernel_h; kernel_row++) {
                 for (int kernel_col = 0; kernel_col < kernel_w; kernel_col++) {
                     int input_row = -pad_h + kernel_row * dilation_h;
                     for (int output_rows = output_h; output_rows; output_rows--) {
-                        if (!((unsigned int)input_row < (unsigned int)height)) {
+                        if (!((unsigned int)input_row < (unsigned int)input_h)) {
                             for (int output_cols = output_w; output_cols; output_cols--) {
                                 *(data_col++) = 0;
                             }
                         } else {
                             int input_col = -pad_w + kernel_col * dilation_w;
                             for (int output_col = output_w; output_col; output_col--) {
-                                if ((unsigned int)input_col < (unsigned int)width) {
-                                    *(data_col++) = data_im[input_row * width + input_col];
+                                if ((unsigned int)input_col < (unsigned int)input_w) {
+                                    *(data_col++) = data_im[input_row * input_w + input_col];
                                 } else {
                                     *(data_col++) = 0;
                                 }
@@ -189,8 +186,8 @@ static void im2col (const float* data_im,
     const int dkernel_h = dilation_h * (kernel_h - 1) + 1;
     const int dkernel_w = dilation_w * (kernel_w - 1) + 1;
     
-    int height_col = (height + pad_t + pad_b - dkernel_h) / stride_h + 1;
-    int width_col = (width + pad_l + pad_r - dkernel_w) / stride_w + 1;
+    int height_col = (input_h + pad_t + pad_b - dkernel_h) / stride_h + 1;
+    int width_col = (input_w + pad_l + pad_r - dkernel_w) / stride_w + 1;
     
     int channels_col = channels * kernel_h * kernel_w;
     for (int c = 0; c < channels_col; ++c) {
@@ -201,9 +198,9 @@ static void im2col (const float* data_im,
             for (int w = 0; w < width_col; ++w) {
                 int h_pad = h * stride_h - pad_t + h_offset * dilation_h;
                 int w_pad = w * stride_w - pad_l + w_offset * dilation_w;
-                if (h_pad >= 0 && h_pad < height && w_pad >= 0 && w_pad < width)
+                if (h_pad >= 0 && h_pad < input_h && w_pad >= 0 && w_pad < input_w)
                     data_col[(c * height_col + h) * width_col + w] =
-                    data_im[(c_im * height + h_pad) * width + w_pad];
+                    data_im[(c_im * input_h + h_pad) * input_w + w_pad];
                 else
                     data_col[(c * height_col + h) * width_col + w] = 0;
             }
@@ -313,10 +310,10 @@ static void computeMaxPooling(const float *input_pointer,
                               size_t padding_left,
                               size_t output_height,
                               size_t output_width,
-                              uint32_t stride_height,
-                              uint32_t stride_width,
-                              uint32_t pooling_height,
-                              uint32_t pooling_width) {
+                              size_t stride_height,
+                              size_t stride_width,
+                              size_t pooling_height,
+                              size_t pooling_width) {
     const float (*input)[input_width] = (const float(*)[input_width]) input_pointer;
     float (*output)[output_width] = (float(*)[output_width]) output_pointer;
     
@@ -347,10 +344,10 @@ static void computeAveragePooling(const float *input_pointer,
                                   size_t padding_left,
                                   size_t output_height,
                                   size_t output_width,
-                                  uint32_t stride_height,
-                                  uint32_t stride_width,
-                                  uint32_t pooling_height,
-                                  uint32_t pooling_width) {
+                                  size_t stride_height,
+                                  size_t stride_width,
+                                  size_t pooling_height,
+                                  size_t pooling_width) {
     const float (*input)[input_width] = (const float(*)[input_width]) input_pointer;
     float (*output)[output_width] = (float(*)[output_width]) output_pointer;
     
