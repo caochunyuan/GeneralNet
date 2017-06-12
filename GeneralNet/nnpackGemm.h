@@ -9,8 +9,6 @@
 #ifndef nnpackGemm_h
 #define nnpackGemm_h
 
-#define USE_ACCELERATE_FOR_TRANSPOSE 1
-
 enum NNPACK_TRANSPOSE {
     nnpackNoTrans = 111,
     nnpackTrans   = 112
