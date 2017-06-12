@@ -17,7 +17,7 @@
                                dataFile:(NSString *)dataFile;
 - (void)forwardWithImage:(UIImage *)image
               completion:(void (^)())completion;
-- (NSString *)getTopProbs;
+- (NSString *)labelsOfTopProbs;
 
 @end
 

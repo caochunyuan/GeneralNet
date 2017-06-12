@@ -8,14 +8,14 @@
 
 3. 运行`convert_caffemodel.py`，输出**存有卷积层和全连接层的权重和偏置的dat文件**。从终端运行的时候需要给三个参数：`.prototxt`的路径、`.caffemodel`的路径和希望输出的dat文件名（不包括`.dat`）。比如：`python convert_caffemodel.py deploy.prototxt alexnet.caffemodel alexnet`。输出就是`alexnet.dat`。这一步可能出现的细节问题比较多，可能需要手动改`convert_caffemodel.py`的代码。
 
-4. 把`.json`文件和`.dat`文件放进Xcode工程里，然后用`-initWithDescriptionFile:dataFile:`**初始化**一个`GeneralNet`，`-forwardWithImage:completion:`**输入一个UIImage并且运行网络**，`-getTopProbs`**取网络计算的结果**。例如：
+4. 把`.json`文件和`.dat`文件放进Xcode工程里，然后用`-initWithDescriptionFile:dataFile:`**初始化**一个`GeneralNet`，`-forwardWithImage:completion:`**输入一个UIImage并且运行网络**，`-labelsOfTopProbs`**取网络计算的结果**。例如：
 
 ```objc
 UIImage *testImage = [UIImage imageNamed:@"test.jpg"];
 GeneralNet *anyNet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"anynet" ofType:@"json"]
                                                         dataFile:[[NSBundle mainBundle] pathForResource:@"anynet" ofType:@"dat"]];
 [anyNet forwardWithImage:testImage completion:^{
-    NSString *result = [anyNet getTopProbs];
+    NSString *result = [anyNet labelsOfTopProbs];
 }];
 ```
 
@@ -109,9 +109,9 @@ else:
 
 所以iOS上的核心任务就是：
 
-1. 根据`layer_info`来构建每一步操作，并分配储存结果的空间(constructLayersFromInfo:)；
+1. 根据`layer_info`来构建每一步操作，并分配储存结果的空间(constructLayersWithInfo:)；
 2. 按照`encode_seq`的顺序来执行操作(forwardWithImage:completion:)；
-3. 在`labels`里找可能性最大的标签(getTopProbs)。
+3. 在`labels`里找可能性最大的标签(labelsOfTopProbs)。
 
 GPU版和CPU版的`GeneralNet`都有`NSMutableDictionary *layersDict`、`NSMutableArray *encodeSequence`和`NSArray *labels`这三样东西，就是拿来存JSON文件里的对应信息的。另外JSON文件里还有一个字典`inout_info`，这里储存的是有关网络输入输出层的信息，它们不参与神经网络的构建，但有其他用途。
 
@@ -181,7 +181,7 @@ pass
 
 卷积层是用caffe2的`ìm2col`加上一个`Gemm`实现的。后者可以是Accelerate的`cblas_sgemm`，也可以是自己实现的`nnpack_gemm`或者`eigen_gemm`。`.pch`的宏定义有`USE_NNPACK_FOR_GEMM`和`USE_EIGEN_FOR_GEMM`，选一个定义为1即可；都为0则默认用Accelerate。注意如果用的是Eigen，必需把`CPULayer.m`的后缀改成`.mm`。如果用的是NNPACK，`CPULayer.m`后缀必须是`.m`；也可以把`nnpackGemm.c`后缀改成`.cpp`，`CPULayer.m`改成`.mm`。
 
-Eigen的使用和SDK里面、caffe2里面都是一样的，只是要注意，已经发现用Debug版时Eigen极其慢，跑一张图片用了5秒多，用Release版的时候才比较正常，原因未知。
+Eigen的使用和SDK里面、caffe2里面都是一样的，只是要注意，已经发现用Debug版时Eigen极其慢，跑一张图片用了5秒多，用Release版的时候才比较正常，原因未知。GitHub的工程里我没有上传Eigen的源文件；搜索最新版本的Eigen，把其中的`Eigen`文件夹放进工程即可。
 
 `nnpackGemm.c`是从NNPACK的源代码里面抽出来修改而成的，里面有一些静态定义，如：
 

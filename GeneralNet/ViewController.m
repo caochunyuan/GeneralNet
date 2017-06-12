@@ -108,7 +108,7 @@
                    completion:^{
                        if (i == max_itr - 1) {
                            float elapsed = -[startTime timeIntervalSinceNow] * 1000 / (float)max_itr;
-                           _predictLabel.text = [[net getTopProbs] stringByAppendingFormat:@"\nElapsed time: %.0f millisecs.", elapsed];
+                           _predictLabel.text = [[net labelsOfTopProbs] stringByAppendingFormat:@"\nElapsed time: %.0f millisecs.", elapsed];
                            _predictLabel.hidden = NO;
                        }
                    }];

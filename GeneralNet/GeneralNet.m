@@ -39,7 +39,7 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:NULL];
         
         NSDictionary *inoutInfo = jsonDict[@"inout_info"];
-        NSArray *layerInfo = jsonDict[@"layer_info"];
+        NSArray *layersInfo = jsonDict[@"layer_info"];
         NSArray *encodeSeq = jsonDict[@"encode_seq"];
         NSMutableDictionary *layersDict = [[NSMutableDictionary alloc] init];
         NSMutableArray *encodeSequence = [[NSMutableArray alloc] init];
@@ -62,10 +62,10 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         NSAssert(_basePtr, @"Error: mmap failed with errno = %d", errno);
         
         // construct layers and encode sequence
-        [self constructLayersFromInfo:layerInfo
-                     withPrefetchList:prefetchList
-                        tempImageList:tempImageList
-                           layersDict:layersDict];
+        [self constructLayersWithInfo:layersInfo
+                           layersDict:layersDict
+                         prefetchList:prefetchList
+                        tempImageList:tempImageList];
         for (NSArray *triplet in encodeSeq) {
             [encodeSequence addObject:@[layersDict[triplet[0]], layersDict[triplet[1]], layersDict[triplet[2]]]];
         }
@@ -87,61 +87,61 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
     return self;
 }
 
-- (void)constructLayersFromInfo:(NSArray *)layers
-               withPrefetchList:(NSMutableArray *)prefetchList
-                  tempImageList:(NSMutableArray *)tempImageList
-                     layersDict:(NSMutableDictionary *)layersDict {
-    for (NSDictionary *layer in layers) {
-        NSString *layerName = layer[@"name"];
-        NSString *layerType = layer[@"layer_type"];
-        NSString *imageType = layer[@"image_type"];
+- (void)constructLayersWithInfo:(NSArray *)layersInfo
+                     layersDict:(NSMutableDictionary *)layersDict
+                   prefetchList:(NSMutableArray *)prefetchList
+                  tempImageList:(NSMutableArray *)tempImageList {
+    for (NSDictionary *layerInfo in layersInfo) {
+        NSString *layerName = layerInfo[@"name"];
+        NSString *layerType = layerInfo[@"layer_type"];
+        NSString *imageType = layerInfo[@"image_type"];
         
         // construct kernel
         MPSCNNKernel *kernel;
         MPSCNNNeuronReLU *relu = [[MPSCNNNeuronReLU alloc] initWithDevice: m_Device a:0];
         
         if ([layerType isEqualToString:@"Convolution"]) {
-            kernel = [[SlimMPSCNNConvolution alloc] initWithKernelSize:[(NSNumber *)layer[@"kernel_size"] unsignedIntegerValue]
-                                                  inputFeatureChannels:[(NSNumber *)layer[@"input_channel"] unsignedIntegerValue]
-                                                 outputFeatureChannels:[(NSNumber *)layer[@"output_channel"] unsignedIntegerValue]
-                                                                neuron:[(NSString *)layer[@"activation"] isEqualToString:@"ReLU"]? relu : nil
+            kernel = [[SlimMPSCNNConvolution alloc] initWithKernelSize:[(NSNumber *)layerInfo[@"kernel_size"] unsignedIntegerValue]
+                                                  inputFeatureChannels:[(NSNumber *)layerInfo[@"input_channel"] unsignedIntegerValue]
+                                                 outputFeatureChannels:[(NSNumber *)layerInfo[@"output_channel"] unsignedIntegerValue]
+                                                                neuron:[(NSString *)layerInfo[@"activation"] isEqualToString:@"ReLU"]? relu : nil
                                                                 device: m_Device
-                                                               weights:m_BasePtr + [(NSNumber *)layer[@"weight_offset"] unsignedIntegerValue]
-                                                                  bias:m_BasePtr + [(NSNumber *)layer[@"bias_offset"] unsignedIntegerValue]
-                                                               willPad:[(NSNumber *)layer[@"pad"] unsignedIntegerValue] != 0? YES : NO
-                                                                stride:[(NSNumber *)layer[@"stride"] unsignedIntegerValue]
-                                       destinationFeatureChannelOffset:[(NSNumber *)layer[@"destination_channel_offset"] unsignedIntegerValue]
-                                                                 group:[(NSNumber *)layer[@"group"] unsignedIntegerValue]];
+                                                               weights:m_BasePtr + [(NSNumber *)layerInfo[@"weight_offset"] unsignedIntegerValue]
+                                                                  bias:m_BasePtr + [(NSNumber *)layerInfo[@"bias_offset"] unsignedIntegerValue]
+                                                               willPad:[(NSNumber *)layerInfo[@"pad"] unsignedIntegerValue] != 0? YES : NO
+                                                                stride:[(NSNumber *)layerInfo[@"stride"] unsignedIntegerValue]
+                                       destinationFeatureChannelOffset:[(NSNumber *)layerInfo[@"destination_channel_offset"] unsignedIntegerValue]
+                                                                 group:[(NSNumber *)layerInfo[@"group"] unsignedIntegerValue]];
         } else if ([layerType isEqualToString:@"FullyConnected"]) {
-            kernel = [[SlimMPSCNNFullyConnected alloc] initWithKernelSize:[(NSNumber *)layer[@"kernel_size"] unsignedIntegerValue]
-                                                     inputFeatureChannels:[(NSNumber *)layer[@"input_channel"] unsignedIntegerValue]
-                                                    outputFeatureChannels:[(NSNumber *)layer[@"output_channel"] unsignedIntegerValue]
-                                                                   neuron:[(NSString *)layer[@"activation"] isEqualToString:@"ReLU"]? relu : nil
+            kernel = [[SlimMPSCNNFullyConnected alloc] initWithKernelSize:[(NSNumber *)layerInfo[@"kernel_size"] unsignedIntegerValue]
+                                                     inputFeatureChannels:[(NSNumber *)layerInfo[@"input_channel"] unsignedIntegerValue]
+                                                    outputFeatureChannels:[(NSNumber *)layerInfo[@"output_channel"] unsignedIntegerValue]
+                                                                   neuron:[(NSString *)layerInfo[@"activation"] isEqualToString:@"ReLU"]? relu : nil
                                                                    device: m_Device
-                                                                  weights:m_BasePtr + [(NSNumber *)layer[@"weight_offset"] unsignedIntegerValue]
-                                                                     bias:m_BasePtr + [(NSNumber *)layer[@"bias_offset"] unsignedIntegerValue]
-                                          destinationFeatureChannelOffset:[(NSNumber *)layer[@"destination_channel_offset"] unsignedIntegerValue]];
+                                                                  weights:m_BasePtr + [(NSNumber *)layerInfo[@"weight_offset"] unsignedIntegerValue]
+                                                                     bias:m_BasePtr + [(NSNumber *)layerInfo[@"bias_offset"] unsignedIntegerValue]
+                                          destinationFeatureChannelOffset:[(NSNumber *)layerInfo[@"destination_channel_offset"] unsignedIntegerValue]];
         } else if ([layerType isEqualToString:@"PoolingMax"]) {
             kernel = [[SlimMPSCNNPoolingMax alloc] initWithDevice: m_Device
-                                                       kernelSize:[(NSNumber *)layer[@"kernel_size"] unsignedIntegerValue]
-                                                           stride:[(NSNumber *)layer[@"stride"] unsignedIntegerValue]
-                                                          willPad:[(NSNumber *)layer[@"pad"] unsignedIntegerValue]? YES : NO];
+                                                       kernelSize:[(NSNumber *)layerInfo[@"kernel_size"] unsignedIntegerValue]
+                                                           stride:[(NSNumber *)layerInfo[@"stride"] unsignedIntegerValue]
+                                                          willPad:[(NSNumber *)layerInfo[@"pad"] unsignedIntegerValue]? YES : NO];
         } else if ([layerType isEqualToString:@"PoolingAverage"]) {
-            if ((BOOL)layer[@"global"]) {
+            if ((BOOL)layerInfo[@"global"]) {
                 kernel = [[SlimMPSCNNPoolingGlobalAverage alloc] initWithDevice: m_Device
-                                                                      inputSize:[(NSNumber *)layer[@"input_size"] unsignedIntegerValue]];
+                                                                      inputSize:[(NSNumber *)layerInfo[@"input_size"] unsignedIntegerValue]];
             } else {
                 kernel = [[MPSCNNPoolingAverage alloc] initWithDevice: m_Device
-                                                          kernelWidth:[(NSNumber *)layer[@"kernel_size"] unsignedIntegerValue]
-                                                         kernelHeight:[(NSNumber *)layer[@"kernel_size"] unsignedIntegerValue]
-                                                      strideInPixelsX:[(NSNumber *)layer[@"stride"] unsignedIntegerValue]
-                                                      strideInPixelsY:[(NSNumber *)layer[@"stride"] unsignedIntegerValue]];
+                                                          kernelWidth:[(NSNumber *)layerInfo[@"kernel_size"] unsignedIntegerValue]
+                                                         kernelHeight:[(NSNumber *)layerInfo[@"kernel_size"] unsignedIntegerValue]
+                                                      strideInPixelsX:[(NSNumber *)layerInfo[@"stride"] unsignedIntegerValue]
+                                                      strideInPixelsY:[(NSNumber *)layerInfo[@"stride"] unsignedIntegerValue]];
             }
         } else if ([layerType isEqualToString:@"LocalResponseNormalization"]) {
             kernel = [[SlimMPSCNNLocalResponseNormalization alloc] initWithDevice: m_Device
-                                                                        localSize:[(NSNumber *)layer[@"local_size"] unsignedIntegerValue]
-                                                                            alpha:[(NSNumber *)layer[@"alpha"] floatValue]
-                                                                             beta:[(NSNumber *)layer[@"beta"] floatValue]];
+                                                                        localSize:[(NSNumber *)layerInfo[@"local_size"] unsignedIntegerValue]
+                                                                            alpha:[(NSNumber *)layerInfo[@"alpha"] floatValue]
+                                                                             beta:[(NSNumber *)layerInfo[@"beta"] floatValue]];
         } else if ([layerType isEqualToString:@"SoftMax"]) {
             kernel = [[MPSCNNSoftMax alloc] initWithDevice: m_Device];
         } else if ([layerType isEqualToString:@"Concat"]) {
@@ -152,9 +152,9 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         
         // construct output image
         MPSImageDescriptor *imageDescriptor = [MPSImageDescriptor imageDescriptorWithChannelFormat:kTextureFormat
-                                                                                             width:[(NSNumber *)layer[@"output_size"] unsignedIntegerValue]
-                                                                                            height:[(NSNumber *)layer[@"output_size"] unsignedIntegerValue]
-                                                                                   featureChannels:[(NSNumber *)layer[@"output_channel"] unsignedIntegerValue]];
+                                                                                             width:[(NSNumber *)layerInfo[@"output_size"] unsignedIntegerValue]
+                                                                                            height:[(NSNumber *)layerInfo[@"output_size"] unsignedIntegerValue]
+                                                                                   featureChannels:[(NSNumber *)layerInfo[@"output_channel"] unsignedIntegerValue]];
         
         MPSImage *outputImage;
         if ([imageType isEqualToString:@"Permanent"]) {
@@ -167,7 +167,7 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         MPSLayer *newLayer = [[MPSLayer alloc] initWithName:layerName
                                                      kernel:kernel
                                             ImageDescriptor:imageDescriptor
-                                                  readCount:[imageType isEqualToString:@"Temporary"]? [(NSNumber *)layer[@"read_count"] unsignedIntegerValue] : 0
+                                                  readCount:[imageType isEqualToString:@"Temporary"]? [(NSNumber *)layerInfo[@"read_count"] unsignedIntegerValue] : 0
                                                 outputImage:outputImage];
         if ([imageType isEqualToString:@"Temporary"]) [tempImageList addObject:newLayer];
         [layersDict setObject:newLayer forKey:layerName];
@@ -251,7 +251,7 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
     }
 }
 
-- (NSString *)getTopProbs {
+- (NSString *)labelsOfTopProbs {
     
     // gather measurements of MPSImage to use to get out probabilities
     MPSImage *outputImage = m_LastLayer.outputImage;
@@ -377,7 +377,7 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         NSData *jsonData = [NSData dataWithContentsOfFile:descriptionFile];
         NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:NULL];
         NSDictionary *inoutInfo = jsonDict[@"inout_info"];
-        NSArray *layerInfo = jsonDict[@"layer_info"];
+        NSArray *layersInfo = jsonDict[@"layer_info"];
         NSArray *encodeSeq = jsonDict[@"encode_seq"];
         NSMutableDictionary *layersDict = [[NSMutableDictionary alloc] init];
         NSMutableArray *encodeSequence = [[NSMutableArray alloc] init];
@@ -395,7 +395,7 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         NSAssert(_basePtr, @"Error: mmap failed with errno = %d", errno);
         
         // construct layers and encode sequence
-        [self constructLayersFromInfo:layerInfo withLayersDict:layersDict];
+        [self constructLayersWithInfo:layersInfo layersDict:layersDict];
         for (NSArray *triplet in encodeSeq) {
             [encodeSequence addObject:@[layersDict[triplet[0]], layersDict[triplet[1]], layersDict[triplet[2]]]];
         }
@@ -411,95 +411,95 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
     return self;
 }
 
-- (void)constructLayersFromInfo:(NSArray *)layers
-                 withLayersDict:(NSMutableDictionary *)layersDict {
+- (void)constructLayersWithInfo:(NSArray *)layersInfo
+                     layersDict:(NSMutableDictionary *)layersDict {
     
     // find out the maximum of size of col_data
     // col_data will only be created once, and then shared by all convolution layers
     size_t maxColDataSize = 0;
-    for (NSDictionary *layer in layers) {
-        if ([layer[@"layer_type"] isEqualToString:@"Convolution"]) {
-            size_t colDataSize = [(NSNumber *)layer[@"output_size"] intValue] * [(NSNumber *)layer[@"output_size"] intValue] *
-            [(NSNumber *)layer[@"input_channel"] intValue] * [(NSNumber *)layer[@"kernel_size"] intValue] *
-            [(NSNumber *)layer[@"kernel_size"] intValue];
+    for (NSDictionary *layerInfo in layersInfo) {
+        if ([layerInfo[@"layer_type"] isEqualToString:@"Convolution"]) {
+            size_t colDataSize = [(NSNumber *)layerInfo[@"output_size"] intValue] * [(NSNumber *)layerInfo[@"output_size"] intValue] *
+            [(NSNumber *)layerInfo[@"input_channel"] intValue] * [(NSNumber *)layerInfo[@"kernel_size"] intValue] *
+            [(NSNumber *)layerInfo[@"kernel_size"] intValue];
             if (colDataSize > maxColDataSize) maxColDataSize = colDataSize;
         }
     }
     m_ColData = malloc(maxColDataSize * sizeof(float));
     
-    for (NSDictionary *layer in layers) {
-        NSString *layerName = layer[@"name"];
-        NSString *layerType = layer[@"layer_type"];
-        NSString *imageType = layer[@"image_type"];
+    for (NSDictionary *layerInfo in layersInfo) {
+        NSString *layerName = layerInfo[@"name"];
+        NSString *layerType = layerInfo[@"layer_type"];
+        NSString *imageType = layerInfo[@"image_type"];
         
         CPULayer *newLayer;
         
         // construct forward method
         if ([layerType isEqualToString:@"Convolution"]) {
             newLayer = [[CPUConvolutionLayer alloc] initWithName:layerName
-                                                          weight:m_BasePtr + [(NSNumber *)layer[@"weight_offset"] intValue]
-                                                            bias:m_BasePtr + [(NSNumber *)layer[@"bias_offset"] intValue]
-                                                           group:[(NSNumber *)layer[@"group"] intValue]
-                                                    inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]
-                                                   outputChannel:[(NSNumber *)layer[@"output_channel"] intValue]
-                                                       inputSize:[(NSNumber *)layer[@"input_size"] intValue]
-                                                      outputSize:[(NSNumber *)layer[@"output_size"] intValue]
-                                                      kernelSize:[(NSNumber *)layer[@"kernel_size"] intValue]
-                                                             pad:[(NSNumber *)layer[@"pad"] intValue]
-                                                          stride:[(NSNumber *)layer[@"stride"] intValue]
-                                                          doReLU:[(NSString *)layer[@"activation"] isEqualToString:@"ReLU"]? YES : NO
+                                                          weight:m_BasePtr + [(NSNumber *)layerInfo[@"weight_offset"] intValue]
+                                                            bias:m_BasePtr + [(NSNumber *)layerInfo[@"bias_offset"] intValue]
+                                                           group:[(NSNumber *)layerInfo[@"group"] intValue]
+                                                    inputChannel:[(NSNumber *)layerInfo[@"input_channel"] intValue]
+                                                   outputChannel:[(NSNumber *)layerInfo[@"output_channel"] intValue]
+                                                       inputSize:[(NSNumber *)layerInfo[@"input_size"] intValue]
+                                                      outputSize:[(NSNumber *)layerInfo[@"output_size"] intValue]
+                                                      kernelSize:[(NSNumber *)layerInfo[@"kernel_size"] intValue]
+                                                             pad:[(NSNumber *)layerInfo[@"pad"] intValue]
+                                                          stride:[(NSNumber *)layerInfo[@"stride"] intValue]
+                                                          doReLU:[(NSString *)layerInfo[@"activation"] isEqualToString:@"ReLU"]? YES : NO
                                                          colData:m_ColData];
         } else if ([layerType isEqualToString:@"FullyConnected"]) {
             newLayer = [[CPUFullyConnectedLayer alloc] initWithName:layerName
-                                                             weight:m_BasePtr + [(NSNumber *)layer[@"weight_offset"] intValue]
-                                                               bias:m_BasePtr + [(NSNumber *)layer[@"bias_offset"] intValue]
-                                                       inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]
-                                                      outputChannel:[(NSNumber *)layer[@"output_channel"] intValue]
-                                                          inputSize:[(NSNumber *)layer[@"input_size"] intValue]
-                                                             doReLU:[(NSString *)layer[@"activation"] isEqualToString:@"ReLU"]? YES : NO];
+                                                             weight:m_BasePtr + [(NSNumber *)layerInfo[@"weight_offset"] intValue]
+                                                               bias:m_BasePtr + [(NSNumber *)layerInfo[@"bias_offset"] intValue]
+                                                       inputChannel:[(NSNumber *)layerInfo[@"input_channel"] intValue]
+                                                      outputChannel:[(NSNumber *)layerInfo[@"output_channel"] intValue]
+                                                          inputSize:[(NSNumber *)layerInfo[@"input_size"] intValue]
+                                                             doReLU:[(NSString *)layerInfo[@"activation"] isEqualToString:@"ReLU"]? YES : NO];
         } else if ([layerType isEqualToString:@"PoolingMax"]) {
             newLayer = [[CPUPoolingLayer alloc]initWithName:layerName
                                                 poolingType:ePoolingMax
-                                               inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]
-                                              outputChannel:[(NSNumber *)layer[@"output_channel"] intValue]
-                                                  inputSize:[(NSNumber *)layer[@"input_size"] intValue]
-                                                 outputSize:[(NSNumber *)layer[@"output_size"] intValue]
-                                                 kernelSize:[(NSNumber *)layer[@"kernel_size"] intValue]
-                                                        pad:[(NSNumber *)layer[@"pad"] intValue]
-                                                     stride:[(NSNumber *)layer[@"stride"] intValue]];
+                                               inputChannel:[(NSNumber *)layerInfo[@"input_channel"] intValue]
+                                              outputChannel:[(NSNumber *)layerInfo[@"output_channel"] intValue]
+                                                  inputSize:[(NSNumber *)layerInfo[@"input_size"] intValue]
+                                                 outputSize:[(NSNumber *)layerInfo[@"output_size"] intValue]
+                                                 kernelSize:[(NSNumber *)layerInfo[@"kernel_size"] intValue]
+                                                        pad:[(NSNumber *)layerInfo[@"pad"] intValue]
+                                                     stride:[(NSNumber *)layerInfo[@"stride"] intValue]];
         } else if ([layerType isEqualToString:@"PoolingAverage"]) {
-            if ((BOOL)layer[@"global"]) {
+            if ((BOOL)layerInfo[@"global"]) {
                 newLayer = [[CPUPoolingLayer alloc]initWithName:layerName
                                                     poolingType:ePoolingGlobalAverage
-                                                   inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]
-                                                  outputChannel:[(NSNumber *)layer[@"output_channel"] intValue]
-                                                      inputSize:[(NSNumber *)layer[@"input_size"] intValue]
-                                                     outputSize:[(NSNumber *)layer[@"output_size"] intValue]
-                                                     kernelSize:[(NSNumber *)layer[@"input_size"] intValue]
+                                                   inputChannel:[(NSNumber *)layerInfo[@"input_channel"] intValue]
+                                                  outputChannel:[(NSNumber *)layerInfo[@"output_channel"] intValue]
+                                                      inputSize:[(NSNumber *)layerInfo[@"input_size"] intValue]
+                                                     outputSize:[(NSNumber *)layerInfo[@"output_size"] intValue]
+                                                     kernelSize:[(NSNumber *)layerInfo[@"input_size"] intValue]
                                                             pad:0
-                                                         stride:[(NSNumber *)layer[@"input_size"] intValue]];
+                                                         stride:[(NSNumber *)layerInfo[@"input_size"] intValue]];
             } else {
                 newLayer = [[CPUPoolingLayer alloc]initWithName:layerName
                                                     poolingType:ePoolingAverage
-                                                   inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]
-                                                  outputChannel:[(NSNumber *)layer[@"output_channel"] intValue]
-                                                      inputSize:[(NSNumber *)layer[@"input_size"] intValue]
-                                                     outputSize:[(NSNumber *)layer[@"output_size"] intValue]
-                                                     kernelSize:[(NSNumber *)layer[@"kernel_size"] intValue]
+                                                   inputChannel:[(NSNumber *)layerInfo[@"input_channel"] intValue]
+                                                  outputChannel:[(NSNumber *)layerInfo[@"output_channel"] intValue]
+                                                      inputSize:[(NSNumber *)layerInfo[@"input_size"] intValue]
+                                                     outputSize:[(NSNumber *)layerInfo[@"output_size"] intValue]
+                                                     kernelSize:[(NSNumber *)layerInfo[@"kernel_size"] intValue]
                                                             pad:0
-                                                         stride:[(NSNumber *)layer[@"stride"] intValue]];
+                                                         stride:[(NSNumber *)layerInfo[@"stride"] intValue]];
             }
         } else if ([layerType isEqualToString:@"LocalResponseNormalization"]) {     // only support within-channel normalization for now
             newLayer = [[CPULocalResponseNormalizationLayer alloc] initWithName:layerName
-                                                                   inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]
-                                                                      inputSize:[(NSNumber *)layer[@"input_size"] intValue]
-                                                                          alpha:[(NSNumber *)layer[@"alpha"] floatValue]
-                                                                           beta:[(NSNumber *)layer[@"beta"] floatValue]
+                                                                   inputChannel:[(NSNumber *)layerInfo[@"input_channel"] intValue]
+                                                                      inputSize:[(NSNumber *)layerInfo[@"input_size"] intValue]
+                                                                          alpha:[(NSNumber *)layerInfo[@"alpha"] floatValue]
+                                                                           beta:[(NSNumber *)layerInfo[@"beta"] floatValue]
                                                                           delta:1.0f
-                                                                      localSize:[(NSNumber *)layer[@"local_size"] intValue]];
+                                                                      localSize:[(NSNumber *)layerInfo[@"local_size"] intValue]];
         } else if ([layerType isEqualToString:@"SoftMax"]) {
             newLayer = [[CPUSoftMaxLayer alloc] initWithName:layerName
-                                                inputChannel:[(NSNumber *)layer[@"input_channel"] intValue]];
+                                                inputChannel:[(NSNumber *)layerInfo[@"input_channel"] intValue]];
         } else if ([layerType isEqualToString:@"Concat"]) {
             newLayer = [[CPULayer alloc] initWithName:layerName];
         } else {
@@ -507,14 +507,14 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         }
         
         if (![imageType isEqualToString:@"None"]) {
-            newLayer.outputNum = [(NSNumber *)layer[@"output_size"] intValue] * [(NSNumber *)layer[@"output_size"] intValue] *
-                                 [(NSNumber *)layer[@"output_channel"] intValue];
+            newLayer.outputNum = [(NSNumber *)layerInfo[@"output_size"] intValue] * [(NSNumber *)layerInfo[@"output_size"] intValue] *
+                                 [(NSNumber *)layerInfo[@"output_channel"] intValue];
             newLayer.output = malloc(newLayer.outputNum * sizeof(float));
         }
         
-        if ([layer objectForKey:@"destination_channel_offset"]) {
-            newLayer.destinationOffset = [((NSNumber *)layer[@"destination_channel_offset"]) intValue] *
-                                         [(NSNumber *)layer[@"output_size"] intValue] * [(NSNumber *)layer[@"output_size"] intValue];
+        if ([layerInfo objectForKey:@"destination_channel_offset"]) {
+            newLayer.destinationOffset = [((NSNumber *)layerInfo[@"destination_channel_offset"]) intValue] *
+                                         [(NSNumber *)layerInfo[@"output_size"] intValue] * [(NSNumber *)layerInfo[@"output_size"] intValue];
         }
         
         [layersDict setObject:newLayer forKey:layerName];
@@ -575,7 +575,7 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
 #endif
 }
 
-- (NSString *)getTopProbs {
+- (NSString *)labelsOfTopProbs {
     
     // copy output probabilities into an array of touples of (probability, index)
     NSMutableArray *indexedProbabilities = [[NSMutableArray alloc] initWithCapacity:m_Labels.count];
