@@ -163,7 +163,11 @@ GPU版网络目前都是参照苹果的[Demo](https://developer.apple.com/librar
 
 ## CPU版
 
-CPU版结构比较简单，每一层的操作都写在`-forwardWithInput:output:`里面。目前卷积层用的是caffe2的`ìm2col`+accelerate的`cblas_sgemm`，pooling层用的是苹果BNNS类，其他层是自己写的代码。若要更改某种层的算法，只改这一个方法即可。目前的问题是pooling层比较诡异，虽然用BNNS或者NNPACK算出来结果差不多，但就是和GPU版算出来的差很多，所以pooling层越多结果越难看。现在CPU版的alexnet和squeezenet还算准确，googlenet的结果就很难看。
+CPU版结构比较简单，每一层的操作都写在`-forwardWithInput:output:`里面。目前卷积层用的是caffe2的`ìm2col`+accelerate的`cblas_sgemm`，pooling层用的是NNPACK的代码，其他层是自己写的代码。若要更改某种层的算法，只改这一个方法即可。
+
+苹果有
+
+目前的问题是pooling层比较诡异，虽然用BNNS或者NNPACK算出来结果差不多，但就是和GPU版算出来的差很多，所以pooling层越多结果越难看。现在CPU版的alexnet和squeezenet还算准确，googlenet的结果就很难看。另外NNPACK的pooling算法不太好，用了一大堆的for循环，squeezenet用它比用BNNS慢了10多毫秒，这里是有改进空间的。
 
 ### 预处理
 

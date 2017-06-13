@@ -8,11 +8,7 @@
 
 #import "CPULayer.h"
 #import <Accelerate/Accelerate.h>
-#if USE_NNPACK_FOR_GEMM
-#import "nnpackGemm.h"
-#elif USE_EIGEN_FOR_GEMM
-#import "eigenGemm.hpp"
-#endif
+#import "gemmHandler.h"
 
 @implementation CPULayer
 
@@ -85,14 +81,16 @@
             memcpy(dst + featureIndex * m_M, m_Biases + groupIndex * m_M, m_M * sizeof(float));
         }
         
-#if USE_NNPACK_FOR_GEMM
-        nnpack_gemm(nnpackNoTrans, nnpackNoTrans, m_M, m_N, m_K, 1, m_Weight + groupIndex * m_WeightPerGroup, m_ColData, 1, dst);
-#elif USE_EIGEN_FOR_GEMM
-        eigen_gemm(eigenNoTrans, eigenNoTrans, m_M, m_N, m_K, 1, m_Weight + groupIndex * m_WeightPerGroup, m_ColData, 1, dst);
-#else
-        cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m_M, m_N, m_K, 1,
-                    m_Weight + groupIndex * m_WeightPerGroup, m_K, m_ColData, m_N, 1, dst, m_N);
-#endif
+        [gemmHandler gemmWithTransA:gemmNoTrans
+                             transB:gemmNoTrans
+                                  M:m_M
+                                  N:m_N
+                                  K:m_K
+                              alpha:1
+                                  A:m_Weight + groupIndex * m_WeightPerGroup
+                                  B:m_ColData
+                               beta:1
+                                  C:dst];
     }
     if (m_ReLU) vDSP_vthres(output, 1, &m_Zero, output, 1, m_OutputPerGroup * m_Group);
 }

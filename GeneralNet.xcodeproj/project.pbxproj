@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		BD1633851EB1B2C8009A3CD5 /* metal_squeezenet.dat in Resources */ = {isa = PBXBuildFile; fileRef = BD1633841EB1B2C8009A3CD5 /* metal_squeezenet.dat */; };
+		BD1FFDC01EEFA95D00C5EB1B /* gemmHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = BD1FFDBF1EEFA95D00C5EB1B /* gemmHandler.m */; };
 		BD2190061EC1C66200DB2E29 /* GeneralNet.m in Sources */ = {isa = PBXBuildFile; fileRef = BD2190051EC1C66200DB2E29 /* GeneralNet.m */; };
 		BD443BF21ED58B800039665A /* cpu_squeezenet.dat in Resources */ = {isa = PBXBuildFile; fileRef = BD443BEF1ED58B7F0039665A /* cpu_squeezenet.dat */; };
 		BD443BF31ED58B800039665A /* cpu_googlenet.dat in Resources */ = {isa = PBXBuildFile; fileRef = BD443BF01ED58B7F0039665A /* cpu_googlenet.dat */; };
@@ -92,6 +93,8 @@
 
 /* Begin PBXFileReference section */
 		BD1633841EB1B2C8009A3CD5 /* metal_squeezenet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = metal_squeezenet.dat; sourceTree = "<group>"; };
+		BD1FFDBE1EEFA95D00C5EB1B /* gemmHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gemmHandler.h; sourceTree = "<group>"; };
+		BD1FFDBF1EEFA95D00C5EB1B /* gemmHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = gemmHandler.m; sourceTree = "<group>"; };
 		BD2190041EC1C66200DB2E29 /* GeneralNet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeneralNet.h; sourceTree = "<group>"; };
 		BD2190051EC1C66200DB2E29 /* GeneralNet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneralNet.m; sourceTree = "<group>"; };
 		BD443BEF1ED58B7F0039665A /* cpu_squeezenet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = cpu_squeezenet.dat; sourceTree = "<group>"; };
@@ -1159,6 +1162,8 @@
 				BD87B7801EA600A300DF731C /* SlimMPSCNN.m */,
 				BDCE1C661ED3E928006BBD69 /* CPULayer.h */,
 				BDCE1C671ED3E928006BBD69 /* CPULayer.m */,
+				BD1FFDBE1EEFA95D00C5EB1B /* gemmHandler.h */,
+				BD1FFDBF1EEFA95D00C5EB1B /* gemmHandler.m */,
 				BD87B7811EA600A300DF731C /* Shaders.metal */,
 				BD5887E71EE9376700BD47E6 /* third_party */,
 				BD5887E81EE9378500BD47E6 /* model */,
@@ -1412,6 +1417,7 @@
 			files = (
 				BD87B7851EA600A300DF731C /* Shaders.metal in Sources */,
 				BD87B7821EA600A300DF731C /* ViewController.m in Sources */,
+				BD1FFDC01EEFA95D00C5EB1B /* gemmHandler.m in Sources */,
 				BD87B7841EA600A300DF731C /* SlimMPSCNN.m in Sources */,
 				BD4C0D581EEEA53A006B5522 /* nnpackGemm.c in Sources */,
 				BD4C0D561EEEA461006B5522 /* eigenGemm.cpp in Sources */,
