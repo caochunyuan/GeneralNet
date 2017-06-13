@@ -117,7 +117,7 @@ GPU版和CPU版的`GeneralNet`都有`NSMutableDictionary *layersDict`、`NSMutab
 
 ## GPU版
 
-GPU版网络目前都是参照苹果的[Demo](https://developer.apple.com/library/content/samplecode/MetalImageRecognition/Introduction/Intro.html)，调用`MPSCNN`的类实现的。
+GPU版网络目前都是参照苹果的[Demo](https://developer.apple.com/library/content/samplecode/MetalImageRecognition/Introduction/Intro.html)，调用`MPSCNN`的类实现的。它需要iOS9，而且不知道内部用的是什么算法，是快是慢都没法控制。
 
 ### 预处理
 
@@ -165,9 +165,9 @@ GPU版网络目前都是参照苹果的[Demo](https://developer.apple.com/librar
 
 CPU版结构比较简单，每一层的操作都写在`-forwardWithInput:output:`里面。目前卷积层用的是caffe2的`ìm2col`+accelerate的`cblas_sgemm`，pooling层用的是NNPACK的代码，其他层是自己写的代码。若要更改某种层的算法，只改这一个方法即可。
 
-苹果有
+苹果的Accelerate库里有一些神经网络层的实现，叫做`BNNS`，但只有iOS10以上才能用。其中卷积层的实现很不好，跑一次alexnet需要400多毫秒；但池化层效果又不错，如果不用`BNNS`而用NNPACK那个满是for循环的pooling层代码，squeezenet会慢10多秒。现在`GeneralNet`为了保证所有iOS版本都能用，pooling层用的是NNPACK的代码。
 
-目前的问题是pooling层比较诡异，虽然用BNNS或者NNPACK算出来结果差不多，但就是和GPU版算出来的差很多，所以pooling层越多结果越难看。现在CPU版的alexnet和squeezenet还算准确，googlenet的结果就很难看。另外NNPACK的pooling算法不太好，用了一大堆的for循环，squeezenet用它比用BNNS慢了10多毫秒，这里是有改进空间的。
+目前还存在的问题是pooling层的结果，虽然用`BNNS`或者NNPACK算出来结果差不多，但就是和GPU版算出来的差很多，所以pooling层越多结果越难看。现在CPU版的alexnet和squeezenet还算准确，googlenet的结果就很难看。
 
 ### 预处理
 
@@ -183,7 +183,7 @@ pass
 
 ### Gemm方法
 
-卷积层是用caffe2的`ìm2col`加上一个`Gemm`实现的。后者可以是Accelerate的`cblas_sgemm`，也可以是自己实现的`nnpack_gemm`或者`eigen_gemm`。`.pch`的宏定义有`USE_NNPACK_FOR_GEMM`和`USE_EIGEN_FOR_GEMM`，选一个定义为1即可；都为0则默认用Accelerate。注意如果用的是Eigen，必需把`CPULayer.m`的后缀改成`.mm`。如果用的是NNPACK，`CPULayer.m`后缀必须是`.m`；也可以把`nnpackGemm.c`后缀改成`.cpp`，`CPULayer.m`改成`.mm`。
+卷积层是用caffe2的`ìm2col`加上一个`gemm`实现的。后者可以是Accelerate的`cblas_sgemm`，也可以是自己实现的`nnpack_gemm`或者`eigen_gemm`。`.pch`的宏定义有`USE_NNPACK_FOR_GEMM`和`USE_EIGEN_FOR_GEMM`，选一个定义为1即可；都为0则默认用Accelerate。`gemmHandler`汇集了三种乘法的调用，注意如果是用Eigen，需要把`gemmHandler.m`的后缀改成`.mm`。
 
 Eigen的使用和SDK里面、caffe2里面都是一样的，只是要注意，已经发现用Debug版时Eigen极其慢，跑一张图片用了5秒多，用Release版的时候才比较正常，原因未知。GitHub的工程里我没有上传Eigen的源文件；搜索最新版本的Eigen，把其中的`Eigen`文件夹放进工程即可。
 
@@ -198,7 +198,6 @@ static const size_t row_subblock_max = 4;
 static const size_t col_subblock_max = 12;
 ```
 
-这些参数都是从NNPACK的`init.c`文件里面抽出来的，如有疑问可以到`init.c`核查。
-按原文件的宏定义来看，应该同样适用于Android的CPU。他的本意仿佛是按照CPU的L1、L2、L3级缓存的大小来安排每次运算的数据量，但又并没有真的去读取硬件信息；然后每次计算一个4x12的小块，这个大小的选择也没有提供理由。这些参数或许有问题，或许可以优化，目前只能确保在iPhone6P上没问题。
+这些参数都是从NNPACK的`init.c`文件里面抽出来的，如有疑问可以到`init.c`核查。按原文件的宏定义来看，应该同样适用于Android的CPU。他的本意仿佛是按照CPU的L1、L2、L3级缓存的大小来安排每次运算的数据量，但又并没有真的去读取硬件信息；然后每次计算一个4x12的小块，这个大小的选择也没有提供理由。这些参数或许可以用实际硬件的参数（CPU缓存大小）进一步优化。
 
-总的来说，NNPACK算`C = A * B`就是每次取A矩阵的4行，取B矩阵的12列，用`nnp_sgemm_only_4x12__neon`算出C矩阵的一个4x12的块（原来的算法可以在`NNPACK\src\neon\blas\sgemm.c`里面找到），然后对A矩阵最后不足4行、B矩阵不足12列的用`nnp_sgemm_upto_4x12__neon`来计算，也存到C矩阵里。原来的算法因为是和im2col紧密结合的，直接分离出来是用不了的，所以我对算法做了小的改动，目前是要求先对A矩阵转置，再调用`nnp_sgemm_only_4x12__neon`和`nnp_sgemm_upto_4x12__neon`。转置这一步时间开销也不小，如果能结合到`im2col`里面去，肯定还能更快。
+总的来说，NNPACK算`C = A * B`就是每次取A矩阵的4行，取B矩阵的12列，用`nnp_sgemm_only_4x12__neon`算出C矩阵的一个4x12的块，然后对A矩阵最后不足4行、B矩阵不足12列的用`nnp_sgemm_upto_4x12__neon`来计算，也存到C矩阵里（原来的算法可以在`NNPACK\src\neon\blas\sgemm.c`里面找到）。原来的算法因为是和`im2col`紧密结合的，直接分离出来是用不了的，所以做了一些改动。

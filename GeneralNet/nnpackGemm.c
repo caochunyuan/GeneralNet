@@ -30,18 +30,15 @@ static inline size_t min(size_t a, size_t b)
     return a > b ? b : a;
 }
 
-static inline void transpose(const float *src, float *dst, size_t row, size_t col)
-{
-    // need to handle this
-}
-
 struct NNP_CACHE_ALIGN gemm_context
 {
+    const bool trans_a;
+    const bool trans_b;
     const float alpha;
     const float beta;
-    const float* matrix_A;
-    const float* matrix_B;
-    float* matrix_C;
+    const float *matrix_a;
+    const float *matrix_b;
+    float *matrix_c;
     
     size_t reduction_block_start;
     size_t reduction_block_size;
@@ -58,6 +55,8 @@ void nnp_sgemm_only_4x12(size_t k,
                          size_t output_row,
                          size_t output_col,
                          size_t reduction_size,
+                         const bool trans_a,
+                         const bool trans_b,
                          const float alpha,
                          const float beta,
                          const float *a,
@@ -70,18 +69,37 @@ void nnp_sgemm_only_4x12(size_t k,
     float32x4_t vc30 = vdupq_n_f32(0.0f), vc31 = vdupq_n_f32(0.0f), vc32 = vdupq_n_f32(0.0f);
     
     do {
-        const float32x4_t va = {
+        const float32x4_t va = trans_a ? vld1q_f32(a) :
+        (float32x4_t) {
             *(a + reduction_size * 0),
             *(a + reduction_size * 1),
             *(a + reduction_size * 2),
             *(a + reduction_size * 3),
         };
-        a += 1;
+        a += trans_a ? output_row : 1;
         
-        const float32x4_t vb0 = vld1q_f32(b + 0);
-        const float32x4_t vb1 = vld1q_f32(b + 4);
-        const float32x4_t vb2 = vld1q_f32(b + 8);
-        b += output_col;
+        const float32x4_t vb0 = trans_b ? (float32x4_t) {
+            *(b + reduction_size * 0),
+            *(b + reduction_size * 1),
+            *(b + reduction_size * 2),
+            *(b + reduction_size * 3),
+        }
+        : vld1q_f32(b + 0);
+        const float32x4_t vb1 = trans_b ? (float32x4_t) {
+            *(b + reduction_size * 4),
+            *(b + reduction_size * 5),
+            *(b + reduction_size * 6),
+            *(b + reduction_size * 7),
+        }
+        : vld1q_f32(b + 4);
+        const float32x4_t vb2 = trans_b ? (float32x4_t) {
+            *(b + reduction_size * 8),
+            *(b + reduction_size * 9),
+            *(b + reduction_size * 10),
+            *(b + reduction_size * 11),
+        }
+        : vld1q_f32(b + 8);
+        b += trans_b ? 1 : output_col;
         
 #if defined(__aarch64__)
         vc00 = vfmaq_lane_f32(vc00, vb0, vget_low_f32(va),  0);
@@ -278,6 +296,8 @@ void nnp_sgemm_upto_4x12(size_t mr,
                          size_t output_row,
                          size_t output_col,
                          size_t reduction_size,
+                         const bool trans_a,
+                         const bool trans_b,
                          const float alpha,
                          const float beta,
                          const float *a,
@@ -292,42 +312,61 @@ void nnp_sgemm_upto_4x12(size_t mr,
     do {
         float32x4_t vb0, vb1, vb2;
         
-        vb0 = vld1q_f32(b + 0);
+        vb0 = trans_b ? (float32x4_t) {
+            *(b + reduction_size * 0),
+            nr > 1 ? *(b + reduction_size * 1) : 0.0f,
+            nr > 2 ? *(b + reduction_size * 2) : 0.0f,
+            nr > 3 ? *(b + reduction_size * 3) : 0.0f,
+        }
+        : vld1q_f32(b + 0);
         if (nr > 4) {
-            vb1 = vld1q_f32(b + 4);
-            vb2 = nr > 8 ? vld1q_f32(b + 8) : vdupq_n_f32(0.0f);
+            vb1 =  trans_b ? (float32x4_t) {
+                *(b + reduction_size * 4),
+                nr > 5 ? *(b + reduction_size * 5) : 0.0f,
+                nr > 6 ? *(b + reduction_size * 6) : 0.0f,
+                nr > 7 ? *(b + reduction_size * 7) : 0.0f,
+            }
+            : vld1q_f32(b + 4);
+            vb2 = nr > 8 ? trans_b ? (float32x4_t) {
+                *(b + reduction_size * 8),
+                nr > 9 ? *(b + reduction_size * 9) : 0.0f,
+                nr > 10 ? *(b + reduction_size * 10) : 0.0f,
+                nr > 11 ? *(b + reduction_size * 11) : 0.0f,
+            }
+            : vld1q_f32(b + 8)
+            : vdupq_n_f32(0.0f);
         } else {
             vb1 = vdupq_n_f32(0.0f);
             vb2 = vdupq_n_f32(0.0f);
         }
-        b += output_col;
+        b += trans_b ? 1 : output_col;
         
-        const float32x4_t va0 = vld1q_dup_f32(a + reduction_size * 0);
+        const float32x4_t va0 = trans_a ? vld1q_dup_f32(a + 0) : vld1q_dup_f32(a + reduction_size * 0);
         vc00 = vmuladdq_f32(vc00, va0, vb0);
         vc01 = vmuladdq_f32(vc01, va0, vb1);
         vc02 = vmuladdq_f32(vc02, va0, vb2);
         
         if (mr > 1) {
-            const float32x4_t va1 = vld1q_dup_f32(a + reduction_size * 1);
+            const float32x4_t va1 = trans_a ? vld1q_dup_f32(a + 1) : vld1q_dup_f32(a + reduction_size * 1);
             vc10 = vmuladdq_f32(vc10, va1, vb0);
             vc11 = vmuladdq_f32(vc11, va1, vb1);
             vc12 = vmuladdq_f32(vc12, va1, vb2);
             
             if (mr > 2) {
-                const float32x4_t va2 = vld1q_dup_f32(a + reduction_size * 2);
+                const float32x4_t va2 = trans_a ? vld1q_dup_f32(a + 2) : vld1q_dup_f32(a + reduction_size * 2);
                 vc20 = vmuladdq_f32(vc20, va2, vb0);
                 vc21 = vmuladdq_f32(vc21, va2, vb1);
                 vc22 = vmuladdq_f32(vc22, va2, vb2);
                 
                 if (mr > 3) {
-                    const float32x4_t va3 = vld1q_dup_f32(a + reduction_size * 3);
+                    const float32x4_t va3 = trans_a ? vld1q_dup_f32(a + 3) : vld1q_dup_f32(a + reduction_size * 3);
                     vc30 = vmuladdq_f32(vc30, va3, vb0);
                     vc31 = vmuladdq_f32(vc31, va3, vb1);
                     vc32 = vmuladdq_f32(vc32, va3, vb2);
                 }
             }
         }
-        a += 1;
+        a += trans_a ? output_row : 1;
         
     } while (--k);
     
@@ -606,6 +645,8 @@ void compute_gemm(const struct gemm_context context[1],
                   size_t row_block_start, size_t col_subblock_start,
                   size_t row_block_size,  size_t col_subblock_size)
 {
+    const bool   trans_a                = context->trans_a;
+    const bool   trans_b                = context->trans_b;
     const float  alpha                  = context->alpha;
     const float  beta                   = context->beta;
     const size_t reduction_block_start  = context->reduction_block_start;
@@ -617,9 +658,11 @@ void compute_gemm(const struct gemm_context context[1],
     const size_t col_subblock_max       = context->col_subblock_max;
     const size_t row_subblock_max       = context->row_subblock_max;
     
-    const float* matrix_A = context->matrix_A + row_block_start * reduction_size + reduction_block_start;
-    const float* matrix_B = context->matrix_B + reduction_block_start * output_col + col_block_start + col_subblock_start;
-    float* matrix_C       = context->matrix_C + row_block_start * output_col + col_block_start + col_subblock_start;
+    const float *matrix_a = trans_a ? context->matrix_a + reduction_block_start * output_row + row_block_start :
+    context->matrix_a + row_block_start * reduction_size + reduction_block_start;
+    const float *matrix_b = trans_b ? context->matrix_b + (col_block_start + col_subblock_start) * reduction_size + reduction_block_start :
+    context->matrix_b + reduction_block_start * output_col + col_block_start + col_subblock_start;
+    float *matrix_c       = context->matrix_c + row_block_start * output_col + col_block_start + col_subblock_start;
     
     if (col_subblock_size == col_subblock_max) {
         while (row_block_size >= row_subblock_max) {
@@ -627,12 +670,13 @@ void compute_gemm(const struct gemm_context context[1],
             nnp_sgemm_only_4x12(
                                 reduction_block_size, reduction_block_start,
                                 output_row, output_col, reduction_size,
+                                trans_a, trans_b,
                                 alpha, beta,
-                                matrix_A, matrix_B, matrix_C
+                                matrix_a, matrix_b, matrix_c
                                 );
             
-            matrix_A += row_subblock_max * reduction_size;
-            matrix_C += row_subblock_max * output_col;
+            matrix_a += trans_a ? row_subblock_max : row_subblock_max * reduction_size;
+            matrix_c += row_subblock_max * output_col;
         }
     }
     
@@ -644,12 +688,13 @@ void compute_gemm(const struct gemm_context context[1],
                             row_subblock_size, col_subblock_size,
                             reduction_block_size, reduction_block_start,
                             output_row, output_col, reduction_size,
+                            trans_a, trans_b,
                             alpha, beta,
-                            matrix_A, matrix_B, matrix_C
+                            matrix_a, matrix_b, matrix_c
                             );
         
-        matrix_A += row_subblock_max * reduction_size;
-        matrix_C += row_subblock_max * output_col;
+        matrix_a += trans_a ? row_subblock_max : row_subblock_max * reduction_size;
+        matrix_c += row_subblock_max * output_col;
     }
 }
 
@@ -677,10 +722,6 @@ static const size_t col_block_max = cache_elements_l3 / reduction_block_max / co
 typedef struct nnpack_context {
     bool initialized;
     pthreadpool_t threadpool;
-    float *ptr_a;
-    float *ptr_b;
-    size_t size_a;
-    size_t size_b;
 } nnpack_context;
 
 static nnpack_context global_context = {
@@ -691,8 +732,6 @@ void nnpack_init()
 {
     global_context.initialized = true;
     global_context.threadpool = pthreadpool_create(0);
-    global_context.size_a = 0;
-    global_context.size_b = 0;
 }
 
 void nnpack_gemm(const enum NNPACK_TRANSPOSE transA,
@@ -712,24 +751,6 @@ void nnpack_gemm(const enum NNPACK_TRANSPOSE transA,
     //    printf("NNPACK is using %zu threads\n",
     //           pthreadpool_get_threads_count(global_context.threadpool));
     
-    if (transA == nnpackTrans) {
-        if (M * K > global_context.size_a) {
-            if (global_context.ptr_a) free(global_context.ptr_a);
-            global_context.ptr_a = malloc(M * K * sizeof(float));
-            global_context.size_a = M * K;
-        }
-        transpose(A, global_context.ptr_a, M, K);
-    }
-    
-    if (transB == nnpackTrans) {
-        if (K * N > global_context.size_b) {
-            if (global_context.ptr_b) free(global_context.ptr_b);
-            global_context.ptr_b = malloc(K * N * sizeof(float));
-            global_context.size_b = K * N;
-        }
-        transpose(B, global_context.ptr_b, K, N);
-    }
-    
     const size_t output_row = M;
     const size_t output_col = N;
     const size_t reduction_size = K;
@@ -741,11 +762,13 @@ void nnpack_gemm(const enum NNPACK_TRANSPOSE transA,
             const size_t col_block_size = min(output_col - col_block_start, col_block_max);
             
             struct gemm_context gemm_context = {
+                .trans_a = transA == nnpackTrans,
+                .trans_b = transB == nnpackTrans,
                 .alpha = alpha,
                 .beta = beta,
-                .matrix_A = transA == nnpackNoTrans ? A : global_context.ptr_a,
-                .matrix_B = transB == nnpackNoTrans ? B : global_context.ptr_b,
-                .matrix_C = C,
+                .matrix_a = A,
+                .matrix_b = B,
+                .matrix_c = C,
                 .reduction_block_start = reduction_block_start,
                 .reduction_block_size = reduction_block_size,
                 .output_row = output_row,
