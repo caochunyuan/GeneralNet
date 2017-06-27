@@ -183,7 +183,7 @@ pass
 
 ### Gemm方法
 
-卷积层是用caffe2的`ìm2col`加上一个`gemm`实现的。后者可以是Accelerate的`cblas_sgemm`，也可以是自己实现的`nnpack_gemm`或者`eigen_gemm`。`.pch`的宏定义有`USE_NNPACK_FOR_GEMM`和`USE_EIGEN_FOR_GEMM`，选一个定义为1即可；都为0则默认用Accelerate。`gemmHandler`汇集了三种乘法的调用，注意如果是用Eigen，需要把`gemmHandler.m`的后缀改成`.mm`。
+卷积层是用caffe2的`ìm2col`加上一个`gemm`实现的。后者可以是Accelerate的`cblas_sgemm`，也可以是自己实现的`nnpack_gemm`或者`eigen_gemm`。`.pch`的宏定义有`USE_NNPACK_FOR_GEMM`和`USE_EIGEN_FOR_GEMM`，选一个定义为1即可；都为0则默认用Accelerate。`Eigen`是C++的，所以用了一个`eigenGemmWrapper.mm`来负责调用C++的方法，这样再被其他文件调用的时候，其他文件就不需要以`.mm`为后缀了。`gemmHandler`汇集了三种乘法的调用。
 
 Eigen的使用和SDK里面、caffe2里面都是一样的，只是要注意，已经发现用Debug版时Eigen极其慢，跑一张图片用了5秒多，用Release版的时候才比较正常，原因未知。GitHub的工程里我没有上传Eigen的源文件；搜索最新版本的Eigen，把其中的`Eigen`文件夹放进工程即可。
 
@@ -201,3 +201,5 @@ static const size_t col_subblock_max = 12;
 这些参数都是从NNPACK的`init.c`文件里面抽出来的，如有疑问可以到`init.c`核查。按原文件的宏定义来看，应该同样适用于Android的CPU。他的本意仿佛是按照CPU的L1、L2、L3级缓存的大小来安排每次运算的数据量，但又并没有真的去读取硬件信息；然后每次计算一个4x12的小块，这个大小的选择也没有提供理由。这些参数或许可以用实际硬件的参数（CPU缓存大小）进一步优化。
 
 总的来说，NNPACK算`C = A * B`就是每次取A矩阵的4行，取B矩阵的12列，用`nnp_sgemm_only_4x12__neon`算出C矩阵的一个4x12的块，然后对A矩阵最后不足4行、B矩阵不足12列的用`nnp_sgemm_upto_4x12__neon`来计算，也存到C矩阵里（原来的算法可以在`NNPACK\src\neon\blas\sgemm.c`里面找到）。原来的算法因为是和`im2col`紧密结合的，直接分离出来是用不了的，所以做了一些改动。
+
+后来又加上了一个算法，每次取A矩阵的8行，取B矩阵的8列，算出c矩阵的一个8x8的块。于是把原来方法命名为`nnpackGemm4x12`，新的叫`nnpackGemm8x8`。测试发现如果`gemm`方法要求A矩阵或B矩阵先转置再相乘，`nnpackGemm8x8`会比`nnpackGemm4x12`要快；A、B都要求转置时效果最明显。于是又加上了`nnpackGemmAuto`这个选项，当A、B矩阵都不要求转置时，自动调用`nnpackGemm4x12`，否则调用`nnpackGemm8x8`。平时使用时就用这个`nnpackGemmAuto`即可。
