@@ -10,7 +10,7 @@
 #import <UIKit/UIKit.h>
 #import <sys/mman.h>
 
-#pragma mark - protocol for both GPU and CPU
+#pragma mark - protocol for both GPU and CPU implemention
 @protocol GeneralNetProtocol
 
 - (instancetype)initWithDescriptionFile:(NSString *)descriptionFile

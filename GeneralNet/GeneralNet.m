@@ -24,7 +24,7 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         // preparation for Metal
          m_Device = MTLCreateSystemDefaultDevice();
         
-        NSAssert(MPSSupportsMTLDevice(_device), @"Metal Performance Shaders not supported on current device");
+        NSAssert(MPSSupportsMTLDevice(m_Device), @"Metal Performance Shaders not supported on current device");
         
         m_CommandQueue = [ m_Device newCommandQueue];
         m_TextureLoader = [[MTKTextureLoader alloc] initWithDevice: m_Device];
@@ -80,7 +80,7 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
         m_Labels = jsonDict[@"labels"];
         
         // close file after initialization
-        NSAssert(munmap(_basePtr, [(NSNumber *)inoutInfo[@"file_size"] unsignedIntegerValue]) == 0, @"Error: munmap failed with errno = %d", errno);
+        NSAssert(munmap(m_BasePtr, [(NSNumber *)inoutInfo[@"file_size"] unsignedIntegerValue]) == 0, @"Error: munmap failed with errno = %d", errno);
         close(m_Fd);
     }
     
@@ -622,7 +622,7 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
 - (void)dealloc {
     
     // close file
-    NSAssert(munmap(_basePtr, _fileSize) == 0, @"Error: munmap failed with errno = %d", errno);
+    NSAssert(munmap(m_BasePtr, m_FileSize) == 0, @"Error: munmap failed with errno = %d", errno);
     close(m_Fd);
     
     // release pointers

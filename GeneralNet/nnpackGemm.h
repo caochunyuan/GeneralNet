@@ -14,7 +14,14 @@ enum NNPACK_TRANSPOSE {
     nnpackTrans   = 112
 };
 
-void nnpack_gemm(const enum NNPACK_TRANSPOSE transA,
+enum NNPACK_ALGORITHM {
+    nnpackGemmAuto = 151,
+    nnpackGemm4x12 = 152,
+    nnpackGemm8x8  = 153
+};
+
+void nnpack_gemm(const enum NNPACK_ALGORITHM algorithm,
+                 const enum NNPACK_TRANSPOSE transA,
                  const enum NNPACK_TRANSPOSE transB,
                  const int M,
                  const int N,

@@ -80,7 +80,6 @@
         for (int featureIndex = 0; featureIndex < m_N; featureIndex++) {
             memcpy(dst + featureIndex * m_M, m_Biases + groupIndex * m_M, m_M * sizeof(float));
         }
-        
         [gemmHandler gemmWithTransA:gemmNoTrans
                              transB:gemmNoTrans
                                   M:m_M
@@ -416,14 +415,14 @@ static void computeGlobalAveragePooling(const float *input_pointer,
     for (int channelIndex = 0; channelIndex < m_InputChannel; channelIndex++) {
         const float *src = input + channelIndex * m_InputPerChannel;
         float *dst = output + channelIndex * m_InputPerChannel;
-        vDSP_vsq(src, 1, m_MidShort, 1, m_InputPerChannel);                                           // square of each element
+        vDSP_vsq(src, 1, m_MidShort, 1, m_InputPerChannel);                                             // square of each element
         memset(m_MidLong, 0, m_PaddedPerChannel * sizeof(float));
-        for (int regionIndex = 0; regionIndex < m_LocalSize; regionIndex++) {                        // sum up nearby channels
+        for (int regionIndex = 0; regionIndex < m_LocalSize; regionIndex++) {                           // sum up nearby channels
             vDSP_vadd(m_MidLong + regionIndex, 1, m_MidShort, 1, m_MidLong + regionIndex, 1, m_InputPerChannel);
         }
-        vDSP_vsmsa(m_MidLong + m_Pad, 1, &m_AlphaOverN, &m_Delta, m_MidShort, 1, m_InputPerChannel);      // denom = delta + (alpha / N) * sum
+        vDSP_vsmsa(m_MidLong + m_Pad, 1, &m_AlphaOverN, &m_Delta, m_MidShort, 1, m_InputPerChannel);    // denom = delta + (alpha / N) * sum
         vvpowf(m_MidShort, m_Beta, m_MidShort, &m_InputPerChannel);                                     // denom = denom ^ beta
-        vDSP_vdiv(m_MidShort, 1, src, 1, dst, 1, m_InputPerChannel);                                  // norm_result = origin / denom
+        vDSP_vdiv(m_MidShort, 1, src, 1, dst, 1, m_InputPerChannel);                                    // norm_result = origin / denom
     }
 }
 
@@ -449,10 +448,10 @@ static void computeGlobalAveragePooling(const float *input_pointer,
 - (void)forwardWithInput:(const float *)input
                   output:(float *)output {
     float max;
-    vDSP_maxv(input, 1, &max, m_InputChannel);                 // find maximum
+    vDSP_maxv(input, 1, &max, m_InputChannel);                  // find maximum
     max *= -1;
     vDSP_vsadd(input, 1, &max, m_Mid, 1, m_InputChannel);       // subtract the maximum
-    vvexpf(m_Mid, m_Mid, &m_InputChannel);                       // exponential of each element
+    vvexpf(m_Mid, m_Mid, &m_InputChannel);                      // exponential of each element
     float sum;
     vDSP_sve(m_Mid, 1, &sum, m_InputChannel);                   // sum of exponential of all elements
     vDSP_vsdiv(m_Mid, 1, &sum, output, 1, m_InputChannel);      // divide by the sum of exponential
