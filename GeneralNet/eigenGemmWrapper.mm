@@ -21,7 +21,7 @@
                      B:(const float *)B
                   beta:(const float)beta
                      C:(float *)C {
-    eigen_gemm(transA? eigenTrans : eigenNoTrans, transB? eigenTrans : eigenNoTrans, M, N, K, 1, A, B, 1, C);
+    eigen_gemm(transA? eigenTrans : eigenNoTrans, transB? eigenTrans : eigenNoTrans, M, N, K, alpha, A, B, beta, C);
 }
 
 @end

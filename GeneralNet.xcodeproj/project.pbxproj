@@ -11,10 +11,10 @@
 		BD1FFDC01EEFA95D00C5EB1B /* gemmHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = BD1FFDBF1EEFA95D00C5EB1B /* gemmHandler.m */; };
 		BD2190061EC1C66200DB2E29 /* GeneralNet.m in Sources */ = {isa = PBXBuildFile; fileRef = BD2190051EC1C66200DB2E29 /* GeneralNet.m */; };
 		BD2391841F02097F0015EB41 /* threadpool-pthreads.c in Sources */ = {isa = PBXBuildFile; fileRef = BD2391831F02097F0015EB41 /* threadpool-pthreads.c */; };
-		BD23918A1F020A640015EB41 /* nnpackGemm.c in Sources */ = {isa = PBXBuildFile; fileRef = BD2391861F020A640015EB41 /* nnpackGemm.c */; };
-		BD23918B1F020A640015EB41 /* nnpackAlgorithm.c in Sources */ = {isa = PBXBuildFile; fileRef = BD2391881F020A640015EB41 /* nnpackAlgorithm.c */; };
 		BD2391901F020AAF0015EB41 /* eigenGemm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD23918D1F020AAF0015EB41 /* eigenGemm.cpp */; };
 		BD2391911F020AAF0015EB41 /* eigenGemmWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = BD23918F1F020AAF0015EB41 /* eigenGemmWrapper.mm */; };
+		BD2C31AE1F077513000AE0CB /* nnpackGemm.c in Sources */ = {isa = PBXBuildFile; fileRef = BD2C31AB1F077513000AE0CB /* nnpackGemm.c */; };
+		BD2C31AF1F077513000AE0CB /* nnpackAlgorithm.c in Sources */ = {isa = PBXBuildFile; fileRef = BD2C31AD1F077513000AE0CB /* nnpackAlgorithm.c */; };
 		BD443BF21ED58B800039665A /* cpu_squeezenet.dat in Resources */ = {isa = PBXBuildFile; fileRef = BD443BEF1ED58B7F0039665A /* cpu_squeezenet.dat */; };
 		BD443BF31ED58B800039665A /* cpu_googlenet.dat in Resources */ = {isa = PBXBuildFile; fileRef = BD443BF01ED58B7F0039665A /* cpu_googlenet.dat */; };
 		BD443BF41ED58B800039665A /* cpu_alexnet.dat in Resources */ = {isa = PBXBuildFile; fileRef = BD443BF11ED58B800039665A /* cpu_alexnet.dat */; };
@@ -101,14 +101,14 @@
 		BD2190051EC1C66200DB2E29 /* GeneralNet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneralNet.m; sourceTree = "<group>"; };
 		BD2391831F02097F0015EB41 /* threadpool-pthreads.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "threadpool-pthreads.c"; sourceTree = "<group>"; };
 		BD2391851F0209F50015EB41 /* fxdiv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fxdiv.h; sourceTree = "<group>"; };
-		BD2391861F020A640015EB41 /* nnpackGemm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nnpackGemm.c; sourceTree = "<group>"; };
-		BD2391871F020A640015EB41 /* nnpackGemm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nnpackGemm.h; sourceTree = "<group>"; };
-		BD2391881F020A640015EB41 /* nnpackAlgorithm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nnpackAlgorithm.c; sourceTree = "<group>"; };
-		BD2391891F020A640015EB41 /* nnpackAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nnpackAlgorithm.h; sourceTree = "<group>"; };
 		BD23918C1F020AAF0015EB41 /* eigenGemm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = eigenGemm.hpp; path = ../eigenGemm.hpp; sourceTree = "<group>"; };
 		BD23918D1F020AAF0015EB41 /* eigenGemm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = eigenGemm.cpp; path = ../eigenGemm.cpp; sourceTree = "<group>"; };
 		BD23918E1F020AAF0015EB41 /* eigenGemmWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = eigenGemmWrapper.h; path = ../eigenGemmWrapper.h; sourceTree = "<group>"; };
 		BD23918F1F020AAF0015EB41 /* eigenGemmWrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = eigenGemmWrapper.mm; path = ../eigenGemmWrapper.mm; sourceTree = "<group>"; };
+		BD2C31AA1F077513000AE0CB /* nnpackGemm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nnpackGemm.h; sourceTree = "<group>"; };
+		BD2C31AB1F077513000AE0CB /* nnpackGemm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nnpackGemm.c; sourceTree = "<group>"; };
+		BD2C31AC1F077513000AE0CB /* nnpackAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nnpackAlgorithm.h; sourceTree = "<group>"; };
+		BD2C31AD1F077513000AE0CB /* nnpackAlgorithm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nnpackAlgorithm.c; sourceTree = "<group>"; };
 		BD443BEF1ED58B7F0039665A /* cpu_squeezenet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = cpu_squeezenet.dat; sourceTree = "<group>"; };
 		BD443BF01ED58B7F0039665A /* cpu_googlenet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = cpu_googlenet.dat; sourceTree = "<group>"; };
 		BD443BF11ED58B800039665A /* cpu_alexnet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = cpu_alexnet.dat; sourceTree = "<group>"; };
@@ -1238,10 +1238,10 @@
 		BD978D601EEAD8FB00303E31 /* NNPACK */ = {
 			isa = PBXGroup;
 			children = (
-				BD2391861F020A640015EB41 /* nnpackGemm.c */,
-				BD2391871F020A640015EB41 /* nnpackGemm.h */,
-				BD2391881F020A640015EB41 /* nnpackAlgorithm.c */,
-				BD2391891F020A640015EB41 /* nnpackAlgorithm.h */,
+				BD2C31AA1F077513000AE0CB /* nnpackGemm.h */,
+				BD2C31AB1F077513000AE0CB /* nnpackGemm.c */,
+				BD2C31AC1F077513000AE0CB /* nnpackAlgorithm.h */,
+				BD2C31AD1F077513000AE0CB /* nnpackAlgorithm.c */,
 				BD2391851F0209F50015EB41 /* fxdiv.h */,
 				BD5887E31EE92F8E00BD47E6 /* pthreadpool.h */,
 				BD2391831F02097F0015EB41 /* threadpool-pthreads.c */,
@@ -1435,14 +1435,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				BD87B7851EA600A300DF731C /* Shaders.metal in Sources */,
-				BD23918A1F020A640015EB41 /* nnpackGemm.c in Sources */,
 				BD87B7821EA600A300DF731C /* ViewController.m in Sources */,
 				BD1FFDC01EEFA95D00C5EB1B /* gemmHandler.m in Sources */,
 				BD2391901F020AAF0015EB41 /* eigenGemm.cpp in Sources */,
+				BD2C31AF1F077513000AE0CB /* nnpackAlgorithm.c in Sources */,
 				BD87B7841EA600A300DF731C /* SlimMPSCNN.m in Sources */,
 				BD2190061EC1C66200DB2E29 /* GeneralNet.m in Sources */,
+				BD2C31AE1F077513000AE0CB /* nnpackGemm.c in Sources */,
 				BD2391841F02097F0015EB41 /* threadpool-pthreads.c in Sources */,
-				BD23918B1F020A640015EB41 /* nnpackAlgorithm.c in Sources */,
 				BD87B74D1EA6006C00DF731C /* AppDelegate.m in Sources */,
 				BDCE1C681ED3E928006BBD69 /* CPULayer.m in Sources */,
 				BD87B74A1EA6006C00DF731C /* main.m in Sources */,

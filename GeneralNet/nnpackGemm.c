@@ -107,7 +107,8 @@ void compute_gemm(const struct gemm_context context[1],
                                                         + reduction_block_start :
                                       context->matrix_b + reduction_block_start * output_col + col_block_start
                                                         + col_subblock_start;
-    float *matrix_c       = context->matrix_c + row_block_start * output_col + col_block_start + col_subblock_start;
+    float *matrix_c       =           context->matrix_c + row_block_start * output_col + col_block_start
+                                                        + col_subblock_start;
     
     if (col_subblock_size == col_subblock_max) {
         while (row_block_size >= row_subblock_max) {
@@ -161,35 +162,45 @@ void nnpack_gemm(const enum NNPACK_ALGORITHM algorithm,
     const size_t output_col = N;
     const size_t reduction_size = K;
     
-    size_t algorithm_width;
-    size_t algorithm_height;
+    nnpack_gemm_func_only algorithm_only;
+    nnpack_gemm_func_upto algorithm_upto;
+    
+    size_t algorithm_row;
+    size_t algorithm_col;
     
     switch (algorithm) {
         case nnpackGemmAuto:
             if (transA == nnpackNoTrans && transB == nnpackNoTrans) {
-                algorithm_width  =  4;
-                algorithm_height = 12;
+                algorithm_only = nnp_sgemm_only_4x12;
+                algorithm_upto = nnp_sgemm_upto_4x12;
+                algorithm_row  =  4;
+                algorithm_col  = 12;
             } else {
-                algorithm_width  =  8;
-                algorithm_height =  8;
+                algorithm_only = nnp_sgemm_only_8x8;
+                algorithm_upto = nnp_sgemm_upto_8x8;
+                algorithm_row  =  8;
+                algorithm_col  =  8;
             }
             break;
         case nnpackGemm4x12:
-            algorithm_width  =  4;
-            algorithm_height = 12;
+            algorithm_only = nnp_sgemm_only_4x12;
+            algorithm_upto = nnp_sgemm_upto_4x12;
+            algorithm_row  =  4;
+            algorithm_col  = 12;
             break;
         case nnpackGemm8x8:
-            algorithm_width  =  8;
-            algorithm_height =  8;
-            break;
-        default:
-            algorithm_width  =  8;
-            algorithm_height =  8;
+            algorithm_only = nnp_sgemm_only_8x8;
+            algorithm_upto = nnp_sgemm_upto_8x8;
+            algorithm_row  =  8;
+            algorithm_col  =  8;
             break;
     }
     
-    const size_t row_subblock_max = algorithm_width;
-    const size_t col_subblock_max = algorithm_height;
+    const nnpack_gemm_func_only func_only = algorithm_only;
+    const nnpack_gemm_func_upto func_upto = algorithm_upto;
+    
+    const size_t row_subblock_max = algorithm_row;
+    const size_t col_subblock_max = algorithm_col;
     
     const size_t reduction_block_max = round_down(cache_elements_l1 / (row_subblock_max + col_subblock_max), 2);
     const size_t row_block_max = round_down(cache_elements_l2 / reduction_block_max, row_subblock_max);
@@ -217,30 +228,9 @@ void nnpack_gemm(const enum NNPACK_ALGORITHM algorithm,
                 .col_block_start = col_block_start,
                 .col_subblock_max = col_subblock_max,
                 .row_subblock_max = row_subblock_max,
+                .func_only = func_only,
+                .func_upto = func_upto,
             };
-            switch (algorithm) {
-                case nnpackGemmAuto:
-                    if (transA == nnpackNoTrans && transB == nnpackNoTrans) {
-                        gemm_context.func_only = nnp_sgemm_only_4x12;
-                        gemm_context.func_upto = nnp_sgemm_upto_4x12;
-                    } else {
-                        gemm_context.func_only = nnp_sgemm_only_8x8;
-                        gemm_context.func_upto = nnp_sgemm_upto_8x8;
-                    }
-                    break;
-                case nnpackGemm4x12:
-                    gemm_context.func_only = nnp_sgemm_only_4x12;
-                    gemm_context.func_upto = nnp_sgemm_upto_4x12;
-                    break;
-                case nnpackGemm8x8:
-                    gemm_context.func_only = nnp_sgemm_only_8x8;
-                    gemm_context.func_upto = nnp_sgemm_upto_8x8;
-                    break;
-                default:
-                    gemm_context.func_only = nnp_sgemm_only_8x8;
-                    gemm_context.func_upto = nnp_sgemm_upto_8x8;
-                    break;
-            }
             pthreadpool_compute_2d_tiled(global_context.threadpool,
                                          (pthreadpool_function_2d_tiled_t) compute_gemm,
                                          &gemm_context,

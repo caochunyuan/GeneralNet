@@ -37,41 +37,47 @@ void nnp_sgemm_only_4x12(size_t k,
     float32x4_t vc30 = vdupq_n_f32(0.0f), vc31 = vdupq_n_f32(0.0f), vc32 = vdupq_n_f32(0.0f);
     
     do {
-        const float32x4_t va = trans_a ?
-        vld1q_f32(a) :
-        (float32x4_t) {
-            *(a + reduction_size * 0),
-            *(a + reduction_size * 1),
-            *(a + reduction_size * 2),
-            *(a + reduction_size * 3),
-        };
-        a += trans_a ? output_row : 1;
+        float32x4_t va;
+        if (trans_a) {
+            va = vld1q_f32(a);
+            a += output_row;
+        } else {
+            va = (float32x4_t) {
+                *(a + reduction_size * 0),
+                *(a + reduction_size * 1),
+                *(a + reduction_size * 2),
+                *(a + reduction_size * 3),
+            };
+            a += 1;
+        }
         
-        const float32x4_t vb0 = trans_b ?
-        (float32x4_t) {
-            *(b + reduction_size * 0),
-            *(b + reduction_size * 1),
-            *(b + reduction_size * 2),
-            *(b + reduction_size * 3),
+        float32x4_t vb0, vb1, vb2;
+        if (trans_b) {
+            vb0 = (float32x4_t) {
+                *(b + reduction_size * 0),
+                *(b + reduction_size * 1),
+                *(b + reduction_size * 2),
+                *(b + reduction_size * 3),
+            };
+            vb1 = (float32x4_t) {
+                *(b + reduction_size * 4),
+                *(b + reduction_size * 5),
+                *(b + reduction_size * 6),
+                *(b + reduction_size * 7),
+            };
+            vb2 = (float32x4_t) {
+                *(b + reduction_size * 8),
+                *(b + reduction_size * 9),
+                *(b + reduction_size * 10),
+                *(b + reduction_size * 11),
+            };
+            b += 1;
+        } else {
+            vb0 = vld1q_f32(b + 0);
+            vb1 = vld1q_f32(b + 4);
+            vb2 = vld1q_f32(b + 8);
+            b += output_col;
         }
-        : vld1q_f32(b + 0);
-        const float32x4_t vb1 = trans_b ?
-        (float32x4_t) {
-            *(b + reduction_size * 4),
-            *(b + reduction_size * 5),
-            *(b + reduction_size * 6),
-            *(b + reduction_size * 7),
-        }
-        : vld1q_f32(b + 4);
-        const float32x4_t vb2 = trans_b ?
-        (float32x4_t) {
-            *(b + reduction_size * 8),
-            *(b + reduction_size * 9),
-            *(b + reduction_size * 10),
-            *(b + reduction_size * 11),
-        }
-        : vld1q_f32(b + 8);
-        b += trans_b ? 1 : output_col;
         
 #if defined(__aarch64__)
         vc00 = vfmaq_lane_f32(vc00, vb0, vget_low_f32(va),  0);
@@ -281,39 +287,42 @@ void nnp_sgemm_upto_4x12(size_t mr,
     float32x4_t vc30 = vdupq_n_f32(0.0f), vc31 = vdupq_n_f32(0.0f), vc32 = vdupq_n_f32(0.0f);
     
     do {
-        float32x4_t vb0, vb1, vb2;
+        float32x4_t vb0 = vdupq_n_f32(0.0f), vb1 = vdupq_n_f32(0.0f), vb2 = vdupq_n_f32(0.0f);
         
-        vb0 = trans_b ?
-        (float32x4_t) {
-                     *(b + reduction_size * 0),
-            nr > 1 ? *(b + reduction_size * 1) : 0.0f,
-            nr > 2 ? *(b + reduction_size * 2) : 0.0f,
-            nr > 3 ? *(b + reduction_size * 3) : 0.0f,
-        }
-        : vld1q_f32(b + 0);
-        if (nr > 4) {
-            vb1 =  trans_b ?
-            (float32x4_t) {
-                         *(b + reduction_size * 4),
-                nr > 5 ? *(b + reduction_size * 5) : 0.0f,
-                nr > 6 ? *(b + reduction_size * 6) : 0.0f,
-                nr > 7 ? *(b + reduction_size * 7) : 0.0f,
-            }
-            : vld1q_f32(b + 4);
-            vb2 = nr > 8 ? trans_b ?
-                (float32x4_t) {
-                              *(b + reduction_size * 8),
-                    nr > 9 ?  *(b + reduction_size * 9) : 0.0f,
-                    nr > 10 ? *(b + reduction_size * 10) : 0.0f,
-                    nr > 11 ? *(b + reduction_size * 11) : 0.0f,
+        if (trans_b) {
+            vb0 = (float32x4_t) {
+                         *(b + reduction_size * 0),
+                nr > 1 ? *(b + reduction_size * 1) : 0.0f,
+                nr > 2 ? *(b + reduction_size * 2) : 0.0f,
+                nr > 3 ? *(b + reduction_size * 3) : 0.0f,
+            };
+            if (nr > 4) {
+                vb1 = (float32x4_t) {
+                             *(b + reduction_size * 4),
+                    nr > 5 ? *(b + reduction_size * 5) : 0.0f,
+                    nr > 6 ? *(b + reduction_size * 6) : 0.0f,
+                    nr > 7 ? *(b + reduction_size * 7) : 0.0f,
+                };
+                if (nr > 8) {
+                    vb2 = (float32x4_t) {
+                                  *(b + reduction_size * 8),
+                        nr > 9  ? *(b + reduction_size * 9)  : 0.0f,
+                        nr > 10 ? *(b + reduction_size * 10) : 0.0f,
+                        nr > 11 ? *(b + reduction_size * 11) : 0.0f,
+                    };
                 }
-                : vld1q_f32(b + 8)
-            : vdupq_n_f32(0.0f);
+            }
+            b += 1;
         } else {
-            vb1 = vdupq_n_f32(0.0f);
-            vb2 = vdupq_n_f32(0.0f);
+            vb0 = vld1q_f32(b + 0);
+            if (nr > 4) {
+                vb1 = vld1q_f32(b + 4);
+                if (nr > 8) {
+                    vb2 = vld1q_f32(b + 8);
+                }
+            }
+            b += output_col;
         }
-        b += trans_b ? 1 : output_col;
         
         const float32x4_t va0 = trans_a ? vld1q_dup_f32(a + 0) : vld1q_dup_f32(a + reduction_size * 0);
         vc00 = vmuladdq_f32(vc00, va0, vb0);
@@ -638,41 +647,47 @@ void nnp_sgemm_only_8x8(size_t k,
     float32x4_t vc70 = vdupq_n_f32(0.0f), vc71 = vdupq_n_f32(0.0f);
     
     do {
-        const float32x4_t va0 = trans_a ?
-        vld1q_f32(a + 0) :
-        (float32x4_t) {
-            *(a + reduction_size * 0),
-            *(a + reduction_size * 1),
-            *(a + reduction_size * 2),
-            *(a + reduction_size * 3),
-        };
-        const float32x4_t va1 = trans_a ?
-        vld1q_f32(a + 4) :
-        (float32x4_t) {
-            *(a + reduction_size * 4),
-            *(a + reduction_size * 5),
-            *(a + reduction_size * 6),
-            *(a + reduction_size * 7),
-        };
-        a += trans_a ? output_row : 1;
+        float32x4_t va0, va1;
+        if (trans_a) {
+            va0 = vld1q_f32(a + 0);
+            va1 = vld1q_f32(a + 4);
+            a += output_row;
+        } else {
+            va0 = (float32x4_t) {
+                *(a + reduction_size * 0),
+                *(a + reduction_size * 1),
+                *(a + reduction_size * 2),
+                *(a + reduction_size * 3),
+            };
+            va1 = (float32x4_t) {
+                *(a + reduction_size * 4),
+                *(a + reduction_size * 5),
+                *(a + reduction_size * 6),
+                *(a + reduction_size * 7),
+            };
+            a += 1;
+        }
         
-        const float32x4_t vb0 = trans_b ?
-        (float32x4_t) {
-            *(b + reduction_size * 0),
-            *(b + reduction_size * 1),
-            *(b + reduction_size * 2),
-            *(b + reduction_size * 3),
+        float32x4_t vb0, vb1;
+        if (trans_b) {
+            vb0 = (float32x4_t) {
+                *(b + reduction_size * 0),
+                *(b + reduction_size * 1),
+                *(b + reduction_size * 2),
+                *(b + reduction_size * 3),
+            };
+            vb1 = (float32x4_t) {
+                *(b + reduction_size * 4),
+                *(b + reduction_size * 5),
+                *(b + reduction_size * 6),
+                *(b + reduction_size * 7),
+            };
+            b += 1;
+        } else {
+            vb0 = vld1q_f32(b + 0);
+            vb1 = vld1q_f32(b + 4);
+            b += output_col;
         }
-        : vld1q_f32(b + 0);
-        const float32x4_t vb1 = trans_b ?
-        (float32x4_t) {
-            *(b + reduction_size * 4),
-            *(b + reduction_size * 5),
-            *(b + reduction_size * 6),
-            *(b + reduction_size * 7),
-        }
-        : vld1q_f32(b + 4);
-        b += trans_b ? 1 : output_col;
         
 #if defined(__aarch64__)
         vc00 = vfmaq_lane_f32(vc00, vb0, vget_low_f32(va0),  0);
@@ -958,29 +973,31 @@ void nnp_sgemm_upto_8x8(size_t mr,
     float32x4_t vc70 = vdupq_n_f32(0.0f), vc71 = vdupq_n_f32(0.0f);
     
     do {
-        float32x4_t vb0, vb1;
+        float32x4_t vb0 = vdupq_n_f32(0.0f), vb1 = vdupq_n_f32(0.0f);
         
-        vb0 = trans_b ?
-        (float32x4_t) {
-                     *(b + reduction_size * 0),
-            nr > 1 ? *(b + reduction_size * 1) : 0.0f,
-            nr > 2 ? *(b + reduction_size * 2) : 0.0f,
-            nr > 3 ? *(b + reduction_size * 3) : 0.0f,
-        }
-        : vld1q_f32(b + 0);
-        if (nr > 4) {
-            vb1 =  trans_b ?
-            (float32x4_t) {
-                         *(b + reduction_size * 4),
-                nr > 5 ? *(b + reduction_size * 5) : 0.0f,
-                nr > 6 ? *(b + reduction_size * 6) : 0.0f,
-                nr > 7 ? *(b + reduction_size * 7) : 0.0f,
+        if (trans_b) {
+            vb0 = (float32x4_t) {
+                         *(b + reduction_size * 0),
+                nr > 1 ? *(b + reduction_size * 1) : 0.0f,
+                nr > 2 ? *(b + reduction_size * 2) : 0.0f,
+                nr > 3 ? *(b + reduction_size * 3) : 0.0f,
+            };
+            if (nr > 4) {
+                vb1 = (float32x4_t) {
+                             *(b + reduction_size * 4),
+                    nr > 5 ? *(b + reduction_size * 5) : 0.0f,
+                    nr > 6 ? *(b + reduction_size * 6) : 0.0f,
+                    nr > 7 ? *(b + reduction_size * 7) : 0.0f,
+                };
             }
-            : vld1q_f32(b + 4);
+            b += 1;
         } else {
-            vb1 = vdupq_n_f32(0.0f);
+            vb0 = vld1q_f32(b + 0);
+            if (nr > 4) {
+                vb1 = vld1q_f32(b + 4);
+            }
+            b += output_col;
         }
-        b += trans_b ? 1 : output_col;
         
         const float32x4_t va0 = trans_a ? vld1q_dup_f32(a + 0) : vld1q_dup_f32(a + reduction_size * 0);
         vc00 = vmuladdq_f32(vc00, va0, vb0);
