@@ -291,22 +291,22 @@ void nnp_sgemm_upto_4x12(size_t mr,
         
         if (trans_b) {
             vb0 = (float32x4_t) {
-                         *(b + reduction_size * 0),
+                *(b + reduction_size * 0),
                 nr > 1 ? *(b + reduction_size * 1) : 0.0f,
                 nr > 2 ? *(b + reduction_size * 2) : 0.0f,
                 nr > 3 ? *(b + reduction_size * 3) : 0.0f,
             };
             if (nr > 4) {
                 vb1 = (float32x4_t) {
-                             *(b + reduction_size * 4),
+                    *(b + reduction_size * 4),
                     nr > 5 ? *(b + reduction_size * 5) : 0.0f,
                     nr > 6 ? *(b + reduction_size * 6) : 0.0f,
                     nr > 7 ? *(b + reduction_size * 7) : 0.0f,
                 };
                 if (nr > 8) {
                     vb2 = (float32x4_t) {
-                                  *(b + reduction_size * 8),
-                        nr > 9  ? *(b + reduction_size * 9)  : 0.0f,
+                        *(b + reduction_size *  8),
+                        nr > 9  ? *(b + reduction_size *  9) : 0.0f,
                         nr > 10 ? *(b + reduction_size * 10) : 0.0f,
                         nr > 11 ? *(b + reduction_size * 11) : 0.0f,
                     };
@@ -314,11 +314,26 @@ void nnp_sgemm_upto_4x12(size_t mr,
             }
             b += 1;
         } else {
-            vb0 = vld1q_f32(b + 0);
+            vb0 = (float32x4_t) {
+                *(b + 0),
+                nr > 1 ? *(b + 1) : 0.0f,
+                nr > 2 ? *(b + 2) : 0.0f,
+                nr > 3 ? *(b + 3) : 0.0f,
+            };
             if (nr > 4) {
-                vb1 = vld1q_f32(b + 4);
+                vb1 = (float32x4_t) {
+                    *(b + 4),
+                    nr > 5 ? *(b + 5) : 0.0f,
+                    nr > 6 ? *(b + 6) : 0.0f,
+                    nr > 7 ? *(b + 7) : 0.0f,
+                };
                 if (nr > 8) {
-                    vb2 = vld1q_f32(b + 8);
+                    vb2 = (float32x4_t) {
+                        *(b +  8),
+                        nr > 9  ? *(b +  9) : 0.0f,
+                        nr > 10 ? *(b + 10) : 0.0f,
+                        nr > 11 ? *(b + 11) : 0.0f,
+                    };
                 }
             }
             b += output_col;
@@ -977,14 +992,14 @@ void nnp_sgemm_upto_8x8(size_t mr,
         
         if (trans_b) {
             vb0 = (float32x4_t) {
-                         *(b + reduction_size * 0),
+                *(b + reduction_size * 0),
                 nr > 1 ? *(b + reduction_size * 1) : 0.0f,
                 nr > 2 ? *(b + reduction_size * 2) : 0.0f,
                 nr > 3 ? *(b + reduction_size * 3) : 0.0f,
             };
             if (nr > 4) {
                 vb1 = (float32x4_t) {
-                             *(b + reduction_size * 4),
+                    *(b + reduction_size * 4),
                     nr > 5 ? *(b + reduction_size * 5) : 0.0f,
                     nr > 6 ? *(b + reduction_size * 6) : 0.0f,
                     nr > 7 ? *(b + reduction_size * 7) : 0.0f,
@@ -992,9 +1007,19 @@ void nnp_sgemm_upto_8x8(size_t mr,
             }
             b += 1;
         } else {
-            vb0 = vld1q_f32(b + 0);
+            vb0 = (float32x4_t) {
+                *(b + 0),
+                nr > 1 ? *(b + 1) : 0.0f,
+                nr > 2 ? *(b + 2) : 0.0f,
+                nr > 3 ? *(b + 3) : 0.0f,
+            };
             if (nr > 4) {
-                vb1 = vld1q_f32(b + 4);
+                vb1 = (float32x4_t) {
+                    *(b + 4),
+                    nr > 5 ? *(b + 5) : 0.0f,
+                    nr > 6 ? *(b + 6) : 0.0f,
+                    nr > 7 ? *(b + 7) : 0.0f,
+                };
             }
             b += output_col;
         }
