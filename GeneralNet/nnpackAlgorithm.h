@@ -9,7 +9,6 @@
 #ifndef nnpackAlgorithm_h
 #define nnpackAlgorithm_h
 
-#include <stdio.h>
 #include <stdbool.h>
 
 void nnp_sgemm_only_4x12(size_t k,
