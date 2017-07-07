@@ -1,6 +1,6 @@
 //
 //  nnpackAlgorithm.h
-//  OperationCluster
+//  GeneralNet
 //
 //  Created by Lun on 2017/6/26.
 //  Copyright © 2017年 Lun. All rights reserved.

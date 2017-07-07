@@ -14,7 +14,6 @@
 		BD2391901F020AAF0015EB41 /* eigenGemm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD23918D1F020AAF0015EB41 /* eigenGemm.cpp */; };
 		BD2391911F020AAF0015EB41 /* eigenGemmWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = BD23918F1F020AAF0015EB41 /* eigenGemmWrapper.mm */; };
 		BD2C31AE1F077513000AE0CB /* nnpackGemm.c in Sources */ = {isa = PBXBuildFile; fileRef = BD2C31AB1F077513000AE0CB /* nnpackGemm.c */; };
-		BD2C31AF1F077513000AE0CB /* nnpackAlgorithm.c in Sources */ = {isa = PBXBuildFile; fileRef = BD2C31AD1F077513000AE0CB /* nnpackAlgorithm.c */; };
 		BD443BF21ED58B800039665A /* cpu_squeezenet.dat in Resources */ = {isa = PBXBuildFile; fileRef = BD443BEF1ED58B7F0039665A /* cpu_squeezenet.dat */; };
 		BD443BF31ED58B800039665A /* cpu_googlenet.dat in Resources */ = {isa = PBXBuildFile; fileRef = BD443BF01ED58B7F0039665A /* cpu_googlenet.dat */; };
 		BD443BF41ED58B800039665A /* cpu_alexnet.dat in Resources */ = {isa = PBXBuildFile; fileRef = BD443BF11ED58B800039665A /* cpu_alexnet.dat */; };
@@ -71,6 +70,7 @@
 		BD87B7C41EA6013000DF731C /* final5.jpg in Resources */ = {isa = PBXBuildFile; fileRef = BD87B7BC1EA6013000DF731C /* final5.jpg */; };
 		BD87B7C51EA6013000DF731C /* final6.jpg in Resources */ = {isa = PBXBuildFile; fileRef = BD87B7BD1EA6013000DF731C /* final6.jpg */; };
 		BD9593901EAAE8C80095F009 /* final0.jpg in Resources */ = {isa = PBXBuildFile; fileRef = BD95938F1EAAE8C80095F009 /* final0.jpg */; };
+		BDA02F461F0FEA5E00854D6D /* nnpackAlgorithm.c in Sources */ = {isa = PBXBuildFile; fileRef = BDA02F441F0FEA5E00854D6D /* nnpackAlgorithm.c */; };
 		BDB3DE081ECF04FF00F9B865 /* final9.jpg in Resources */ = {isa = PBXBuildFile; fileRef = BDB3DE071ECF04FF00F9B865 /* final9.jpg */; };
 		BDCE1C681ED3E928006BBD69 /* CPULayer.m in Sources */ = {isa = PBXBuildFile; fileRef = BDCE1C671ED3E928006BBD69 /* CPULayer.m */; };
 		BDF651A91EB06783009E35A6 /* metal_googlenet.dat in Resources */ = {isa = PBXBuildFile; fileRef = BDF651A81EB06783009E35A6 /* metal_googlenet.dat */; };
@@ -107,8 +107,6 @@
 		BD23918F1F020AAF0015EB41 /* eigenGemmWrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = eigenGemmWrapper.mm; path = ../eigenGemmWrapper.mm; sourceTree = "<group>"; };
 		BD2C31AA1F077513000AE0CB /* nnpackGemm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nnpackGemm.h; sourceTree = "<group>"; };
 		BD2C31AB1F077513000AE0CB /* nnpackGemm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nnpackGemm.c; sourceTree = "<group>"; };
-		BD2C31AC1F077513000AE0CB /* nnpackAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nnpackAlgorithm.h; sourceTree = "<group>"; };
-		BD2C31AD1F077513000AE0CB /* nnpackAlgorithm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nnpackAlgorithm.c; sourceTree = "<group>"; };
 		BD443BEF1ED58B7F0039665A /* cpu_squeezenet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = cpu_squeezenet.dat; sourceTree = "<group>"; };
 		BD443BF01ED58B7F0039665A /* cpu_googlenet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = cpu_googlenet.dat; sourceTree = "<group>"; };
 		BD443BF11ED58B800039665A /* cpu_alexnet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = cpu_alexnet.dat; sourceTree = "<group>"; };
@@ -447,6 +445,8 @@
 		BD87B7BC1EA6013000DF731C /* final5.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = final5.jpg; sourceTree = "<group>"; };
 		BD87B7BD1EA6013000DF731C /* final6.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = final6.jpg; sourceTree = "<group>"; };
 		BD95938F1EAAE8C80095F009 /* final0.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = final0.jpg; sourceTree = "<group>"; };
+		BDA02F441F0FEA5E00854D6D /* nnpackAlgorithm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nnpackAlgorithm.c; sourceTree = "<group>"; };
+		BDA02F451F0FEA5E00854D6D /* nnpackAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nnpackAlgorithm.h; sourceTree = "<group>"; };
 		BDB3DE071ECF04FF00F9B865 /* final9.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = final9.jpg; sourceTree = "<group>"; };
 		BDCE1C661ED3E928006BBD69 /* CPULayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPULayer.h; sourceTree = "<group>"; };
 		BDCE1C671ED3E928006BBD69 /* CPULayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CPULayer.m; sourceTree = "<group>"; };
@@ -1240,8 +1240,8 @@
 			children = (
 				BD2C31AA1F077513000AE0CB /* nnpackGemm.h */,
 				BD2C31AB1F077513000AE0CB /* nnpackGemm.c */,
-				BD2C31AC1F077513000AE0CB /* nnpackAlgorithm.h */,
-				BD2C31AD1F077513000AE0CB /* nnpackAlgorithm.c */,
+				BDA02F451F0FEA5E00854D6D /* nnpackAlgorithm.h */,
+				BDA02F441F0FEA5E00854D6D /* nnpackAlgorithm.c */,
 				BD2391851F0209F50015EB41 /* fxdiv.h */,
 				BD5887E31EE92F8E00BD47E6 /* pthreadpool.h */,
 				BD2391831F02097F0015EB41 /* threadpool-pthreads.c */,
@@ -1438,7 +1438,7 @@
 				BD87B7821EA600A300DF731C /* ViewController.m in Sources */,
 				BD1FFDC01EEFA95D00C5EB1B /* gemmHandler.m in Sources */,
 				BD2391901F020AAF0015EB41 /* eigenGemm.cpp in Sources */,
-				BD2C31AF1F077513000AE0CB /* nnpackAlgorithm.c in Sources */,
+				BDA02F461F0FEA5E00854D6D /* nnpackAlgorithm.c in Sources */,
 				BD87B7841EA600A300DF731C /* SlimMPSCNN.m in Sources */,
 				BD2190061EC1C66200DB2E29 /* GeneralNet.m in Sources */,
 				BD2C31AE1F077513000AE0CB /* nnpackGemm.c in Sources */,

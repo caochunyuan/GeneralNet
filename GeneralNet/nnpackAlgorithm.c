@@ -1,6 +1,6 @@
 //
 //  nnpackAlgorithm.c
-//  OperationCluster
+//  GeneralNet
 //
 //  Created by Lun on 2017/6/26.
 //  Copyright © 2017年 Lun. All rights reserved.
@@ -16,6 +16,10 @@ static inline float32x4_t vmuladdq_f32(float32x4_t c, float32x4_t a, float32x4_t
 #else
     return vmlaq_f32(c, a, b);
 #endif
+}
+
+static inline float32x4_t vld1q_f32_aligned(const float* address) {
+    return vld1q_f32((const float*) __builtin_assume_aligned(address, sizeof(float32x4_t)));
 }
 
 void nnp_sgemm_only_4x12(size_t k,
@@ -39,7 +43,7 @@ void nnp_sgemm_only_4x12(size_t k,
     do {
         float32x4_t va;
         if (trans_a) {
-            va = vld1q_f32(a);
+            va = vld1q_f32_aligned(a);
             a += output_row;
         } else {
             va = (float32x4_t) {
@@ -73,9 +77,9 @@ void nnp_sgemm_only_4x12(size_t k,
             };
             b += 1;
         } else {
-            vb0 = vld1q_f32(b + 0);
-            vb1 = vld1q_f32(b + 4);
-            vb2 = vld1q_f32(b + 8);
+            vb0 = vld1q_f32_aligned(b + 0);
+            vb1 = vld1q_f32_aligned(b + 4);
+            vb2 = vld1q_f32_aligned(b + 8);
             b += output_col;
         }
         
@@ -109,160 +113,42 @@ void nnp_sgemm_only_4x12(size_t k,
     } while (--k);
     
     // c = alpha * a * b + beta * c
-    if (alpha == 1.0f) {
-        // alpha == 1 (nothing to do with alpha)
-        if (update) {
-            // update (nothing to do with beta)
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc00));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc01));
-            vst1q_f32(c + 8, vaddq_f32(vld1q_f32(c + 8), vc02));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc10));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc11));
-            vst1q_f32(c + 8, vaddq_f32(vld1q_f32(c + 8), vc12));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc20));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc21));
-            vst1q_f32(c + 8, vaddq_f32(vld1q_f32(c + 8), vc22));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc30));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc31));
-            vst1q_f32(c + 8, vaddq_f32(vld1q_f32(c + 8), vc32));
-        } else {
-            // !update (should consider beta)
-            if (beta == 0.0f) {
-                // beta == 0 (nothing to do with beta)
-                vst1q_f32(c + 0, vc00);
-                vst1q_f32(c + 4, vc01);
-                vst1q_f32(c + 8, vc02);
-                c += output_col;
-                vst1q_f32(c + 0, vc10);
-                vst1q_f32(c + 4, vc11);
-                vst1q_f32(c + 8, vc12);
-                c += output_col;
-                vst1q_f32(c + 0, vc20);
-                vst1q_f32(c + 4, vc21);
-                vst1q_f32(c + 8, vc22);
-                c += output_col;
-                vst1q_f32(c + 0, vc30);
-                vst1q_f32(c + 4, vc31);
-                vst1q_f32(c + 8, vc32);
-            } else if (beta == 1.0f) {
-                // beta == 1 (do not need to multiply with beta)
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc00));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc01));
-                vst1q_f32(c + 8, vaddq_f32(vld1q_f32(c + 8), vc02));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc10));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc11));
-                vst1q_f32(c + 8, vaddq_f32(vld1q_f32(c + 8), vc12));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc20));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc21));
-                vst1q_f32(c + 8, vaddq_f32(vld1q_f32(c + 8), vc22));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc30));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc31));
-                vst1q_f32(c + 8, vaddq_f32(vld1q_f32(c + 8), vc32));
-            } else {
-                // beta != 0 (should consider beta)
-                float32x4_t beta_t = vdupq_n_f32(beta);
-                
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vc00));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vc01));
-                vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32(c + 8), beta_t), vc02));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vc10));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vc11));
-                vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32(c + 8), beta_t), vc12));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vc20));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vc21));
-                vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32(c + 8), beta_t), vc22));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vc30));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vc31));
-                vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32(c + 8), beta_t), vc32));
-            }
-        }
+    float32x4_t alpha_t = vdupq_n_f32(alpha);
+    
+    if (update) {
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc00, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc01, alpha_t)));
+        vst1q_f32(c + 8, vaddq_f32(vld1q_f32_aligned(c + 8), vmulq_f32(vc02, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc10, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc11, alpha_t)));
+        vst1q_f32(c + 8, vaddq_f32(vld1q_f32_aligned(c + 8), vmulq_f32(vc12, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc20, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc21, alpha_t)));
+        vst1q_f32(c + 8, vaddq_f32(vld1q_f32_aligned(c + 8), vmulq_f32(vc22, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc30, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc31, alpha_t)));
+        vst1q_f32(c + 8, vaddq_f32(vld1q_f32_aligned(c + 8), vmulq_f32(vc32, alpha_t)));
     } else {
-        // alpha != 1 (should consider alpha)
-        float32x4_t alpha_t = vdupq_n_f32(alpha);
+        float32x4_t beta_t = vdupq_n_f32(beta);
         
-        if (update) {
-            // update (nothing to do with beta)
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc00, alpha_t)));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc01, alpha_t)));
-            vst1q_f32(c + 8, vaddq_f32(vld1q_f32(c + 8), vmulq_f32(vc02, alpha_t)));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc10, alpha_t)));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc11, alpha_t)));
-            vst1q_f32(c + 8, vaddq_f32(vld1q_f32(c + 8), vmulq_f32(vc12, alpha_t)));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc20, alpha_t)));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc21, alpha_t)));
-            vst1q_f32(c + 8, vaddq_f32(vld1q_f32(c + 8), vmulq_f32(vc22, alpha_t)));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc30, alpha_t)));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc31, alpha_t)));
-            vst1q_f32(c + 8, vaddq_f32(vld1q_f32(c + 8), vmulq_f32(vc32, alpha_t)));
-        } else {
-            // !update (should consider beta)
-            if (beta == 0.0f) {
-                // beta == 0 (nothing to do with beta)
-                vst1q_f32(c + 0, vmulq_f32(vc00, alpha_t));
-                vst1q_f32(c + 4, vmulq_f32(vc01, alpha_t));
-                vst1q_f32(c + 8, vmulq_f32(vc02, alpha_t));
-                c += output_col;
-                vst1q_f32(c + 0, vmulq_f32(vc10, alpha_t));
-                vst1q_f32(c + 4, vmulq_f32(vc11, alpha_t));
-                vst1q_f32(c + 8, vmulq_f32(vc12, alpha_t));
-                c += output_col;
-                vst1q_f32(c + 0, vmulq_f32(vc20, alpha_t));
-                vst1q_f32(c + 4, vmulq_f32(vc21, alpha_t));
-                vst1q_f32(c + 8, vmulq_f32(vc22, alpha_t));
-                c += output_col;
-                vst1q_f32(c + 0, vmulq_f32(vc30, alpha_t));
-                vst1q_f32(c + 4, vmulq_f32(vc31, alpha_t));
-                vst1q_f32(c + 8, vmulq_f32(vc32, alpha_t));
-            } else if (beta == 1.0f) {
-                // beta == 1 (do not need to multiply with beta)
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc00, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc01, alpha_t)));
-                vst1q_f32(c + 8, vaddq_f32(vld1q_f32(c + 8), vmulq_f32(vc02, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc10, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc11, alpha_t)));
-                vst1q_f32(c + 8, vaddq_f32(vld1q_f32(c + 8), vmulq_f32(vc12, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc20, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc21, alpha_t)));
-                vst1q_f32(c + 8, vaddq_f32(vld1q_f32(c + 8), vmulq_f32(vc22, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc30, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc31, alpha_t)));
-                vst1q_f32(c + 8, vaddq_f32(vld1q_f32(c + 8), vmulq_f32(vc32, alpha_t)));
-            } else {
-                // beta != 0 (should consider beta)
-                float32x4_t beta_t = vdupq_n_f32(beta);
-                
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vmulq_f32(vc00, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vmulq_f32(vc01, alpha_t)));
-                vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32(c + 8), beta_t), vmulq_f32(vc02, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vmulq_f32(vc10, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vmulq_f32(vc11, alpha_t)));
-                vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32(c + 8), beta_t), vmulq_f32(vc12, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vmulq_f32(vc20, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vmulq_f32(vc21, alpha_t)));
-                vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32(c + 8), beta_t), vmulq_f32(vc22, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vmulq_f32(vc30, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vmulq_f32(vc31, alpha_t)));
-                vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32(c + 8), beta_t), vmulq_f32(vc32, alpha_t)));
-            }
-        }
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc00, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc01, alpha_t)));
+        vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 8), beta_t), vmulq_f32(vc02, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc10, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc11, alpha_t)));
+        vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 8), beta_t), vmulq_f32(vc12, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc20, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc21, alpha_t)));
+        vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 8), beta_t), vmulq_f32(vc22, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc30, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc31, alpha_t)));
+        vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 8), beta_t), vmulq_f32(vc32, alpha_t)));
     }
 }
 
@@ -290,50 +176,194 @@ void nnp_sgemm_upto_4x12(size_t mr,
         float32x4_t vb0 = vdupq_n_f32(0.0f), vb1 = vdupq_n_f32(0.0f), vb2 = vdupq_n_f32(0.0f);
         
         if (trans_b) {
-            vb0 = (float32x4_t) {
-                         *(b + reduction_size * 0),
-                nr > 1 ? *(b + reduction_size * 1) : 0.0f,
-                nr > 2 ? *(b + reduction_size * 2) : 0.0f,
-                nr > 3 ? *(b + reduction_size * 3) : 0.0f,
-            };
-            if (nr > 4) {
-                vb1 = (float32x4_t) {
-                             *(b + reduction_size * 4),
-                    nr > 5 ? *(b + reduction_size * 5) : 0.0f,
-                    nr > 6 ? *(b + reduction_size * 6) : 0.0f,
-                    nr > 7 ? *(b + reduction_size * 7) : 0.0f,
+            if (nr >= 4) {
+                vb0 = (float32x4_t) {
+                    *(b + reduction_size * 0),
+                    *(b + reduction_size * 1),
+                    *(b + reduction_size * 2),
+                    *(b + reduction_size * 3)
                 };
-                if (nr > 8) {
-                    vb2 = (float32x4_t) {
-                                  *(b + reduction_size *  8),
-                        nr > 9  ? *(b + reduction_size *  9) : 0.0f,
-                        nr > 10 ? *(b + reduction_size * 10) : 0.0f,
-                        nr > 11 ? *(b + reduction_size * 11) : 0.0f,
-                    };
+                if (nr != 4) {
+                    if (nr >= 8) {
+                        vb1 = (float32x4_t) {
+                            *(b + reduction_size * 4),
+                            *(b + reduction_size * 5),
+                            *(b + reduction_size * 6),
+                            *(b + reduction_size * 7)
+                        };
+                        if (nr != 8) {
+                            if (nr == 12) {
+                                vb2 = (float32x4_t) {
+                                    *(b + reduction_size * 8),
+                                    *(b + reduction_size * 9),
+                                    *(b + reduction_size * 10),
+                                    *(b + reduction_size * 11)
+                                };
+                            } else {
+                                switch (nr) {
+                                    case 9:
+                                        vb2 = (float32x4_t) {
+                                            *(b + reduction_size * 8),
+                                            0.0f, 0.0f, 0.0f
+                                        };
+                                        break;
+                                    case 10:
+                                        vb2 = (float32x4_t) {
+                                            *(b + reduction_size * 8),
+                                            *(b + reduction_size * 9),
+                                            0.0f, 0.0f
+                                        };
+                                        break;
+                                    case 11:
+                                        vb2 = (float32x4_t) {
+                                            *(b + reduction_size * 8),
+                                            *(b + reduction_size * 9),
+                                            *(b + reduction_size * 10),
+                                            0.0f
+                                        };
+                                        break;
+                                }
+                            }
+                        }
+                    } else {
+                        switch (nr) {
+                            case 5:
+                                vb1 = (float32x4_t) {
+                                    *(b + reduction_size * 4),
+                                    0.0f, 0.0f, 0.0f
+                                };
+                                break;
+                            case 6:
+                                vb1 = (float32x4_t) {
+                                    *(b + reduction_size * 4),
+                                    *(b + reduction_size * 5),
+                                    0.0f, 0.0f
+                                };
+                                break;
+                            case 7:
+                                vb1 = (float32x4_t) {
+                                    *(b + reduction_size * 4),
+                                    *(b + reduction_size * 5),
+                                    *(b + reduction_size * 6),
+                                    0.0f
+                                };
+                                break;
+                        }
+                    }
+                }
+            } else {
+                switch (nr) {
+                    case 1:
+                        vb0 = (float32x4_t) {
+                            *(b + reduction_size * 0),
+                            0.0f, 0.0f, 0.0f
+                        };
+                        break;
+                    case 2:
+                        vb0 = (float32x4_t) {
+                            *(b + reduction_size * 0),
+                            *(b + reduction_size * 1),
+                            0.0f, 0.0f
+                        };
+                        break;
+                    case 3:
+                        vb0 = (float32x4_t) {
+                            *(b + reduction_size * 0),
+                            *(b + reduction_size * 1),
+                            *(b + reduction_size * 2),
+                            0.0f
+                        };
+                        break;
                 }
             }
             b += 1;
         } else {
-            vb0 = (float32x4_t) {
-                         *(b + 0),
-                nr > 1 ? *(b + 1) : 0.0f,
-                nr > 2 ? *(b + 2) : 0.0f,
-                nr > 3 ? *(b + 3) : 0.0f,
-            };
-            if (nr > 4) {
-                vb1 = (float32x4_t) {
-                             *(b + 4),
-                    nr > 5 ? *(b + 5) : 0.0f,
-                    nr > 6 ? *(b + 6) : 0.0f,
-                    nr > 7 ? *(b + 7) : 0.0f,
-                };
-                if (nr > 8) {
-                    vb2 = (float32x4_t) {
-                                  *(b +  8),
-                        nr > 9  ? *(b +  9) : 0.0f,
-                        nr > 10 ? *(b + 10) : 0.0f,
-                        nr > 11 ? *(b + 11) : 0.0f,
-                    };
+            if (nr >= 4) {
+                vb0 = vld1q_f32_aligned(b + 0);
+                
+                if (nr != 4) {
+                    if (nr >= 8) {
+                        vb1 = vld1q_f32_aligned(b + 4);
+                        
+                        if (nr != 8) {
+                            if (nr == 12) {
+                                vb2 = vld1q_f32_aligned(b + 8);
+                                
+                            } else {
+                                switch (nr) {
+                                    case 9:
+                                        vb2 = (float32x4_t) {
+                                            *(b + 8),
+                                            0.0f, 0.0f, 0.0f
+                                        };
+                                        break;
+                                    case 10:
+                                        vb2 = (float32x4_t) {
+                                            *(b + 8),
+                                            *(b + 9),
+                                            0.0f, 0.0f
+                                        };
+                                        break;
+                                    case 11:
+                                        vb2 = (float32x4_t) {
+                                            *(b + 8),
+                                            *(b + 9),
+                                            *(b + 10),
+                                            0.0f
+                                        };
+                                        break;
+                                }
+                            }
+                        }
+                    } else {
+                        switch (nr) {
+                            case 5:
+                                vb1 = (float32x4_t) {
+                                    *(b + 4),
+                                    0.0f, 0.0f, 0.0f
+                                };
+                                break;
+                            case 6:
+                                vb1 = (float32x4_t) {
+                                    *(b + 4),
+                                    *(b + 5),
+                                    0.0f, 0.0f
+                                };
+                                break;
+                            case 7:
+                                vb1 = (float32x4_t) {
+                                    *(b + 4),
+                                    *(b + 5),
+                                    *(b + 6),
+                                    0.0f
+                                };
+                                break;
+                        }
+                    }
+                }
+            } else {
+                switch (nr) {
+                    case 1:
+                        vb0 = (float32x4_t) {
+                            *(b + 0),
+                            0.0f, 0.0f, 0.0f
+                        };
+                        break;
+                    case 2:
+                        vb0 = (float32x4_t) {
+                            *(b + 0),
+                            *(b + 1),
+                            0.0f, 0.0f
+                        };
+                        break;
+                    case 3:
+                        vb0 = (float32x4_t) {
+                            *(b + 0),
+                            *(b + 1),
+                            *(b + 2),
+                            0.0f
+                        };
+                        break;
                 }
             }
             b += output_col;
@@ -375,17 +405,16 @@ void nnp_sgemm_upto_4x12(size_t mr,
     float32x2_t beta_t2 = vdup_n_f32(beta);
     
     if (update) {
-        // update (nothing to do with beta)
         float32x4_t vc0n = vc00;
         size_t nr0 = nr;
         float* c0n = c;
         if (nr0 > 4) {
-            vst1q_f32(c0n, vaddq_f32(vld1q_f32(c0n), vmulq_f32(vc0n, alpha_t4)));
+            vst1q_f32(c0n, vaddq_f32(vld1q_f32_aligned(c0n), vmulq_f32(vc0n, alpha_t4)));
             c0n += 4;
             nr0 -= 4;
             vc0n = vc01;
             if (nr0 > 4) {
-                vst1q_f32(c0n, vaddq_f32(vld1q_f32(c0n), vmulq_f32(vc0n, alpha_t4)));
+                vst1q_f32(c0n, vaddq_f32(vld1q_f32_aligned(c0n), vmulq_f32(vc0n, alpha_t4)));
                 c0n += 4;
                 nr0 -= 4;
                 vc0n = vc02;
@@ -393,7 +422,7 @@ void nnp_sgemm_upto_4x12(size_t mr,
         }
         switch (nr0) {
             case 4:
-                vst1q_f32(c0n, vaddq_f32(vld1q_f32(c0n), vmulq_f32(vc0n, alpha_t4)));
+                vst1q_f32(c0n, vaddq_f32(vld1q_f32_aligned(c0n), vmulq_f32(vc0n, alpha_t4)));
                 break;
             case 3:
                 vst1_lane_f32(c0n + 2, vadd_f32(vld1_dup_f32(c0n + 2), vmul_f32(vget_high_f32(vc0n), alpha_t2)), 0);
@@ -412,12 +441,12 @@ void nnp_sgemm_upto_4x12(size_t mr,
             size_t nr1 = nr;
             float* c1n = c;
             if (nr1 > 4) {
-                vst1q_f32(c1n, vaddq_f32(vld1q_f32(c1n), vmulq_f32(vc1n, alpha_t4)));
+                vst1q_f32(c1n, vaddq_f32(vld1q_f32_aligned(c1n), vmulq_f32(vc1n, alpha_t4)));
                 c1n += 4;
                 nr1 -= 4;
                 vc1n = vc11;
                 if (nr1 > 4) {
-                    vst1q_f32(c1n, vaddq_f32(vld1q_f32(c1n), vmulq_f32(vc1n, alpha_t4)));
+                    vst1q_f32(c1n, vaddq_f32(vld1q_f32_aligned(c1n), vmulq_f32(vc1n, alpha_t4)));
                     c1n += 4;
                     nr1 -= 4;
                     vc1n = vc12;
@@ -425,7 +454,7 @@ void nnp_sgemm_upto_4x12(size_t mr,
             }
             switch (nr1) {
                 case 4:
-                    vst1q_f32(c1n, vaddq_f32(vld1q_f32(c1n), vmulq_f32(vc1n, alpha_t4)));
+                    vst1q_f32(c1n, vaddq_f32(vld1q_f32_aligned(c1n), vmulq_f32(vc1n, alpha_t4)));
                     break;
                 case 3:
                     vst1_lane_f32(c1n + 2, vadd_f32(vld1_dup_f32(c1n + 2), vmul_f32(vget_high_f32(vc1n), alpha_t2)), 0);
@@ -444,12 +473,12 @@ void nnp_sgemm_upto_4x12(size_t mr,
                 size_t nr2 = nr;
                 float* c2n = c;
                 if (nr2 > 4) {
-                    vst1q_f32(c2n, vaddq_f32(vld1q_f32(c2n), vmulq_f32(vc2n, alpha_t4)));
+                    vst1q_f32(c2n, vaddq_f32(vld1q_f32_aligned(c2n), vmulq_f32(vc2n, alpha_t4)));
                     c2n += 4;
                     nr2 -= 4;
                     vc2n = vc21;
                     if (nr2 > 4) {
-                        vst1q_f32(c2n, vaddq_f32(vld1q_f32(c2n), vmulq_f32(vc2n, alpha_t4)));
+                        vst1q_f32(c2n, vaddq_f32(vld1q_f32_aligned(c2n), vmulq_f32(vc2n, alpha_t4)));
                         c2n += 4;
                         nr2 -= 4;
                         vc2n = vc22;
@@ -457,7 +486,7 @@ void nnp_sgemm_upto_4x12(size_t mr,
                 }
                 switch (nr2) {
                     case 4:
-                        vst1q_f32(c2n, vaddq_f32(vld1q_f32(c2n), vmulq_f32(vc2n, alpha_t4)));
+                        vst1q_f32(c2n, vaddq_f32(vld1q_f32_aligned(c2n), vmulq_f32(vc2n, alpha_t4)));
                         break;
                     case 3:
                         vst1_lane_f32(c2n + 2, vadd_f32(vld1_dup_f32(c2n + 2), vmul_f32(vget_high_f32(vc2n), alpha_t2)), 0);
@@ -476,12 +505,12 @@ void nnp_sgemm_upto_4x12(size_t mr,
                     size_t nr3 = nr;
                     float* c3n = c;
                     if (nr3 > 4) {
-                        vst1q_f32(c3n, vaddq_f32(vld1q_f32(c3n), vmulq_f32(vc3n, alpha_t4)));
+                        vst1q_f32(c3n, vaddq_f32(vld1q_f32_aligned(c3n), vmulq_f32(vc3n, alpha_t4)));
                         c3n += 4;
                         nr3 -= 4;
                         vc3n = vc31;
                         if (nr3 > 4) {
-                            vst1q_f32(c3n, vaddq_f32(vld1q_f32(c3n), vmulq_f32(vc3n, alpha_t4)));
+                            vst1q_f32(c3n, vaddq_f32(vld1q_f32_aligned(c3n), vmulq_f32(vc3n, alpha_t4)));
                             c3n += 4;
                             nr3 -= 4;
                             vc3n = vc32;
@@ -489,7 +518,7 @@ void nnp_sgemm_upto_4x12(size_t mr,
                     }
                     switch (nr3) {
                         case 4:
-                            vst1q_f32(c3n, vaddq_f32(vld1q_f32(c3n), vmulq_f32(vc3n, alpha_t4)));
+                            vst1q_f32(c3n, vaddq_f32(vld1q_f32_aligned(c3n), vmulq_f32(vc3n, alpha_t4)));
                             break;
                         case 3:
                             vst1_lane_f32(c3n + 2, vadd_f32(vld1_dup_f32(c3n + 2), vmul_f32(vget_high_f32(vc3n), alpha_t2)), 0);
@@ -506,17 +535,16 @@ void nnp_sgemm_upto_4x12(size_t mr,
             }
         }
     } else {
-        // !update (should consider beta)
         float32x4_t vc0n = vc00;
         size_t nr0 = nr;
         float* c0n = c;
         if (nr0 > 4) {
-            vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32(c0n), beta_t4), vmulq_f32(vc0n, alpha_t4)));
+            vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c0n), beta_t4), vmulq_f32(vc0n, alpha_t4)));
             c0n += 4;
             nr0 -= 4;
             vc0n = vc01;
             if (nr0 > 4) {
-                vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32(c0n), beta_t4), vmulq_f32(vc0n, alpha_t4)));
+                vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c0n), beta_t4), vmulq_f32(vc0n, alpha_t4)));
                 c0n += 4;
                 nr0 -= 4;
                 vc0n = vc02;
@@ -524,7 +552,7 @@ void nnp_sgemm_upto_4x12(size_t mr,
         }
         switch (nr0) {
             case 4:
-                vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32(c0n), beta_t4), vmulq_f32(vc0n, alpha_t4)));
+                vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c0n), beta_t4), vmulq_f32(vc0n, alpha_t4)));
                 break;
             case 3:
                 vst1_lane_f32(c0n + 2, vadd_f32(vmul_f32(vld1_f32(c0n + 2), beta_t2), vmul_f32(vget_high_f32(vc0n), alpha_t2)), 0);
@@ -543,12 +571,12 @@ void nnp_sgemm_upto_4x12(size_t mr,
             size_t nr1 = nr;
             float* c1n = c;
             if (nr1 > 4) {
-                vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32(c1n), beta_t4), vmulq_f32(vc1n, alpha_t4)));
+                vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c1n), beta_t4), vmulq_f32(vc1n, alpha_t4)));
                 c1n += 4;
                 nr1 -= 4;
                 vc1n = vc11;
                 if (nr1 > 4) {
-                    vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32(c1n), beta_t4), vmulq_f32(vc1n, alpha_t4)));
+                    vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c1n), beta_t4), vmulq_f32(vc1n, alpha_t4)));
                     c1n += 4;
                     nr1 -= 4;
                     vc1n = vc12;
@@ -556,7 +584,7 @@ void nnp_sgemm_upto_4x12(size_t mr,
             }
             switch (nr1) {
                 case 4:
-                    vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32(c1n), beta_t4), vmulq_f32(vc1n, alpha_t4)));
+                    vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c1n), beta_t4), vmulq_f32(vc1n, alpha_t4)));
                     break;
                 case 3:
                     vst1_lane_f32(c1n + 2, vadd_f32(vmul_f32(vld1_f32(c1n + 2), beta_t2), vmul_f32(vget_high_f32(vc1n), alpha_t2)), 0);
@@ -575,12 +603,12 @@ void nnp_sgemm_upto_4x12(size_t mr,
                 size_t nr2 = nr;
                 float* c2n = c;
                 if (nr2 > 4) {
-                    vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32(c2n), beta_t4), vmulq_f32(vc2n, alpha_t4)));
+                    vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c2n), beta_t4), vmulq_f32(vc2n, alpha_t4)));
                     c2n += 4;
                     nr2 -= 4;
                     vc2n = vc21;
                     if (nr2 > 4) {
-                        vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32(c2n), beta_t4), vmulq_f32(vc2n, alpha_t4)));
+                        vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c2n), beta_t4), vmulq_f32(vc2n, alpha_t4)));
                         c2n += 4;
                         nr2 -= 4;
                         vc2n = vc22;
@@ -588,7 +616,7 @@ void nnp_sgemm_upto_4x12(size_t mr,
                 }
                 switch (nr2) {
                     case 4:
-                        vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32(c2n), beta_t4), vmulq_f32(vc2n, alpha_t4)));
+                        vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c2n), beta_t4), vmulq_f32(vc2n, alpha_t4)));
                         break;
                     case 3:
                         vst1_lane_f32(c2n + 2, vadd_f32(vmul_f32(vld1_f32(c2n + 2), beta_t2), vmul_f32(vget_high_f32(vc2n), alpha_t2)), 0);
@@ -607,12 +635,12 @@ void nnp_sgemm_upto_4x12(size_t mr,
                     size_t nr3 = nr;
                     float* c3n = c;
                     if (nr3 > 4) {
-                        vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32(c3n), beta_t4), vmulq_f32(vc3n, alpha_t4)));
+                        vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c3n), beta_t4), vmulq_f32(vc3n, alpha_t4)));
                         c3n += 4;
                         nr3 -= 4;
                         vc3n = vc31;
                         if (nr3 > 4) {
-                            vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32(c3n), beta_t4), vmulq_f32(vc3n, alpha_t4)));
+                            vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c3n), beta_t4), vmulq_f32(vc3n, alpha_t4)));
                             c3n += 4;
                             nr3 -= 4;
                             vc3n = vc32;
@@ -620,7 +648,7 @@ void nnp_sgemm_upto_4x12(size_t mr,
                     }
                     switch (nr3) {
                         case 4:
-                            vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32(c3n), beta_t4), vmulq_f32(vc3n, alpha_t4)));
+                            vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c3n), beta_t4), vmulq_f32(vc3n, alpha_t4)));
                             break;
                         case 3:
                             vst1_lane_f32(c3n + 2, vadd_f32(vmul_f32(vld1_f32(c3n + 2), beta_t2), vmul_f32(vget_high_f32(vc3n), alpha_t2)), 0);
@@ -664,8 +692,8 @@ void nnp_sgemm_only_8x8(size_t k,
     do {
         float32x4_t va0, va1;
         if (trans_a) {
-            va0 = vld1q_f32(a + 0);
-            va1 = vld1q_f32(a + 4);
+            va0 = vld1q_f32_aligned(a + 0);
+            va1 = vld1q_f32_aligned(a + 4);
             a += output_row;
         } else {
             va0 = (float32x4_t) {
@@ -699,8 +727,8 @@ void nnp_sgemm_only_8x8(size_t k,
             };
             b += 1;
         } else {
-            vb0 = vld1q_f32(b + 0);
-            vb1 = vld1q_f32(b + 4);
+            vb0 = vld1q_f32_aligned(b + 0);
+            vb1 = vld1q_f32_aligned(b + 4);
             b += output_col;
         }
         
@@ -742,224 +770,58 @@ void nnp_sgemm_only_8x8(size_t k,
     } while (--k);
     
     // c = alpha * a * b + beta * c
-    if (alpha == 1.0f) {
-        // alpha == 1 (nothing to do with alpha)
-        if (update) {
-            // update (nothing to do with beta)
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc00));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc01));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc10));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc11));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc20));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc21));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc30));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc31));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc40));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc41));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc50));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc51));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc60));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc61));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc70));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc71));
-        } else {
-            // !update (should consider beta)
-            if (beta == 0.0f) {
-                // beta == 0 (nothing to do with beta)
-                vst1q_f32(c + 0, vc00);
-                vst1q_f32(c + 4, vc01);
-                c += output_col;
-                vst1q_f32(c + 0, vc10);
-                vst1q_f32(c + 4, vc11);
-                c += output_col;
-                vst1q_f32(c + 0, vc20);
-                vst1q_f32(c + 4, vc21);
-                c += output_col;
-                vst1q_f32(c + 0, vc30);
-                vst1q_f32(c + 4, vc31);
-                c += output_col;
-                vst1q_f32(c + 0, vc40);
-                vst1q_f32(c + 4, vc41);
-                c += output_col;
-                vst1q_f32(c + 0, vc50);
-                vst1q_f32(c + 4, vc51);
-                c += output_col;
-                vst1q_f32(c + 0, vc60);
-                vst1q_f32(c + 4, vc61);
-                c += output_col;
-                vst1q_f32(c + 0, vc70);
-                vst1q_f32(c + 4, vc71);
-            } else if (beta == 1.0f) {
-                // beta == 1 (do not need to multiply with beta)
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc00));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc01));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc10));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc11));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc20));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc21));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc30));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc31));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc40));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc41));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc50));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc51));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc60));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc61));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vc70));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vc71));
-            } else {
-                // beta != 0 (should consider beta)
-                float32x4_t beta_t = vdupq_n_f32(beta);
-                
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vc00));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vc01));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vc10));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vc11));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vc20));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vc21));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vc30));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vc31));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vc40));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vc41));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vc50));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vc51));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vc60));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vc61));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vc70));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vc71));
-            }
-        }
+    float32x4_t alpha_t = vdupq_n_f32(alpha);
+    
+    if (update) {
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc00, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc01, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc10, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc11, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc20, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc21, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc30, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc31, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc40, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc41, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc50, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc51, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc60, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc61, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc70, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc71, alpha_t)));
     } else {
-        // alpha != 1 (should consider alpha)
-        float32x4_t alpha_t = vdupq_n_f32(alpha);
+        float32x4_t beta_t = vdupq_n_f32(beta);
         
-        if (update) {
-            // update (nothing to do with beta)
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc00, alpha_t)));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc01, alpha_t)));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc10, alpha_t)));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc11, alpha_t)));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc20, alpha_t)));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc21, alpha_t)));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc30, alpha_t)));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc31, alpha_t)));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc40, alpha_t)));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc41, alpha_t)));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc50, alpha_t)));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc51, alpha_t)));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc60, alpha_t)));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc61, alpha_t)));
-            c += output_col;
-            vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc70, alpha_t)));
-            vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc71, alpha_t)));
-        } else {
-            // !update (should consider beta)
-            if (beta == 0.0f) {
-                // beta == 0 (nothing to do with beta)
-                vst1q_f32(c + 0, vmulq_f32(vc00, alpha_t));
-                vst1q_f32(c + 4, vmulq_f32(vc01, alpha_t));
-                c += output_col;
-                vst1q_f32(c + 0, vmulq_f32(vc10, alpha_t));
-                vst1q_f32(c + 4, vmulq_f32(vc11, alpha_t));
-                c += output_col;
-                vst1q_f32(c + 0, vmulq_f32(vc20, alpha_t));
-                vst1q_f32(c + 4, vmulq_f32(vc21, alpha_t));
-                c += output_col;
-                vst1q_f32(c + 0, vmulq_f32(vc30, alpha_t));
-                vst1q_f32(c + 4, vmulq_f32(vc31, alpha_t));
-                c += output_col;
-                vst1q_f32(c + 0, vmulq_f32(vc40, alpha_t));
-                vst1q_f32(c + 4, vmulq_f32(vc41, alpha_t));
-                c += output_col;
-                vst1q_f32(c + 0, vmulq_f32(vc50, alpha_t));
-                vst1q_f32(c + 4, vmulq_f32(vc51, alpha_t));
-                c += output_col;
-                vst1q_f32(c + 0, vmulq_f32(vc60, alpha_t));
-                vst1q_f32(c + 4, vmulq_f32(vc61, alpha_t));
-                c += output_col;
-                vst1q_f32(c + 0, vmulq_f32(vc70, alpha_t));
-                vst1q_f32(c + 4, vmulq_f32(vc71, alpha_t));
-            } else if (beta == 1.0f) {
-                // beta == 1 (do not need to multiply with beta)
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc00, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc01, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc10, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc11, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc20, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc21, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc30, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc31, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc40, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc41, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc50, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc51, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc60, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc61, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vld1q_f32(c + 0), vmulq_f32(vc70, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vld1q_f32(c + 4), vmulq_f32(vc71, alpha_t)));
-            } else {
-                // beta != 0 (should consider beta)
-                float32x4_t beta_t = vdupq_n_f32(beta);
-                
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vmulq_f32(vc00, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vmulq_f32(vc01, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vmulq_f32(vc10, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vmulq_f32(vc11, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vmulq_f32(vc20, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vmulq_f32(vc21, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vmulq_f32(vc30, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vmulq_f32(vc31, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vmulq_f32(vc40, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vmulq_f32(vc41, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vmulq_f32(vc50, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vmulq_f32(vc51, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vmulq_f32(vc60, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vmulq_f32(vc61, alpha_t)));
-                c += output_col;
-                vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32(c + 0), beta_t), vmulq_f32(vc70, alpha_t)));
-                vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32(c + 4), beta_t), vmulq_f32(vc71, alpha_t)));
-            }
-        }
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc00, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc01, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc10, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc11, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc20, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc21, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc30, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc31, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc40, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc41, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc50, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc51, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc60, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc61, alpha_t)));
+        c += output_col;
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc70, alpha_t)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc71, alpha_t)));
     }
 }
 
@@ -991,35 +853,131 @@ void nnp_sgemm_upto_8x8(size_t mr,
         float32x4_t vb0 = vdupq_n_f32(0.0f), vb1 = vdupq_n_f32(0.0f);
         
         if (trans_b) {
-            vb0 = (float32x4_t) {
-                         *(b + reduction_size * 0),
-                nr > 1 ? *(b + reduction_size * 1) : 0.0f,
-                nr > 2 ? *(b + reduction_size * 2) : 0.0f,
-                nr > 3 ? *(b + reduction_size * 3) : 0.0f,
-            };
-            if (nr > 4) {
-                vb1 = (float32x4_t) {
-                             *(b + reduction_size * 4),
-                    nr > 5 ? *(b + reduction_size * 5) : 0.0f,
-                    nr > 6 ? *(b + reduction_size * 6) : 0.0f,
-                    nr > 7 ? *(b + reduction_size * 7) : 0.0f,
+            if (nr >= 4) {
+                vb0 = (float32x4_t) {
+                    *(b + reduction_size * 0),
+                    *(b + reduction_size * 1),
+                    *(b + reduction_size * 2),
+                    *(b + reduction_size * 3)
                 };
+                if (nr != 4) {
+                    if (nr == 8) {
+                        vb1 = (float32x4_t) {
+                            *(b + reduction_size * 4),
+                            *(b + reduction_size * 5),
+                            *(b + reduction_size * 6),
+                            *(b + reduction_size * 7)
+                        };
+                    } else {
+                        switch (nr) {
+                            case 5:
+                                vb1 = (float32x4_t) {
+                                    *(b + reduction_size * 4),
+                                    0.0f, 0.0f, 0.0f
+                                };
+                                break;
+                            case 6:
+                                vb1 = (float32x4_t) {
+                                    *(b + reduction_size * 4),
+                                    *(b + reduction_size * 5),
+                                    0.0f, 0.0f
+                                };
+                                break;
+                            case 7:
+                                vb1 = (float32x4_t) {
+                                    *(b + reduction_size * 4),
+                                    *(b + reduction_size * 5),
+                                    *(b + reduction_size * 6),
+                                    0.0f
+                                };
+                                break;
+                        }
+                    }
+                }
+            } else {
+                switch (nr) {
+                    case 1:
+                        vb0 = (float32x4_t) {
+                            *(b + reduction_size * 0),
+                            0.0f, 0.0f, 0.0f
+                        };
+                        break;
+                    case 2:
+                        vb0 = (float32x4_t) {
+                            *(b + reduction_size * 0),
+                            *(b + reduction_size * 1),
+                            0.0f, 0.0f
+                        };
+                        break;
+                    case 3:
+                        vb0 = (float32x4_t) {
+                            *(b + reduction_size * 0),
+                            *(b + reduction_size * 1),
+                            *(b + reduction_size * 2),
+                            0.0f
+                        };
+                        break;
+                }
             }
             b += 1;
         } else {
-            vb0 = (float32x4_t) {
-                         *(b + 0),
-                nr > 1 ? *(b + 1) : 0.0f,
-                nr > 2 ? *(b + 2) : 0.0f,
-                nr > 3 ? *(b + 3) : 0.0f,
-            };
-            if (nr > 4) {
-                vb1 = (float32x4_t) {
-                             *(b + 4),
-                    nr > 5 ? *(b + 5) : 0.0f,
-                    nr > 6 ? *(b + 6) : 0.0f,
-                    nr > 7 ? *(b + 7) : 0.0f,
-                };
+            if (nr >= 4) {
+                vb0 = vld1q_f32_aligned(b + 0);
+                
+                if (nr != 4) {
+                    if (nr == 8) {
+                        vb1 = vld1q_f32_aligned(b + 4);
+                        
+                    } else {
+                        switch (nr) {
+                            case 5:
+                                vb1 = (float32x4_t) {
+                                    *(b + 4),
+                                    0.0f, 0.0f, 0.0f
+                                };
+                                break;
+                            case 6:
+                                vb1 = (float32x4_t) {
+                                    *(b + 4),
+                                    *(b + 5),
+                                    0.0f, 0.0f
+                                };
+                                break;
+                            case 7:
+                                vb1 = (float32x4_t) {
+                                    *(b + 4),
+                                    *(b + 5),
+                                    *(b + 6),
+                                    0.0f
+                                };
+                                break;
+                        }
+                    }
+                }
+            } else {
+                switch (nr) {
+                    case 1:
+                        vb0 = (float32x4_t) {
+                            *(b + 0),
+                            0.0f, 0.0f, 0.0f
+                        };
+                        break;
+                    case 2:
+                        vb0 = (float32x4_t) {
+                            *(b + 0),
+                            *(b + 1),
+                            0.0f, 0.0f
+                        };
+                        break;
+                    case 3:
+                        vb0 = (float32x4_t) {
+                            *(b + 0),
+                            *(b + 1),
+                            *(b + 2),
+                            0.0f
+                        };
+                        break;
+                }
             }
             b += output_col;
         }
@@ -1080,19 +1038,18 @@ void nnp_sgemm_upto_8x8(size_t mr,
     float32x2_t beta_t2 = vdup_n_f32(beta);
     
     if (update) {
-        // update (nothing to do with beta)
         float32x4_t vc0n = vc00;
         size_t nr0 = nr;
         float* c0n = c;
         if (nr0 > 4) {
-            vst1q_f32(c0n, vaddq_f32(vld1q_f32(c0n), vmulq_f32(vc0n, alpha_t4)));
+            vst1q_f32(c0n, vaddq_f32(vld1q_f32_aligned(c0n), vmulq_f32(vc0n, alpha_t4)));
             c0n += 4;
             nr0 -= 4;
             vc0n = vc01;
         }
         switch (nr0) {
             case 4:
-                vst1q_f32(c0n, vaddq_f32(vld1q_f32(c0n), vmulq_f32(vc0n, alpha_t4)));
+                vst1q_f32(c0n, vaddq_f32(vld1q_f32_aligned(c0n), vmulq_f32(vc0n, alpha_t4)));
                 break;
             case 3:
                 vst1_lane_f32(c0n + 2, vadd_f32(vld1_dup_f32(c0n + 2), vmul_f32(vget_high_f32(vc0n), alpha_t2)), 0);
@@ -1111,14 +1068,14 @@ void nnp_sgemm_upto_8x8(size_t mr,
             size_t nr1 = nr;
             float* c1n = c;
             if (nr1 > 4) {
-                vst1q_f32(c1n, vaddq_f32(vld1q_f32(c1n), vmulq_f32(vc1n, alpha_t4)));
+                vst1q_f32(c1n, vaddq_f32(vld1q_f32_aligned(c1n), vmulq_f32(vc1n, alpha_t4)));
                 c1n += 4;
                 nr1 -= 4;
                 vc1n = vc11;
             }
             switch (nr1) {
                 case 4:
-                    vst1q_f32(c1n, vaddq_f32(vld1q_f32(c1n), vmulq_f32(vc1n, alpha_t4)));
+                    vst1q_f32(c1n, vaddq_f32(vld1q_f32_aligned(c1n), vmulq_f32(vc1n, alpha_t4)));
                     break;
                 case 3:
                     vst1_lane_f32(c1n + 2, vadd_f32(vld1_dup_f32(c1n + 2), vmul_f32(vget_high_f32(vc1n), alpha_t2)), 0);
@@ -1137,14 +1094,14 @@ void nnp_sgemm_upto_8x8(size_t mr,
                 size_t nr2 = nr;
                 float* c2n = c;
                 if (nr2 > 4) {
-                    vst1q_f32(c2n, vaddq_f32(vld1q_f32(c2n), vmulq_f32(vc2n, alpha_t4)));
+                    vst1q_f32(c2n, vaddq_f32(vld1q_f32_aligned(c2n), vmulq_f32(vc2n, alpha_t4)));
                     c2n += 4;
                     nr2 -= 4;
                     vc2n = vc21;
                 }
                 switch (nr2) {
                     case 4:
-                        vst1q_f32(c2n, vaddq_f32(vld1q_f32(c2n), vmulq_f32(vc2n, alpha_t4)));
+                        vst1q_f32(c2n, vaddq_f32(vld1q_f32_aligned(c2n), vmulq_f32(vc2n, alpha_t4)));
                         break;
                     case 3:
                         vst1_lane_f32(c2n + 2, vadd_f32(vld1_dup_f32(c2n + 2), vmul_f32(vget_high_f32(vc2n), alpha_t2)), 0);
@@ -1163,14 +1120,14 @@ void nnp_sgemm_upto_8x8(size_t mr,
                     size_t nr3 = nr;
                     float* c3n = c;
                     if (nr3 > 4) {
-                        vst1q_f32(c3n, vaddq_f32(vld1q_f32(c3n), vmulq_f32(vc3n, alpha_t4)));
+                        vst1q_f32(c3n, vaddq_f32(vld1q_f32_aligned(c3n), vmulq_f32(vc3n, alpha_t4)));
                         c3n += 4;
                         nr3 -= 4;
                         vc3n = vc31;
                     }
                     switch (nr3) {
                         case 4:
-                            vst1q_f32(c3n, vaddq_f32(vld1q_f32(c3n), vmulq_f32(vc3n, alpha_t4)));
+                            vst1q_f32(c3n, vaddq_f32(vld1q_f32_aligned(c3n), vmulq_f32(vc3n, alpha_t4)));
                             break;
                         case 3:
                             vst1_lane_f32(c3n + 2, vadd_f32(vld1_dup_f32(c3n + 2), vmul_f32(vget_high_f32(vc3n), alpha_t2)), 0);
@@ -1189,14 +1146,14 @@ void nnp_sgemm_upto_8x8(size_t mr,
                         size_t nr4 = nr;
                         float* c4n = c;
                         if (nr4 > 4) {
-                            vst1q_f32(c4n, vaddq_f32(vld1q_f32(c4n), vmulq_f32(vc4n, alpha_t4)));
+                            vst1q_f32(c4n, vaddq_f32(vld1q_f32_aligned(c4n), vmulq_f32(vc4n, alpha_t4)));
                             c4n += 4;
                             nr4 -= 4;
                             vc4n = vc41;
                         }
                         switch (nr4) {
                             case 4:
-                                vst1q_f32(c4n, vaddq_f32(vld1q_f32(c4n), vmulq_f32(vc4n, alpha_t4)));
+                                vst1q_f32(c4n, vaddq_f32(vld1q_f32_aligned(c4n), vmulq_f32(vc4n, alpha_t4)));
                                 break;
                             case 3:
                                 vst1_lane_f32(c4n + 2, vadd_f32(vld1_dup_f32(c4n + 2), vmul_f32(vget_high_f32(vc4n), alpha_t2)), 0);
@@ -1215,14 +1172,14 @@ void nnp_sgemm_upto_8x8(size_t mr,
                             size_t nr5 = nr;
                             float* c5n = c;
                             if (nr5 > 4) {
-                                vst1q_f32(c5n, vaddq_f32(vld1q_f32(c5n), vmulq_f32(vc5n, alpha_t4)));
+                                vst1q_f32(c5n, vaddq_f32(vld1q_f32_aligned(c5n), vmulq_f32(vc5n, alpha_t4)));
                                 c5n += 4;
                                 nr5 -= 4;
                                 vc5n = vc51;
                             }
                             switch (nr5) {
                                 case 4:
-                                    vst1q_f32(c5n, vaddq_f32(vld1q_f32(c5n), vmulq_f32(vc5n, alpha_t4)));
+                                    vst1q_f32(c5n, vaddq_f32(vld1q_f32_aligned(c5n), vmulq_f32(vc5n, alpha_t4)));
                                     break;
                                 case 3:
                                     vst1_lane_f32(c5n + 2, vadd_f32(vld1_dup_f32(c5n + 2), vmul_f32(vget_high_f32(vc5n), alpha_t2)), 0);
@@ -1241,14 +1198,14 @@ void nnp_sgemm_upto_8x8(size_t mr,
                                 size_t nr6 = nr;
                                 float* c6n = c;
                                 if (nr6 > 4) {
-                                    vst1q_f32(c6n, vaddq_f32(vld1q_f32(c6n), vmulq_f32(vc6n, alpha_t4)));
+                                    vst1q_f32(c6n, vaddq_f32(vld1q_f32_aligned(c6n), vmulq_f32(vc6n, alpha_t4)));
                                     c6n += 4;
                                     nr6 -= 4;
                                     vc6n = vc61;
                                 }
                                 switch (nr6) {
                                     case 4:
-                                        vst1q_f32(c6n, vaddq_f32(vld1q_f32(c6n), vmulq_f32(vc6n, alpha_t4)));
+                                        vst1q_f32(c6n, vaddq_f32(vld1q_f32_aligned(c6n), vmulq_f32(vc6n, alpha_t4)));
                                         break;
                                     case 3:
                                         vst1_lane_f32(c6n + 2, vadd_f32(vld1_dup_f32(c6n + 2), vmul_f32(vget_high_f32(vc6n), alpha_t2)), 0);
@@ -1267,14 +1224,14 @@ void nnp_sgemm_upto_8x8(size_t mr,
                                     size_t nr7 = nr;
                                     float* c7n = c;
                                     if (nr7 > 4) {
-                                        vst1q_f32(c7n, vaddq_f32(vld1q_f32(c7n), vmulq_f32(vc7n, alpha_t4)));
+                                        vst1q_f32(c7n, vaddq_f32(vld1q_f32_aligned(c7n), vmulq_f32(vc7n, alpha_t4)));
                                         c7n += 4;
                                         nr7 -= 4;
                                         vc7n = vc71;
                                     }
                                     switch (nr7) {
                                         case 4:
-                                            vst1q_f32(c7n, vaddq_f32(vld1q_f32(c7n), vmulq_f32(vc7n, alpha_t4)));
+                                            vst1q_f32(c7n, vaddq_f32(vld1q_f32_aligned(c7n), vmulq_f32(vc7n, alpha_t4)));
                                             break;
                                         case 3:
                                             vst1_lane_f32(c7n + 2, vadd_f32(vld1_dup_f32(c7n + 2), vmul_f32(vget_high_f32(vc7n), alpha_t2)), 0);
@@ -1295,19 +1252,18 @@ void nnp_sgemm_upto_8x8(size_t mr,
             }
         }
     } else {
-        // !update (should consider beta)
         float32x4_t vc0n = vc00;
         size_t nr0 = nr;
         float* c0n = c;
         if (nr0 > 4) {
-            vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32(c0n), beta_t4), vmulq_f32(vc0n, alpha_t4)));
+            vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c0n), beta_t4), vmulq_f32(vc0n, alpha_t4)));
             c0n += 4;
             nr0 -= 4;
             vc0n = vc01;
         }
         switch (nr0) {
             case 4:
-                vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32(c0n), beta_t4), vmulq_f32(vc0n, alpha_t4)));
+                vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c0n), beta_t4), vmulq_f32(vc0n, alpha_t4)));
                 break;
             case 3:
                 vst1_lane_f32(c0n + 2, vadd_f32(vmul_f32(vld1_f32(c0n + 2), beta_t2), vmul_f32(vget_high_f32(vc0n), alpha_t2)), 0);
@@ -1326,14 +1282,14 @@ void nnp_sgemm_upto_8x8(size_t mr,
             size_t nr1 = nr;
             float* c1n = c;
             if (nr1 > 4) {
-                vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32(c1n), beta_t4), vmulq_f32(vc1n, alpha_t4)));
+                vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c1n), beta_t4), vmulq_f32(vc1n, alpha_t4)));
                 c1n += 4;
                 nr1 -= 4;
                 vc1n = vc11;
             }
             switch (nr1) {
                 case 4:
-                    vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32(c1n), beta_t4), vmulq_f32(vc1n, alpha_t4)));
+                    vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c1n), beta_t4), vmulq_f32(vc1n, alpha_t4)));
                     break;
                 case 3:
                     vst1_lane_f32(c1n + 2, vadd_f32(vmul_f32(vld1_f32(c1n + 2), beta_t2), vmul_f32(vget_high_f32(vc1n), alpha_t2)), 0);
@@ -1352,14 +1308,14 @@ void nnp_sgemm_upto_8x8(size_t mr,
                 size_t nr2 = nr;
                 float* c2n = c;
                 if (nr2 > 4) {
-                    vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32(c2n), beta_t4), vmulq_f32(vc2n, alpha_t4)));
+                    vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c2n), beta_t4), vmulq_f32(vc2n, alpha_t4)));
                     c2n += 4;
                     nr2 -= 4;
                     vc2n = vc21;
                 }
                 switch (nr2) {
                     case 4:
-                        vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32(c2n), beta_t4), vmulq_f32(vc2n, alpha_t4)));
+                        vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c2n), beta_t4), vmulq_f32(vc2n, alpha_t4)));
                         break;
                     case 3:
                         vst1_lane_f32(c2n + 2, vadd_f32(vmul_f32(vld1_f32(c2n + 2), beta_t2), vmul_f32(vget_high_f32(vc2n), alpha_t2)), 0);
@@ -1378,14 +1334,14 @@ void nnp_sgemm_upto_8x8(size_t mr,
                     size_t nr3 = nr;
                     float* c3n = c;
                     if (nr3 > 4) {
-                        vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32(c3n), beta_t4), vmulq_f32(vc3n, alpha_t4)));
+                        vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c3n), beta_t4), vmulq_f32(vc3n, alpha_t4)));
                         c3n += 4;
                         nr3 -= 4;
                         vc3n = vc31;
                     }
                     switch (nr3) {
                         case 4:
-                            vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32(c3n), beta_t4), vmulq_f32(vc3n, alpha_t4)));
+                            vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c3n), beta_t4), vmulq_f32(vc3n, alpha_t4)));
                             break;
                         case 3:
                             vst1_lane_f32(c3n + 2, vadd_f32(vmul_f32(vld1_f32(c3n + 2), beta_t2), vmul_f32(vget_high_f32(vc3n), alpha_t2)), 0);
@@ -1404,14 +1360,14 @@ void nnp_sgemm_upto_8x8(size_t mr,
                         size_t nr4 = nr;
                         float* c4n = c;
                         if (nr4 > 4) {
-                            vst1q_f32(c4n, vaddq_f32(vmulq_f32(vld1q_f32(c4n), beta_t4), vmulq_f32(vc4n, alpha_t4)));
+                            vst1q_f32(c4n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c4n), beta_t4), vmulq_f32(vc4n, alpha_t4)));
                             c4n += 4;
                             nr4 -= 4;
                             vc4n = vc41;
                         }
                         switch (nr4) {
                             case 4:
-                                vst1q_f32(c4n, vaddq_f32(vmulq_f32(vld1q_f32(c4n), beta_t4), vmulq_f32(vc4n, alpha_t4)));
+                                vst1q_f32(c4n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c4n), beta_t4), vmulq_f32(vc4n, alpha_t4)));
                                 break;
                             case 3:
                                 vst1_lane_f32(c4n + 2, vadd_f32(vmul_f32(vld1_f32(c4n + 2), beta_t2), vmul_f32(vget_high_f32(vc4n), alpha_t2)), 0);
@@ -1430,14 +1386,14 @@ void nnp_sgemm_upto_8x8(size_t mr,
                             size_t nr5 = nr;
                             float* c5n = c;
                             if (nr5 > 4) {
-                                vst1q_f32(c5n, vaddq_f32(vmulq_f32(vld1q_f32(c5n), beta_t4), vmulq_f32(vc5n, alpha_t4)));
+                                vst1q_f32(c5n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c5n), beta_t4), vmulq_f32(vc5n, alpha_t4)));
                                 c5n += 4;
                                 nr5 -= 4;
                                 vc5n = vc51;
                             }
                             switch (nr5) {
                                 case 4:
-                                    vst1q_f32(c5n, vaddq_f32(vmulq_f32(vld1q_f32(c5n), beta_t4), vmulq_f32(vc5n, alpha_t4)));
+                                    vst1q_f32(c5n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c5n), beta_t4), vmulq_f32(vc5n, alpha_t4)));
                                     break;
                                 case 3:
                                     vst1_lane_f32(c5n + 2, vadd_f32(vmul_f32(vld1_f32(c5n + 2), beta_t2), vmul_f32(vget_high_f32(vc5n), alpha_t2)), 0);
@@ -1456,14 +1412,14 @@ void nnp_sgemm_upto_8x8(size_t mr,
                                 size_t nr6 = nr;
                                 float* c6n = c;
                                 if (nr6 > 4) {
-                                    vst1q_f32(c6n, vaddq_f32(vmulq_f32(vld1q_f32(c6n), beta_t4), vmulq_f32(vc6n, alpha_t4)));
+                                    vst1q_f32(c6n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c6n), beta_t4), vmulq_f32(vc6n, alpha_t4)));
                                     c6n += 4;
                                     nr6 -= 4;
                                     vc6n = vc61;
                                 }
                                 switch (nr6) {
                                     case 4:
-                                        vst1q_f32(c6n, vaddq_f32(vmulq_f32(vld1q_f32(c6n), beta_t4), vmulq_f32(vc6n, alpha_t4)));
+                                        vst1q_f32(c6n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c6n), beta_t4), vmulq_f32(vc6n, alpha_t4)));
                                         break;
                                     case 3:
                                         vst1_lane_f32(c6n + 2, vadd_f32(vmul_f32(vld1_f32(c6n + 2), beta_t2), vmul_f32(vget_high_f32(vc6n), alpha_t2)), 0);
@@ -1482,14 +1438,14 @@ void nnp_sgemm_upto_8x8(size_t mr,
                                     size_t nr7 = nr;
                                     float* c7n = c;
                                     if (nr7 > 4) {
-                                        vst1q_f32(c7n, vaddq_f32(vmulq_f32(vld1q_f32(c7n), beta_t4), vmulq_f32(vc7n, alpha_t4)));
+                                        vst1q_f32(c7n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c7n), beta_t4), vmulq_f32(vc7n, alpha_t4)));
                                         c7n += 4;
                                         nr7 -= 4;
                                         vc7n = vc71;
                                     }
                                     switch (nr7) {
                                         case 4:
-                                            vst1q_f32(c7n, vaddq_f32(vmulq_f32(vld1q_f32(c7n), beta_t4), vmulq_f32(vc7n, alpha_t4)));
+                                            vst1q_f32(c7n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c7n), beta_t4), vmulq_f32(vc7n, alpha_t4)));
                                             break;
                                         case 3:
                                             vst1_lane_f32(c7n + 2, vadd_f32(vmul_f32(vld1_f32(c7n + 2), beta_t2), vmul_f32(vget_high_f32(vc7n), alpha_t2)), 0);
