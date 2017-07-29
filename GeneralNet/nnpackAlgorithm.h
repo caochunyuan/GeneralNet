@@ -67,4 +67,14 @@ void nnp_sgemm_upto_8x8(size_t mr,
                         const float *b,
                         float *c);
 
+void nnp_sgemm_1x1(size_t m,
+                   size_t n,
+                   size_t k,
+                   const bool trans_b,
+                   const float alpha,
+                   const float beta,
+                   const float *a,
+                   const float *b,
+                   float *c);
+
 #endif /* nnpackAlgorithm_h */

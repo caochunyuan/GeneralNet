@@ -22,6 +22,7 @@ static inline float32x4_t vld1q_f32_aligned(const float* address) {
     return vld1q_f32((const float*) __builtin_assume_aligned(address, sizeof(float32x4_t)));
 }
 
+// modified from https://github.com/Maratyszcza/NNPACK/blob/e42421c248d746c92e655ec47e2c0fa4f9fc8e8c/src/neon/blas/sgemm.c/#L8
 void nnp_sgemm_only_4x12(size_t k,
                          size_t update,
                          size_t output_row,
@@ -113,45 +114,46 @@ void nnp_sgemm_only_4x12(size_t k,
     } while (--k);
     
     // c = alpha * a * b + beta * c
-    float32x4_t alpha_t = vdupq_n_f32(alpha);
+    float32x4_t alpha_v = vdupq_n_f32(alpha);
     
     if (update) {
-        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc00, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc01, alpha_t)));
-        vst1q_f32(c + 8, vaddq_f32(vld1q_f32_aligned(c + 8), vmulq_f32(vc02, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc00, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc01, alpha_v)));
+        vst1q_f32(c + 8, vaddq_f32(vld1q_f32_aligned(c + 8), vmulq_f32(vc02, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc10, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc11, alpha_t)));
-        vst1q_f32(c + 8, vaddq_f32(vld1q_f32_aligned(c + 8), vmulq_f32(vc12, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc10, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc11, alpha_v)));
+        vst1q_f32(c + 8, vaddq_f32(vld1q_f32_aligned(c + 8), vmulq_f32(vc12, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc20, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc21, alpha_t)));
-        vst1q_f32(c + 8, vaddq_f32(vld1q_f32_aligned(c + 8), vmulq_f32(vc22, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc20, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc21, alpha_v)));
+        vst1q_f32(c + 8, vaddq_f32(vld1q_f32_aligned(c + 8), vmulq_f32(vc22, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc30, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc31, alpha_t)));
-        vst1q_f32(c + 8, vaddq_f32(vld1q_f32_aligned(c + 8), vmulq_f32(vc32, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc30, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc31, alpha_v)));
+        vst1q_f32(c + 8, vaddq_f32(vld1q_f32_aligned(c + 8), vmulq_f32(vc32, alpha_v)));
     } else {
-        float32x4_t beta_t = vdupq_n_f32(beta);
+        float32x4_t beta_v = vdupq_n_f32(beta);
         
-        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc00, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc01, alpha_t)));
-        vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 8), beta_t), vmulq_f32(vc02, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_v), vmulq_f32(vc00, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_v), vmulq_f32(vc01, alpha_v)));
+        vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 8), beta_v), vmulq_f32(vc02, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc10, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc11, alpha_t)));
-        vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 8), beta_t), vmulq_f32(vc12, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_v), vmulq_f32(vc10, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_v), vmulq_f32(vc11, alpha_v)));
+        vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 8), beta_v), vmulq_f32(vc12, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc20, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc21, alpha_t)));
-        vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 8), beta_t), vmulq_f32(vc22, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_v), vmulq_f32(vc20, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_v), vmulq_f32(vc21, alpha_v)));
+        vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 8), beta_v), vmulq_f32(vc22, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc30, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc31, alpha_t)));
-        vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 8), beta_t), vmulq_f32(vc32, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_v), vmulq_f32(vc30, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_v), vmulq_f32(vc31, alpha_v)));
+        vst1q_f32(c + 8, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 8), beta_v), vmulq_f32(vc32, alpha_v)));
     }
 }
 
+// modified from https://github.com/Maratyszcza/NNPACK/blob/e42421c248d746c92e655ec47e2c0fa4f9fc8e8c/src/neon/blas/sgemm.c/#L86
 void nnp_sgemm_upto_4x12(size_t mr,
                          size_t nr,
                          size_t k,
@@ -399,22 +401,22 @@ void nnp_sgemm_upto_4x12(size_t mr,
     } while (--k);
     
     // c = alpha * a * b + beta * c
-    float32x4_t alpha_t4 = vdupq_n_f32(alpha);
-    float32x2_t alpha_t2 = vdup_n_f32(alpha);
-    float32x4_t beta_t4 = vdupq_n_f32(beta);
-    float32x2_t beta_t2 = vdup_n_f32(beta);
+    float32x4_t alpha_v4 = vdupq_n_f32(alpha);
+    float32x2_t alpha_v2 = vdup_n_f32(alpha);
+    float32x4_t beta_v4 = vdupq_n_f32(beta);
+    float32x2_t beta_v2 = vdup_n_f32(beta);
     
     if (update) {
         float32x4_t vc0n = vc00;
         size_t nr0 = nr;
         float* c0n = c;
         if (nr0 > 4) {
-            vst1q_f32(c0n, vaddq_f32(vld1q_f32_aligned(c0n), vmulq_f32(vc0n, alpha_t4)));
+            vst1q_f32(c0n, vaddq_f32(vld1q_f32_aligned(c0n), vmulq_f32(vc0n, alpha_v4)));
             c0n += 4;
             nr0 -= 4;
             vc0n = vc01;
             if (nr0 > 4) {
-                vst1q_f32(c0n, vaddq_f32(vld1q_f32_aligned(c0n), vmulq_f32(vc0n, alpha_t4)));
+                vst1q_f32(c0n, vaddq_f32(vld1q_f32_aligned(c0n), vmulq_f32(vc0n, alpha_v4)));
                 c0n += 4;
                 nr0 -= 4;
                 vc0n = vc02;
@@ -422,15 +424,15 @@ void nnp_sgemm_upto_4x12(size_t mr,
         }
         switch (nr0) {
             case 4:
-                vst1q_f32(c0n, vaddq_f32(vld1q_f32_aligned(c0n), vmulq_f32(vc0n, alpha_t4)));
+                vst1q_f32(c0n, vaddq_f32(vld1q_f32_aligned(c0n), vmulq_f32(vc0n, alpha_v4)));
                 break;
             case 3:
-                vst1_lane_f32(c0n + 2, vadd_f32(vld1_dup_f32(c0n + 2), vmul_f32(vget_high_f32(vc0n), alpha_t2)), 0);
+                vst1_lane_f32(c0n + 2, vadd_f32(vld1_dup_f32(c0n + 2), vmul_f32(vget_high_f32(vc0n), alpha_v2)), 0);
             case 2:
-                vst1_f32(c0n, vadd_f32(vld1_f32(c0n), vmul_f32(vget_low_f32(vc0n), alpha_t2)));
+                vst1_f32(c0n, vadd_f32(vld1_f32(c0n), vmul_f32(vget_low_f32(vc0n), alpha_v2)));
                 break;
             case 1:
-                vst1_lane_f32(c0n, vadd_f32(vld1_dup_f32(c0n), vmul_f32(vget_low_f32(vc0n), alpha_t2)), 0);
+                vst1_lane_f32(c0n, vadd_f32(vld1_dup_f32(c0n), vmul_f32(vget_low_f32(vc0n), alpha_v2)), 0);
                 break;
             default:
                 break;
@@ -441,12 +443,12 @@ void nnp_sgemm_upto_4x12(size_t mr,
             size_t nr1 = nr;
             float* c1n = c;
             if (nr1 > 4) {
-                vst1q_f32(c1n, vaddq_f32(vld1q_f32_aligned(c1n), vmulq_f32(vc1n, alpha_t4)));
+                vst1q_f32(c1n, vaddq_f32(vld1q_f32_aligned(c1n), vmulq_f32(vc1n, alpha_v4)));
                 c1n += 4;
                 nr1 -= 4;
                 vc1n = vc11;
                 if (nr1 > 4) {
-                    vst1q_f32(c1n, vaddq_f32(vld1q_f32_aligned(c1n), vmulq_f32(vc1n, alpha_t4)));
+                    vst1q_f32(c1n, vaddq_f32(vld1q_f32_aligned(c1n), vmulq_f32(vc1n, alpha_v4)));
                     c1n += 4;
                     nr1 -= 4;
                     vc1n = vc12;
@@ -454,15 +456,15 @@ void nnp_sgemm_upto_4x12(size_t mr,
             }
             switch (nr1) {
                 case 4:
-                    vst1q_f32(c1n, vaddq_f32(vld1q_f32_aligned(c1n), vmulq_f32(vc1n, alpha_t4)));
+                    vst1q_f32(c1n, vaddq_f32(vld1q_f32_aligned(c1n), vmulq_f32(vc1n, alpha_v4)));
                     break;
                 case 3:
-                    vst1_lane_f32(c1n + 2, vadd_f32(vld1_dup_f32(c1n + 2), vmul_f32(vget_high_f32(vc1n), alpha_t2)), 0);
+                    vst1_lane_f32(c1n + 2, vadd_f32(vld1_dup_f32(c1n + 2), vmul_f32(vget_high_f32(vc1n), alpha_v2)), 0);
                 case 2:
-                    vst1_f32(c1n, vadd_f32(vld1_f32(c1n), vmul_f32(vget_low_f32(vc1n), alpha_t2)));
+                    vst1_f32(c1n, vadd_f32(vld1_f32(c1n), vmul_f32(vget_low_f32(vc1n), alpha_v2)));
                     break;
                 case 1:
-                    vst1_lane_f32(c1n, vadd_f32(vld1_dup_f32(c1n), vmul_f32(vget_low_f32(vc1n), alpha_t2)), 0);
+                    vst1_lane_f32(c1n, vadd_f32(vld1_dup_f32(c1n), vmul_f32(vget_low_f32(vc1n), alpha_v2)), 0);
                     break;
                 default:
                     break;
@@ -473,12 +475,12 @@ void nnp_sgemm_upto_4x12(size_t mr,
                 size_t nr2 = nr;
                 float* c2n = c;
                 if (nr2 > 4) {
-                    vst1q_f32(c2n, vaddq_f32(vld1q_f32_aligned(c2n), vmulq_f32(vc2n, alpha_t4)));
+                    vst1q_f32(c2n, vaddq_f32(vld1q_f32_aligned(c2n), vmulq_f32(vc2n, alpha_v4)));
                     c2n += 4;
                     nr2 -= 4;
                     vc2n = vc21;
                     if (nr2 > 4) {
-                        vst1q_f32(c2n, vaddq_f32(vld1q_f32_aligned(c2n), vmulq_f32(vc2n, alpha_t4)));
+                        vst1q_f32(c2n, vaddq_f32(vld1q_f32_aligned(c2n), vmulq_f32(vc2n, alpha_v4)));
                         c2n += 4;
                         nr2 -= 4;
                         vc2n = vc22;
@@ -486,15 +488,15 @@ void nnp_sgemm_upto_4x12(size_t mr,
                 }
                 switch (nr2) {
                     case 4:
-                        vst1q_f32(c2n, vaddq_f32(vld1q_f32_aligned(c2n), vmulq_f32(vc2n, alpha_t4)));
+                        vst1q_f32(c2n, vaddq_f32(vld1q_f32_aligned(c2n), vmulq_f32(vc2n, alpha_v4)));
                         break;
                     case 3:
-                        vst1_lane_f32(c2n + 2, vadd_f32(vld1_dup_f32(c2n + 2), vmul_f32(vget_high_f32(vc2n), alpha_t2)), 0);
+                        vst1_lane_f32(c2n + 2, vadd_f32(vld1_dup_f32(c2n + 2), vmul_f32(vget_high_f32(vc2n), alpha_v2)), 0);
                     case 2:
-                        vst1_f32(c2n, vadd_f32(vld1_f32(c2n), vmul_f32(vget_low_f32(vc2n), alpha_t2)));
+                        vst1_f32(c2n, vadd_f32(vld1_f32(c2n), vmul_f32(vget_low_f32(vc2n), alpha_v2)));
                         break;
                     case 1:
-                        vst1_lane_f32(c2n, vadd_f32(vld1_dup_f32(c2n), vmul_f32(vget_low_f32(vc2n), alpha_t2)), 0);
+                        vst1_lane_f32(c2n, vadd_f32(vld1_dup_f32(c2n), vmul_f32(vget_low_f32(vc2n), alpha_v2)), 0);
                         break;
                     default:
                         break;
@@ -505,12 +507,12 @@ void nnp_sgemm_upto_4x12(size_t mr,
                     size_t nr3 = nr;
                     float* c3n = c;
                     if (nr3 > 4) {
-                        vst1q_f32(c3n, vaddq_f32(vld1q_f32_aligned(c3n), vmulq_f32(vc3n, alpha_t4)));
+                        vst1q_f32(c3n, vaddq_f32(vld1q_f32_aligned(c3n), vmulq_f32(vc3n, alpha_v4)));
                         c3n += 4;
                         nr3 -= 4;
                         vc3n = vc31;
                         if (nr3 > 4) {
-                            vst1q_f32(c3n, vaddq_f32(vld1q_f32_aligned(c3n), vmulq_f32(vc3n, alpha_t4)));
+                            vst1q_f32(c3n, vaddq_f32(vld1q_f32_aligned(c3n), vmulq_f32(vc3n, alpha_v4)));
                             c3n += 4;
                             nr3 -= 4;
                             vc3n = vc32;
@@ -518,15 +520,15 @@ void nnp_sgemm_upto_4x12(size_t mr,
                     }
                     switch (nr3) {
                         case 4:
-                            vst1q_f32(c3n, vaddq_f32(vld1q_f32_aligned(c3n), vmulq_f32(vc3n, alpha_t4)));
+                            vst1q_f32(c3n, vaddq_f32(vld1q_f32_aligned(c3n), vmulq_f32(vc3n, alpha_v4)));
                             break;
                         case 3:
-                            vst1_lane_f32(c3n + 2, vadd_f32(vld1_dup_f32(c3n + 2), vmul_f32(vget_high_f32(vc3n), alpha_t2)), 0);
+                            vst1_lane_f32(c3n + 2, vadd_f32(vld1_dup_f32(c3n + 2), vmul_f32(vget_high_f32(vc3n), alpha_v2)), 0);
                         case 2:
-                            vst1_f32(c3n, vadd_f32(vld1_f32(c3n), vmul_f32(vget_low_f32(vc3n), alpha_t2)));
+                            vst1_f32(c3n, vadd_f32(vld1_f32(c3n), vmul_f32(vget_low_f32(vc3n), alpha_v2)));
                             break;
                         case 1:
-                            vst1_lane_f32(c3n, vadd_f32(vld1_dup_f32(c3n), vmul_f32(vget_low_f32(vc3n), alpha_t2)), 0);
+                            vst1_lane_f32(c3n, vadd_f32(vld1_dup_f32(c3n), vmul_f32(vget_low_f32(vc3n), alpha_v2)), 0);
                             break;
                         default:
                             break;
@@ -539,12 +541,12 @@ void nnp_sgemm_upto_4x12(size_t mr,
         size_t nr0 = nr;
         float* c0n = c;
         if (nr0 > 4) {
-            vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c0n), beta_t4), vmulq_f32(vc0n, alpha_t4)));
+            vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c0n), beta_v4), vmulq_f32(vc0n, alpha_v4)));
             c0n += 4;
             nr0 -= 4;
             vc0n = vc01;
             if (nr0 > 4) {
-                vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c0n), beta_t4), vmulq_f32(vc0n, alpha_t4)));
+                vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c0n), beta_v4), vmulq_f32(vc0n, alpha_v4)));
                 c0n += 4;
                 nr0 -= 4;
                 vc0n = vc02;
@@ -552,15 +554,15 @@ void nnp_sgemm_upto_4x12(size_t mr,
         }
         switch (nr0) {
             case 4:
-                vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c0n), beta_t4), vmulq_f32(vc0n, alpha_t4)));
+                vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c0n), beta_v4), vmulq_f32(vc0n, alpha_v4)));
                 break;
             case 3:
-                vst1_lane_f32(c0n + 2, vadd_f32(vmul_f32(vld1_f32(c0n + 2), beta_t2), vmul_f32(vget_high_f32(vc0n), alpha_t2)), 0);
+                vst1_lane_f32(c0n + 2, vadd_f32(vmul_f32(vld1_f32(c0n + 2), beta_v2), vmul_f32(vget_high_f32(vc0n), alpha_v2)), 0);
             case 2:
-                vst1_f32(c0n, vadd_f32(vmul_f32(vld1_f32(c0n), beta_t2), vmul_f32(vget_low_f32(vc0n), alpha_t2)));
+                vst1_f32(c0n, vadd_f32(vmul_f32(vld1_f32(c0n), beta_v2), vmul_f32(vget_low_f32(vc0n), alpha_v2)));
                 break;
             case 1:
-                vst1_lane_f32(c0n, vadd_f32(vmul_f32(vld1_f32(c0n), beta_t2), vmul_f32(vget_low_f32(vc0n), alpha_t2)), 0);
+                vst1_lane_f32(c0n, vadd_f32(vmul_f32(vld1_f32(c0n), beta_v2), vmul_f32(vget_low_f32(vc0n), alpha_v2)), 0);
                 break;
             default:
                 break;
@@ -571,12 +573,12 @@ void nnp_sgemm_upto_4x12(size_t mr,
             size_t nr1 = nr;
             float* c1n = c;
             if (nr1 > 4) {
-                vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c1n), beta_t4), vmulq_f32(vc1n, alpha_t4)));
+                vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c1n), beta_v4), vmulq_f32(vc1n, alpha_v4)));
                 c1n += 4;
                 nr1 -= 4;
                 vc1n = vc11;
                 if (nr1 > 4) {
-                    vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c1n), beta_t4), vmulq_f32(vc1n, alpha_t4)));
+                    vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c1n), beta_v4), vmulq_f32(vc1n, alpha_v4)));
                     c1n += 4;
                     nr1 -= 4;
                     vc1n = vc12;
@@ -584,15 +586,15 @@ void nnp_sgemm_upto_4x12(size_t mr,
             }
             switch (nr1) {
                 case 4:
-                    vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c1n), beta_t4), vmulq_f32(vc1n, alpha_t4)));
+                    vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c1n), beta_v4), vmulq_f32(vc1n, alpha_v4)));
                     break;
                 case 3:
-                    vst1_lane_f32(c1n + 2, vadd_f32(vmul_f32(vld1_f32(c1n + 2), beta_t2), vmul_f32(vget_high_f32(vc1n), alpha_t2)), 0);
+                    vst1_lane_f32(c1n + 2, vadd_f32(vmul_f32(vld1_f32(c1n + 2), beta_v2), vmul_f32(vget_high_f32(vc1n), alpha_v2)), 0);
                 case 2:
-                    vst1_f32(c1n, vadd_f32(vmul_f32(vld1_f32(c1n), beta_t2), vmul_f32(vget_low_f32(vc1n), alpha_t2)));
+                    vst1_f32(c1n, vadd_f32(vmul_f32(vld1_f32(c1n), beta_v2), vmul_f32(vget_low_f32(vc1n), alpha_v2)));
                     break;
                 case 1:
-                    vst1_lane_f32(c1n, vadd_f32(vmul_f32(vld1_f32(c1n), beta_t2), vmul_f32(vget_low_f32(vc1n), alpha_t2)), 0);
+                    vst1_lane_f32(c1n, vadd_f32(vmul_f32(vld1_f32(c1n), beta_v2), vmul_f32(vget_low_f32(vc1n), alpha_v2)), 0);
                     break;
                 default:
                     break;
@@ -603,12 +605,12 @@ void nnp_sgemm_upto_4x12(size_t mr,
                 size_t nr2 = nr;
                 float* c2n = c;
                 if (nr2 > 4) {
-                    vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c2n), beta_t4), vmulq_f32(vc2n, alpha_t4)));
+                    vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c2n), beta_v4), vmulq_f32(vc2n, alpha_v4)));
                     c2n += 4;
                     nr2 -= 4;
                     vc2n = vc21;
                     if (nr2 > 4) {
-                        vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c2n), beta_t4), vmulq_f32(vc2n, alpha_t4)));
+                        vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c2n), beta_v4), vmulq_f32(vc2n, alpha_v4)));
                         c2n += 4;
                         nr2 -= 4;
                         vc2n = vc22;
@@ -616,15 +618,15 @@ void nnp_sgemm_upto_4x12(size_t mr,
                 }
                 switch (nr2) {
                     case 4:
-                        vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c2n), beta_t4), vmulq_f32(vc2n, alpha_t4)));
+                        vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c2n), beta_v4), vmulq_f32(vc2n, alpha_v4)));
                         break;
                     case 3:
-                        vst1_lane_f32(c2n + 2, vadd_f32(vmul_f32(vld1_f32(c2n + 2), beta_t2), vmul_f32(vget_high_f32(vc2n), alpha_t2)), 0);
+                        vst1_lane_f32(c2n + 2, vadd_f32(vmul_f32(vld1_f32(c2n + 2), beta_v2), vmul_f32(vget_high_f32(vc2n), alpha_v2)), 0);
                     case 2:
-                        vst1_f32(c2n, vadd_f32(vmul_f32(vld1_f32(c2n), beta_t2), vmul_f32(vget_low_f32(vc2n), alpha_t2)));
+                        vst1_f32(c2n, vadd_f32(vmul_f32(vld1_f32(c2n), beta_v2), vmul_f32(vget_low_f32(vc2n), alpha_v2)));
                         break;
                     case 1:
-                        vst1_lane_f32(c2n, vadd_f32(vmul_f32(vld1_f32(c2n), beta_t2), vmul_f32(vget_low_f32(vc2n), alpha_t2)), 0);
+                        vst1_lane_f32(c2n, vadd_f32(vmul_f32(vld1_f32(c2n), beta_v2), vmul_f32(vget_low_f32(vc2n), alpha_v2)), 0);
                         break;
                     default:
                         break;
@@ -635,12 +637,12 @@ void nnp_sgemm_upto_4x12(size_t mr,
                     size_t nr3 = nr;
                     float* c3n = c;
                     if (nr3 > 4) {
-                        vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c3n), beta_t4), vmulq_f32(vc3n, alpha_t4)));
+                        vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c3n), beta_v4), vmulq_f32(vc3n, alpha_v4)));
                         c3n += 4;
                         nr3 -= 4;
                         vc3n = vc31;
                         if (nr3 > 4) {
-                            vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c3n), beta_t4), vmulq_f32(vc3n, alpha_t4)));
+                            vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c3n), beta_v4), vmulq_f32(vc3n, alpha_v4)));
                             c3n += 4;
                             nr3 -= 4;
                             vc3n = vc32;
@@ -648,15 +650,15 @@ void nnp_sgemm_upto_4x12(size_t mr,
                     }
                     switch (nr3) {
                         case 4:
-                            vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c3n), beta_t4), vmulq_f32(vc3n, alpha_t4)));
+                            vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c3n), beta_v4), vmulq_f32(vc3n, alpha_v4)));
                             break;
                         case 3:
-                            vst1_lane_f32(c3n + 2, vadd_f32(vmul_f32(vld1_f32(c3n + 2), beta_t2), vmul_f32(vget_high_f32(vc3n), alpha_t2)), 0);
+                            vst1_lane_f32(c3n + 2, vadd_f32(vmul_f32(vld1_f32(c3n + 2), beta_v2), vmul_f32(vget_high_f32(vc3n), alpha_v2)), 0);
                         case 2:
-                            vst1_f32(c3n, vadd_f32(vmul_f32(vld1_f32(c3n), beta_t2), vmul_f32(vget_low_f32(vc3n), alpha_t2)));
+                            vst1_f32(c3n, vadd_f32(vmul_f32(vld1_f32(c3n), beta_v2), vmul_f32(vget_low_f32(vc3n), alpha_v2)));
                             break;
                         case 1:
-                            vst1_lane_f32(c3n, vadd_f32(vmul_f32(vld1_f32(c3n), beta_t2), vmul_f32(vget_low_f32(vc3n), alpha_t2)), 0);
+                            vst1_lane_f32(c3n, vadd_f32(vmul_f32(vld1_f32(c3n), beta_v2), vmul_f32(vget_low_f32(vc3n), alpha_v2)), 0);
                             break;
                         default:
                             break;
@@ -770,58 +772,58 @@ void nnp_sgemm_only_8x8(size_t k,
     } while (--k);
     
     // c = alpha * a * b + beta * c
-    float32x4_t alpha_t = vdupq_n_f32(alpha);
+    float32x4_t alpha_v = vdupq_n_f32(alpha);
     
     if (update) {
-        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc00, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc01, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc00, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc01, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc10, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc11, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc10, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc11, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc20, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc21, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc20, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc21, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc30, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc31, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc30, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc31, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc40, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc41, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc40, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc41, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc50, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc51, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc50, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc51, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc60, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc61, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc60, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc61, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc70, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc71, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vld1q_f32_aligned(c + 0), vmulq_f32(vc70, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vld1q_f32_aligned(c + 4), vmulq_f32(vc71, alpha_v)));
     } else {
-        float32x4_t beta_t = vdupq_n_f32(beta);
+        float32x4_t beta_v = vdupq_n_f32(beta);
         
-        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc00, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc01, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_v), vmulq_f32(vc00, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_v), vmulq_f32(vc01, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc10, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc11, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_v), vmulq_f32(vc10, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_v), vmulq_f32(vc11, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc20, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc21, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_v), vmulq_f32(vc20, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_v), vmulq_f32(vc21, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc30, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc31, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_v), vmulq_f32(vc30, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_v), vmulq_f32(vc31, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc40, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc41, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_v), vmulq_f32(vc40, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_v), vmulq_f32(vc41, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc50, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc51, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_v), vmulq_f32(vc50, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_v), vmulq_f32(vc51, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc60, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc61, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_v), vmulq_f32(vc60, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_v), vmulq_f32(vc61, alpha_v)));
         c += output_col;
-        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_t), vmulq_f32(vc70, alpha_t)));
-        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_t), vmulq_f32(vc71, alpha_t)));
+        vst1q_f32(c + 0, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 0), beta_v), vmulq_f32(vc70, alpha_v)));
+        vst1q_f32(c + 4, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c + 4), beta_v), vmulq_f32(vc71, alpha_v)));
     }
 }
 
@@ -1032,32 +1034,32 @@ void nnp_sgemm_upto_8x8(size_t mr,
     } while (--k);
     
     // c = alpha * a * b + beta * c
-    float32x4_t alpha_t4 = vdupq_n_f32(alpha);
-    float32x2_t alpha_t2 = vdup_n_f32(alpha);
-    float32x4_t beta_t4 = vdupq_n_f32(beta);
-    float32x2_t beta_t2 = vdup_n_f32(beta);
+    float32x4_t alpha_v4 = vdupq_n_f32(alpha);
+    float32x2_t alpha_v2 = vdup_n_f32(alpha);
+    float32x4_t beta_v4 = vdupq_n_f32(beta);
+    float32x2_t beta_v2 = vdup_n_f32(beta);
     
     if (update) {
         float32x4_t vc0n = vc00;
         size_t nr0 = nr;
         float* c0n = c;
         if (nr0 > 4) {
-            vst1q_f32(c0n, vaddq_f32(vld1q_f32_aligned(c0n), vmulq_f32(vc0n, alpha_t4)));
+            vst1q_f32(c0n, vaddq_f32(vld1q_f32_aligned(c0n), vmulq_f32(vc0n, alpha_v4)));
             c0n += 4;
             nr0 -= 4;
             vc0n = vc01;
         }
         switch (nr0) {
             case 4:
-                vst1q_f32(c0n, vaddq_f32(vld1q_f32_aligned(c0n), vmulq_f32(vc0n, alpha_t4)));
+                vst1q_f32(c0n, vaddq_f32(vld1q_f32_aligned(c0n), vmulq_f32(vc0n, alpha_v4)));
                 break;
             case 3:
-                vst1_lane_f32(c0n + 2, vadd_f32(vld1_dup_f32(c0n + 2), vmul_f32(vget_high_f32(vc0n), alpha_t2)), 0);
+                vst1_lane_f32(c0n + 2, vadd_f32(vld1_dup_f32(c0n + 2), vmul_f32(vget_high_f32(vc0n), alpha_v2)), 0);
             case 2:
-                vst1_f32(c0n, vadd_f32(vld1_f32(c0n), vmul_f32(vget_low_f32(vc0n), alpha_t2)));
+                vst1_f32(c0n, vadd_f32(vld1_f32(c0n), vmul_f32(vget_low_f32(vc0n), alpha_v2)));
                 break;
             case 1:
-                vst1_lane_f32(c0n, vadd_f32(vld1_dup_f32(c0n), vmul_f32(vget_low_f32(vc0n), alpha_t2)), 0);
+                vst1_lane_f32(c0n, vadd_f32(vld1_dup_f32(c0n), vmul_f32(vget_low_f32(vc0n), alpha_v2)), 0);
                 break;
             default:
                 break;
@@ -1068,22 +1070,22 @@ void nnp_sgemm_upto_8x8(size_t mr,
             size_t nr1 = nr;
             float* c1n = c;
             if (nr1 > 4) {
-                vst1q_f32(c1n, vaddq_f32(vld1q_f32_aligned(c1n), vmulq_f32(vc1n, alpha_t4)));
+                vst1q_f32(c1n, vaddq_f32(vld1q_f32_aligned(c1n), vmulq_f32(vc1n, alpha_v4)));
                 c1n += 4;
                 nr1 -= 4;
                 vc1n = vc11;
             }
             switch (nr1) {
                 case 4:
-                    vst1q_f32(c1n, vaddq_f32(vld1q_f32_aligned(c1n), vmulq_f32(vc1n, alpha_t4)));
+                    vst1q_f32(c1n, vaddq_f32(vld1q_f32_aligned(c1n), vmulq_f32(vc1n, alpha_v4)));
                     break;
                 case 3:
-                    vst1_lane_f32(c1n + 2, vadd_f32(vld1_dup_f32(c1n + 2), vmul_f32(vget_high_f32(vc1n), alpha_t2)), 0);
+                    vst1_lane_f32(c1n + 2, vadd_f32(vld1_dup_f32(c1n + 2), vmul_f32(vget_high_f32(vc1n), alpha_v2)), 0);
                 case 2:
-                    vst1_f32(c1n, vadd_f32(vld1_f32(c1n), vmul_f32(vget_low_f32(vc1n), alpha_t2)));
+                    vst1_f32(c1n, vadd_f32(vld1_f32(c1n), vmul_f32(vget_low_f32(vc1n), alpha_v2)));
                     break;
                 case 1:
-                    vst1_lane_f32(c1n, vadd_f32(vld1_dup_f32(c1n), vmul_f32(vget_low_f32(vc1n), alpha_t2)), 0);
+                    vst1_lane_f32(c1n, vadd_f32(vld1_dup_f32(c1n), vmul_f32(vget_low_f32(vc1n), alpha_v2)), 0);
                     break;
                 default:
                     break;
@@ -1094,22 +1096,22 @@ void nnp_sgemm_upto_8x8(size_t mr,
                 size_t nr2 = nr;
                 float* c2n = c;
                 if (nr2 > 4) {
-                    vst1q_f32(c2n, vaddq_f32(vld1q_f32_aligned(c2n), vmulq_f32(vc2n, alpha_t4)));
+                    vst1q_f32(c2n, vaddq_f32(vld1q_f32_aligned(c2n), vmulq_f32(vc2n, alpha_v4)));
                     c2n += 4;
                     nr2 -= 4;
                     vc2n = vc21;
                 }
                 switch (nr2) {
                     case 4:
-                        vst1q_f32(c2n, vaddq_f32(vld1q_f32_aligned(c2n), vmulq_f32(vc2n, alpha_t4)));
+                        vst1q_f32(c2n, vaddq_f32(vld1q_f32_aligned(c2n), vmulq_f32(vc2n, alpha_v4)));
                         break;
                     case 3:
-                        vst1_lane_f32(c2n + 2, vadd_f32(vld1_dup_f32(c2n + 2), vmul_f32(vget_high_f32(vc2n), alpha_t2)), 0);
+                        vst1_lane_f32(c2n + 2, vadd_f32(vld1_dup_f32(c2n + 2), vmul_f32(vget_high_f32(vc2n), alpha_v2)), 0);
                     case 2:
-                        vst1_f32(c2n, vadd_f32(vld1_f32(c2n), vmul_f32(vget_low_f32(vc2n), alpha_t2)));
+                        vst1_f32(c2n, vadd_f32(vld1_f32(c2n), vmul_f32(vget_low_f32(vc2n), alpha_v2)));
                         break;
                     case 1:
-                        vst1_lane_f32(c2n, vadd_f32(vld1_dup_f32(c2n), vmul_f32(vget_low_f32(vc2n), alpha_t2)), 0);
+                        vst1_lane_f32(c2n, vadd_f32(vld1_dup_f32(c2n), vmul_f32(vget_low_f32(vc2n), alpha_v2)), 0);
                         break;
                     default:
                         break;
@@ -1120,22 +1122,22 @@ void nnp_sgemm_upto_8x8(size_t mr,
                     size_t nr3 = nr;
                     float* c3n = c;
                     if (nr3 > 4) {
-                        vst1q_f32(c3n, vaddq_f32(vld1q_f32_aligned(c3n), vmulq_f32(vc3n, alpha_t4)));
+                        vst1q_f32(c3n, vaddq_f32(vld1q_f32_aligned(c3n), vmulq_f32(vc3n, alpha_v4)));
                         c3n += 4;
                         nr3 -= 4;
                         vc3n = vc31;
                     }
                     switch (nr3) {
                         case 4:
-                            vst1q_f32(c3n, vaddq_f32(vld1q_f32_aligned(c3n), vmulq_f32(vc3n, alpha_t4)));
+                            vst1q_f32(c3n, vaddq_f32(vld1q_f32_aligned(c3n), vmulq_f32(vc3n, alpha_v4)));
                             break;
                         case 3:
-                            vst1_lane_f32(c3n + 2, vadd_f32(vld1_dup_f32(c3n + 2), vmul_f32(vget_high_f32(vc3n), alpha_t2)), 0);
+                            vst1_lane_f32(c3n + 2, vadd_f32(vld1_dup_f32(c3n + 2), vmul_f32(vget_high_f32(vc3n), alpha_v2)), 0);
                         case 2:
-                            vst1_f32(c3n, vadd_f32(vld1_f32(c3n), vmul_f32(vget_low_f32(vc3n), alpha_t2)));
+                            vst1_f32(c3n, vadd_f32(vld1_f32(c3n), vmul_f32(vget_low_f32(vc3n), alpha_v2)));
                             break;
                         case 1:
-                            vst1_lane_f32(c3n, vadd_f32(vld1_dup_f32(c3n), vmul_f32(vget_low_f32(vc3n), alpha_t2)), 0);
+                            vst1_lane_f32(c3n, vadd_f32(vld1_dup_f32(c3n), vmul_f32(vget_low_f32(vc3n), alpha_v2)), 0);
                             break;
                         default:
                             break;
@@ -1146,22 +1148,22 @@ void nnp_sgemm_upto_8x8(size_t mr,
                         size_t nr4 = nr;
                         float* c4n = c;
                         if (nr4 > 4) {
-                            vst1q_f32(c4n, vaddq_f32(vld1q_f32_aligned(c4n), vmulq_f32(vc4n, alpha_t4)));
+                            vst1q_f32(c4n, vaddq_f32(vld1q_f32_aligned(c4n), vmulq_f32(vc4n, alpha_v4)));
                             c4n += 4;
                             nr4 -= 4;
                             vc4n = vc41;
                         }
                         switch (nr4) {
                             case 4:
-                                vst1q_f32(c4n, vaddq_f32(vld1q_f32_aligned(c4n), vmulq_f32(vc4n, alpha_t4)));
+                                vst1q_f32(c4n, vaddq_f32(vld1q_f32_aligned(c4n), vmulq_f32(vc4n, alpha_v4)));
                                 break;
                             case 3:
-                                vst1_lane_f32(c4n + 2, vadd_f32(vld1_dup_f32(c4n + 2), vmul_f32(vget_high_f32(vc4n), alpha_t2)), 0);
+                                vst1_lane_f32(c4n + 2, vadd_f32(vld1_dup_f32(c4n + 2), vmul_f32(vget_high_f32(vc4n), alpha_v2)), 0);
                             case 2:
-                                vst1_f32(c4n, vadd_f32(vld1_f32(c4n), vmul_f32(vget_low_f32(vc4n), alpha_t2)));
+                                vst1_f32(c4n, vadd_f32(vld1_f32(c4n), vmul_f32(vget_low_f32(vc4n), alpha_v2)));
                                 break;
                             case 1:
-                                vst1_lane_f32(c4n, vadd_f32(vld1_dup_f32(c4n), vmul_f32(vget_low_f32(vc4n), alpha_t2)), 0);
+                                vst1_lane_f32(c4n, vadd_f32(vld1_dup_f32(c4n), vmul_f32(vget_low_f32(vc4n), alpha_v2)), 0);
                                 break;
                             default:
                                 break;
@@ -1172,22 +1174,22 @@ void nnp_sgemm_upto_8x8(size_t mr,
                             size_t nr5 = nr;
                             float* c5n = c;
                             if (nr5 > 4) {
-                                vst1q_f32(c5n, vaddq_f32(vld1q_f32_aligned(c5n), vmulq_f32(vc5n, alpha_t4)));
+                                vst1q_f32(c5n, vaddq_f32(vld1q_f32_aligned(c5n), vmulq_f32(vc5n, alpha_v4)));
                                 c5n += 4;
                                 nr5 -= 4;
                                 vc5n = vc51;
                             }
                             switch (nr5) {
                                 case 4:
-                                    vst1q_f32(c5n, vaddq_f32(vld1q_f32_aligned(c5n), vmulq_f32(vc5n, alpha_t4)));
+                                    vst1q_f32(c5n, vaddq_f32(vld1q_f32_aligned(c5n), vmulq_f32(vc5n, alpha_v4)));
                                     break;
                                 case 3:
-                                    vst1_lane_f32(c5n + 2, vadd_f32(vld1_dup_f32(c5n + 2), vmul_f32(vget_high_f32(vc5n), alpha_t2)), 0);
+                                    vst1_lane_f32(c5n + 2, vadd_f32(vld1_dup_f32(c5n + 2), vmul_f32(vget_high_f32(vc5n), alpha_v2)), 0);
                                 case 2:
-                                    vst1_f32(c5n, vadd_f32(vld1_f32(c5n), vmul_f32(vget_low_f32(vc5n), alpha_t2)));
+                                    vst1_f32(c5n, vadd_f32(vld1_f32(c5n), vmul_f32(vget_low_f32(vc5n), alpha_v2)));
                                     break;
                                 case 1:
-                                    vst1_lane_f32(c5n, vadd_f32(vld1_dup_f32(c5n), vmul_f32(vget_low_f32(vc5n), alpha_t2)), 0);
+                                    vst1_lane_f32(c5n, vadd_f32(vld1_dup_f32(c5n), vmul_f32(vget_low_f32(vc5n), alpha_v2)), 0);
                                     break;
                                 default:
                                     break;
@@ -1198,22 +1200,22 @@ void nnp_sgemm_upto_8x8(size_t mr,
                                 size_t nr6 = nr;
                                 float* c6n = c;
                                 if (nr6 > 4) {
-                                    vst1q_f32(c6n, vaddq_f32(vld1q_f32_aligned(c6n), vmulq_f32(vc6n, alpha_t4)));
+                                    vst1q_f32(c6n, vaddq_f32(vld1q_f32_aligned(c6n), vmulq_f32(vc6n, alpha_v4)));
                                     c6n += 4;
                                     nr6 -= 4;
                                     vc6n = vc61;
                                 }
                                 switch (nr6) {
                                     case 4:
-                                        vst1q_f32(c6n, vaddq_f32(vld1q_f32_aligned(c6n), vmulq_f32(vc6n, alpha_t4)));
+                                        vst1q_f32(c6n, vaddq_f32(vld1q_f32_aligned(c6n), vmulq_f32(vc6n, alpha_v4)));
                                         break;
                                     case 3:
-                                        vst1_lane_f32(c6n + 2, vadd_f32(vld1_dup_f32(c6n + 2), vmul_f32(vget_high_f32(vc6n), alpha_t2)), 0);
+                                        vst1_lane_f32(c6n + 2, vadd_f32(vld1_dup_f32(c6n + 2), vmul_f32(vget_high_f32(vc6n), alpha_v2)), 0);
                                     case 2:
-                                        vst1_f32(c6n, vadd_f32(vld1_f32(c6n), vmul_f32(vget_low_f32(vc6n), alpha_t2)));
+                                        vst1_f32(c6n, vadd_f32(vld1_f32(c6n), vmul_f32(vget_low_f32(vc6n), alpha_v2)));
                                         break;
                                     case 1:
-                                        vst1_lane_f32(c6n, vadd_f32(vld1_dup_f32(c6n), vmul_f32(vget_low_f32(vc6n), alpha_t2)), 0);
+                                        vst1_lane_f32(c6n, vadd_f32(vld1_dup_f32(c6n), vmul_f32(vget_low_f32(vc6n), alpha_v2)), 0);
                                         break;
                                     default:
                                         break;
@@ -1224,22 +1226,22 @@ void nnp_sgemm_upto_8x8(size_t mr,
                                     size_t nr7 = nr;
                                     float* c7n = c;
                                     if (nr7 > 4) {
-                                        vst1q_f32(c7n, vaddq_f32(vld1q_f32_aligned(c7n), vmulq_f32(vc7n, alpha_t4)));
+                                        vst1q_f32(c7n, vaddq_f32(vld1q_f32_aligned(c7n), vmulq_f32(vc7n, alpha_v4)));
                                         c7n += 4;
                                         nr7 -= 4;
                                         vc7n = vc71;
                                     }
                                     switch (nr7) {
                                         case 4:
-                                            vst1q_f32(c7n, vaddq_f32(vld1q_f32_aligned(c7n), vmulq_f32(vc7n, alpha_t4)));
+                                            vst1q_f32(c7n, vaddq_f32(vld1q_f32_aligned(c7n), vmulq_f32(vc7n, alpha_v4)));
                                             break;
                                         case 3:
-                                            vst1_lane_f32(c7n + 2, vadd_f32(vld1_dup_f32(c7n + 2), vmul_f32(vget_high_f32(vc7n), alpha_t2)), 0);
+                                            vst1_lane_f32(c7n + 2, vadd_f32(vld1_dup_f32(c7n + 2), vmul_f32(vget_high_f32(vc7n), alpha_v2)), 0);
                                         case 2:
-                                            vst1_f32(c7n, vadd_f32(vld1_f32(c7n), vmul_f32(vget_low_f32(vc7n), alpha_t2)));
+                                            vst1_f32(c7n, vadd_f32(vld1_f32(c7n), vmul_f32(vget_low_f32(vc7n), alpha_v2)));
                                             break;
                                         case 1:
-                                            vst1_lane_f32(c7n, vadd_f32(vld1_dup_f32(c7n), vmul_f32(vget_low_f32(vc7n), alpha_t2)), 0);
+                                            vst1_lane_f32(c7n, vadd_f32(vld1_dup_f32(c7n), vmul_f32(vget_low_f32(vc7n), alpha_v2)), 0);
                                             break;
                                         default:
                                             break;
@@ -1256,22 +1258,22 @@ void nnp_sgemm_upto_8x8(size_t mr,
         size_t nr0 = nr;
         float* c0n = c;
         if (nr0 > 4) {
-            vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c0n), beta_t4), vmulq_f32(vc0n, alpha_t4)));
+            vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c0n), beta_v4), vmulq_f32(vc0n, alpha_v4)));
             c0n += 4;
             nr0 -= 4;
             vc0n = vc01;
         }
         switch (nr0) {
             case 4:
-                vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c0n), beta_t4), vmulq_f32(vc0n, alpha_t4)));
+                vst1q_f32(c0n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c0n), beta_v4), vmulq_f32(vc0n, alpha_v4)));
                 break;
             case 3:
-                vst1_lane_f32(c0n + 2, vadd_f32(vmul_f32(vld1_f32(c0n + 2), beta_t2), vmul_f32(vget_high_f32(vc0n), alpha_t2)), 0);
+                vst1_lane_f32(c0n + 2, vadd_f32(vmul_f32(vld1_f32(c0n + 2), beta_v2), vmul_f32(vget_high_f32(vc0n), alpha_v2)), 0);
             case 2:
-                vst1_f32(c0n, vadd_f32(vmul_f32(vld1_f32(c0n), beta_t2), vmul_f32(vget_low_f32(vc0n), alpha_t2)));
+                vst1_f32(c0n, vadd_f32(vmul_f32(vld1_f32(c0n), beta_v2), vmul_f32(vget_low_f32(vc0n), alpha_v2)));
                 break;
             case 1:
-                vst1_lane_f32(c0n, vadd_f32(vmul_f32(vld1_f32(c0n), beta_t2), vmul_f32(vget_low_f32(vc0n), alpha_t2)), 0);
+                vst1_lane_f32(c0n, vadd_f32(vmul_f32(vld1_f32(c0n), beta_v2), vmul_f32(vget_low_f32(vc0n), alpha_v2)), 0);
                 break;
             default:
                 break;
@@ -1282,22 +1284,22 @@ void nnp_sgemm_upto_8x8(size_t mr,
             size_t nr1 = nr;
             float* c1n = c;
             if (nr1 > 4) {
-                vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c1n), beta_t4), vmulq_f32(vc1n, alpha_t4)));
+                vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c1n), beta_v4), vmulq_f32(vc1n, alpha_v4)));
                 c1n += 4;
                 nr1 -= 4;
                 vc1n = vc11;
             }
             switch (nr1) {
                 case 4:
-                    vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c1n), beta_t4), vmulq_f32(vc1n, alpha_t4)));
+                    vst1q_f32(c1n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c1n), beta_v4), vmulq_f32(vc1n, alpha_v4)));
                     break;
                 case 3:
-                    vst1_lane_f32(c1n + 2, vadd_f32(vmul_f32(vld1_f32(c1n + 2), beta_t2), vmul_f32(vget_high_f32(vc1n), alpha_t2)), 0);
+                    vst1_lane_f32(c1n + 2, vadd_f32(vmul_f32(vld1_f32(c1n + 2), beta_v2), vmul_f32(vget_high_f32(vc1n), alpha_v2)), 0);
                 case 2:
-                    vst1_f32(c1n, vadd_f32(vmul_f32(vld1_f32(c1n), beta_t2), vmul_f32(vget_low_f32(vc1n), alpha_t2)));
+                    vst1_f32(c1n, vadd_f32(vmul_f32(vld1_f32(c1n), beta_v2), vmul_f32(vget_low_f32(vc1n), alpha_v2)));
                     break;
                 case 1:
-                    vst1_lane_f32(c1n, vadd_f32(vmul_f32(vld1_f32(c1n), beta_t2), vmul_f32(vget_low_f32(vc1n), alpha_t2)), 0);
+                    vst1_lane_f32(c1n, vadd_f32(vmul_f32(vld1_f32(c1n), beta_v2), vmul_f32(vget_low_f32(vc1n), alpha_v2)), 0);
                     break;
                 default:
                     break;
@@ -1308,22 +1310,22 @@ void nnp_sgemm_upto_8x8(size_t mr,
                 size_t nr2 = nr;
                 float* c2n = c;
                 if (nr2 > 4) {
-                    vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c2n), beta_t4), vmulq_f32(vc2n, alpha_t4)));
+                    vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c2n), beta_v4), vmulq_f32(vc2n, alpha_v4)));
                     c2n += 4;
                     nr2 -= 4;
                     vc2n = vc21;
                 }
                 switch (nr2) {
                     case 4:
-                        vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c2n), beta_t4), vmulq_f32(vc2n, alpha_t4)));
+                        vst1q_f32(c2n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c2n), beta_v4), vmulq_f32(vc2n, alpha_v4)));
                         break;
                     case 3:
-                        vst1_lane_f32(c2n + 2, vadd_f32(vmul_f32(vld1_f32(c2n + 2), beta_t2), vmul_f32(vget_high_f32(vc2n), alpha_t2)), 0);
+                        vst1_lane_f32(c2n + 2, vadd_f32(vmul_f32(vld1_f32(c2n + 2), beta_v2), vmul_f32(vget_high_f32(vc2n), alpha_v2)), 0);
                     case 2:
-                        vst1_f32(c2n, vadd_f32(vmul_f32(vld1_f32(c2n), beta_t2), vmul_f32(vget_low_f32(vc2n), alpha_t2)));
+                        vst1_f32(c2n, vadd_f32(vmul_f32(vld1_f32(c2n), beta_v2), vmul_f32(vget_low_f32(vc2n), alpha_v2)));
                         break;
                     case 1:
-                        vst1_lane_f32(c2n, vadd_f32(vmul_f32(vld1_f32(c2n), beta_t2), vmul_f32(vget_low_f32(vc2n), alpha_t2)), 0);
+                        vst1_lane_f32(c2n, vadd_f32(vmul_f32(vld1_f32(c2n), beta_v2), vmul_f32(vget_low_f32(vc2n), alpha_v2)), 0);
                         break;
                     default:
                         break;
@@ -1334,22 +1336,22 @@ void nnp_sgemm_upto_8x8(size_t mr,
                     size_t nr3 = nr;
                     float* c3n = c;
                     if (nr3 > 4) {
-                        vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c3n), beta_t4), vmulq_f32(vc3n, alpha_t4)));
+                        vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c3n), beta_v4), vmulq_f32(vc3n, alpha_v4)));
                         c3n += 4;
                         nr3 -= 4;
                         vc3n = vc31;
                     }
                     switch (nr3) {
                         case 4:
-                            vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c3n), beta_t4), vmulq_f32(vc3n, alpha_t4)));
+                            vst1q_f32(c3n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c3n), beta_v4), vmulq_f32(vc3n, alpha_v4)));
                             break;
                         case 3:
-                            vst1_lane_f32(c3n + 2, vadd_f32(vmul_f32(vld1_f32(c3n + 2), beta_t2), vmul_f32(vget_high_f32(vc3n), alpha_t2)), 0);
+                            vst1_lane_f32(c3n + 2, vadd_f32(vmul_f32(vld1_f32(c3n + 2), beta_v2), vmul_f32(vget_high_f32(vc3n), alpha_v2)), 0);
                         case 2:
-                            vst1_f32(c3n, vadd_f32(vmul_f32(vld1_f32(c3n), beta_t2), vmul_f32(vget_low_f32(vc3n), alpha_t2)));
+                            vst1_f32(c3n, vadd_f32(vmul_f32(vld1_f32(c3n), beta_v2), vmul_f32(vget_low_f32(vc3n), alpha_v2)));
                             break;
                         case 1:
-                            vst1_lane_f32(c3n, vadd_f32(vmul_f32(vld1_f32(c3n), beta_t2), vmul_f32(vget_low_f32(vc3n), alpha_t2)), 0);
+                            vst1_lane_f32(c3n, vadd_f32(vmul_f32(vld1_f32(c3n), beta_v2), vmul_f32(vget_low_f32(vc3n), alpha_v2)), 0);
                             break;
                         default:
                             break;
@@ -1360,22 +1362,22 @@ void nnp_sgemm_upto_8x8(size_t mr,
                         size_t nr4 = nr;
                         float* c4n = c;
                         if (nr4 > 4) {
-                            vst1q_f32(c4n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c4n), beta_t4), vmulq_f32(vc4n, alpha_t4)));
+                            vst1q_f32(c4n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c4n), beta_v4), vmulq_f32(vc4n, alpha_v4)));
                             c4n += 4;
                             nr4 -= 4;
                             vc4n = vc41;
                         }
                         switch (nr4) {
                             case 4:
-                                vst1q_f32(c4n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c4n), beta_t4), vmulq_f32(vc4n, alpha_t4)));
+                                vst1q_f32(c4n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c4n), beta_v4), vmulq_f32(vc4n, alpha_v4)));
                                 break;
                             case 3:
-                                vst1_lane_f32(c4n + 2, vadd_f32(vmul_f32(vld1_f32(c4n + 2), beta_t2), vmul_f32(vget_high_f32(vc4n), alpha_t2)), 0);
+                                vst1_lane_f32(c4n + 2, vadd_f32(vmul_f32(vld1_f32(c4n + 2), beta_v2), vmul_f32(vget_high_f32(vc4n), alpha_v2)), 0);
                             case 2:
-                                vst1_f32(c4n, vadd_f32(vmul_f32(vld1_f32(c4n), beta_t2), vmul_f32(vget_low_f32(vc4n), alpha_t2)));
+                                vst1_f32(c4n, vadd_f32(vmul_f32(vld1_f32(c4n), beta_v2), vmul_f32(vget_low_f32(vc4n), alpha_v2)));
                                 break;
                             case 1:
-                                vst1_lane_f32(c4n, vadd_f32(vmul_f32(vld1_f32(c4n), beta_t2), vmul_f32(vget_low_f32(vc4n), alpha_t2)), 0);
+                                vst1_lane_f32(c4n, vadd_f32(vmul_f32(vld1_f32(c4n), beta_v2), vmul_f32(vget_low_f32(vc4n), alpha_v2)), 0);
                                 break;
                             default:
                                 break;
@@ -1386,22 +1388,22 @@ void nnp_sgemm_upto_8x8(size_t mr,
                             size_t nr5 = nr;
                             float* c5n = c;
                             if (nr5 > 4) {
-                                vst1q_f32(c5n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c5n), beta_t4), vmulq_f32(vc5n, alpha_t4)));
+                                vst1q_f32(c5n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c5n), beta_v4), vmulq_f32(vc5n, alpha_v4)));
                                 c5n += 4;
                                 nr5 -= 4;
                                 vc5n = vc51;
                             }
                             switch (nr5) {
                                 case 4:
-                                    vst1q_f32(c5n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c5n), beta_t4), vmulq_f32(vc5n, alpha_t4)));
+                                    vst1q_f32(c5n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c5n), beta_v4), vmulq_f32(vc5n, alpha_v4)));
                                     break;
                                 case 3:
-                                    vst1_lane_f32(c5n + 2, vadd_f32(vmul_f32(vld1_f32(c5n + 2), beta_t2), vmul_f32(vget_high_f32(vc5n), alpha_t2)), 0);
+                                    vst1_lane_f32(c5n + 2, vadd_f32(vmul_f32(vld1_f32(c5n + 2), beta_v2), vmul_f32(vget_high_f32(vc5n), alpha_v2)), 0);
                                 case 2:
-                                    vst1_f32(c5n, vadd_f32(vmul_f32(vld1_f32(c5n), beta_t2), vmul_f32(vget_low_f32(vc5n), alpha_t2)));
+                                    vst1_f32(c5n, vadd_f32(vmul_f32(vld1_f32(c5n), beta_v2), vmul_f32(vget_low_f32(vc5n), alpha_v2)));
                                     break;
                                 case 1:
-                                    vst1_lane_f32(c5n, vadd_f32(vmul_f32(vld1_f32(c5n), beta_t2), vmul_f32(vget_low_f32(vc5n), alpha_t2)), 0);
+                                    vst1_lane_f32(c5n, vadd_f32(vmul_f32(vld1_f32(c5n), beta_v2), vmul_f32(vget_low_f32(vc5n), alpha_v2)), 0);
                                     break;
                                 default:
                                     break;
@@ -1412,22 +1414,22 @@ void nnp_sgemm_upto_8x8(size_t mr,
                                 size_t nr6 = nr;
                                 float* c6n = c;
                                 if (nr6 > 4) {
-                                    vst1q_f32(c6n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c6n), beta_t4), vmulq_f32(vc6n, alpha_t4)));
+                                    vst1q_f32(c6n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c6n), beta_v4), vmulq_f32(vc6n, alpha_v4)));
                                     c6n += 4;
                                     nr6 -= 4;
                                     vc6n = vc61;
                                 }
                                 switch (nr6) {
                                     case 4:
-                                        vst1q_f32(c6n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c6n), beta_t4), vmulq_f32(vc6n, alpha_t4)));
+                                        vst1q_f32(c6n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c6n), beta_v4), vmulq_f32(vc6n, alpha_v4)));
                                         break;
                                     case 3:
-                                        vst1_lane_f32(c6n + 2, vadd_f32(vmul_f32(vld1_f32(c6n + 2), beta_t2), vmul_f32(vget_high_f32(vc6n), alpha_t2)), 0);
+                                        vst1_lane_f32(c6n + 2, vadd_f32(vmul_f32(vld1_f32(c6n + 2), beta_v2), vmul_f32(vget_high_f32(vc6n), alpha_v2)), 0);
                                     case 2:
-                                        vst1_f32(c6n, vadd_f32(vmul_f32(vld1_f32(c6n), beta_t2), vmul_f32(vget_low_f32(vc6n), alpha_t2)));
+                                        vst1_f32(c6n, vadd_f32(vmul_f32(vld1_f32(c6n), beta_v2), vmul_f32(vget_low_f32(vc6n), alpha_v2)));
                                         break;
                                     case 1:
-                                        vst1_lane_f32(c6n, vadd_f32(vmul_f32(vld1_f32(c6n), beta_t2), vmul_f32(vget_low_f32(vc6n), alpha_t2)), 0);
+                                        vst1_lane_f32(c6n, vadd_f32(vmul_f32(vld1_f32(c6n), beta_v2), vmul_f32(vget_low_f32(vc6n), alpha_v2)), 0);
                                         break;
                                     default:
                                         break;
@@ -1438,22 +1440,22 @@ void nnp_sgemm_upto_8x8(size_t mr,
                                     size_t nr7 = nr;
                                     float* c7n = c;
                                     if (nr7 > 4) {
-                                        vst1q_f32(c7n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c7n), beta_t4), vmulq_f32(vc7n, alpha_t4)));
+                                        vst1q_f32(c7n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c7n), beta_v4), vmulq_f32(vc7n, alpha_v4)));
                                         c7n += 4;
                                         nr7 -= 4;
                                         vc7n = vc71;
                                     }
                                     switch (nr7) {
                                         case 4:
-                                            vst1q_f32(c7n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c7n), beta_t4), vmulq_f32(vc7n, alpha_t4)));
+                                            vst1q_f32(c7n, vaddq_f32(vmulq_f32(vld1q_f32_aligned(c7n), beta_v4), vmulq_f32(vc7n, alpha_v4)));
                                             break;
                                         case 3:
-                                            vst1_lane_f32(c7n + 2, vadd_f32(vmul_f32(vld1_f32(c7n + 2), beta_t2), vmul_f32(vget_high_f32(vc7n), alpha_t2)), 0);
+                                            vst1_lane_f32(c7n + 2, vadd_f32(vmul_f32(vld1_f32(c7n + 2), beta_v2), vmul_f32(vget_high_f32(vc7n), alpha_v2)), 0);
                                         case 2:
-                                            vst1_f32(c7n, vadd_f32(vmul_f32(vld1_f32(c7n), beta_t2), vmul_f32(vget_low_f32(vc7n), alpha_t2)));
+                                            vst1_f32(c7n, vadd_f32(vmul_f32(vld1_f32(c7n), beta_v2), vmul_f32(vget_low_f32(vc7n), alpha_v2)));
                                             break;
                                         case 1:
-                                            vst1_lane_f32(c7n, vadd_f32(vmul_f32(vld1_f32(c7n), beta_t2), vmul_f32(vget_low_f32(vc7n), alpha_t2)), 0);
+                                            vst1_lane_f32(c7n, vadd_f32(vmul_f32(vld1_f32(c7n), beta_v2), vmul_f32(vget_low_f32(vc7n), alpha_v2)), 0);
                                             break;
                                         default:
                                             break;
@@ -1466,4 +1468,49 @@ void nnp_sgemm_upto_8x8(size_t mr,
             }
         }
     }
+}
+
+// modified from https://github.com/Tencent/ncnn/blob/master/src/layer/arm/innerproduct_arm.cpp
+void nnp_sgemm_1x1(size_t m,
+                   size_t n,
+                   size_t k,
+                   const bool trans_b,
+                   const float alpha,
+                   const float beta,
+                   const float *a,
+                   const float *b,
+                   float *c)
+{
+    float sum = 0.0f;
+    float32x4_t sum0 = vdupq_n_f32(0.0f), sum1 = vdupq_n_f32(0.0f);
+    
+    size_t nn = k >> 3;
+    size_t remain = k & 7;
+    
+    for (; nn > 0; nn--) {
+        float32x4_t m1 = vld1q_f32(a);
+        float32x4_t m2 = vld1q_f32(b);
+        sum0 = vmuladdq_f32(sum0, m1, m2);
+
+        m1 = vld1q_f32(a + 4);
+        m2 = vld1q_f32(b + 4);
+        sum1 = vmuladdq_f32(sum1, m1, m2);
+        
+        a += 8;
+        b += 8;
+    }
+    
+    for (; remain > 0; remain--) sum += *a++ * *b++;
+    
+    sum0 = vaddq_f32(sum0, sum1);
+    
+#if __aarch64__
+    sum += vaddvq_f32(sum0);
+#else
+    float32x2_t sumss = vadd_f32(vget_low_f32(sum0), vget_high_f32(sum0));
+    sumss = vpadd_f32(sumss, sumss);
+    sum += vget_lane_f32(sumss, 0);
+#endif
+    
+    *c = sum * alpha + *c * beta;
 }

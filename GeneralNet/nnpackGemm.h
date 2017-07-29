@@ -15,9 +15,10 @@ enum NNPACK_TRANSPOSE {
 };
 
 enum NNPACK_ALGORITHM {
-    nnpackGemmAuto = 151,
-    nnpackGemm4x12 = 152,
-    nnpackGemm8x8  = 153
+    nnpackGemmBaseLine = 151,
+    nnpackGemmAuto     = 152,
+    nnpackGemm4x12     = 153,
+    nnpackGemm8x8      = 154
 };
 
 void nnpack_gemm(const enum NNPACK_ALGORITHM algorithm,

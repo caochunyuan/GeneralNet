@@ -39,6 +39,20 @@ static nnpack_context global_context = {
     .initialized = false
 };
 
+struct NNP_CACHE_ALIGN baseline_gemm_context
+{
+    const bool trans_a;
+    const float alpha;
+    const float beta;
+    const float *a;
+    const float *b;
+    float *c;
+    
+    size_t m;
+    size_t n;
+    size_t k;
+};
+
 struct NNP_CACHE_ALIGN gemm_context
 {
     const bool trans_a;
@@ -80,6 +94,26 @@ void nnpack_init()
     // to check how many threads is NNPACK using, uncomment the next lines
     //    printf("NNPACK is using %zu threads\n",
     //           pthreadpool_get_threads_count(global_context.threadpool));
+}
+
+void baseline_gemm(const struct baseline_gemm_context context[1],
+                   size_t row_block_start,  size_t col_block_start,
+                   size_t row_block_size,   size_t col_block_size)
+{
+    if (row_block_size != 1 || col_block_size != 1) {
+        return;
+    }
+    
+    nnp_sgemm_1x1(
+                  context->m,
+                  context->n,
+                  context->k,
+                  context->trans_a,
+                  context->alpha,
+                  context->beta,
+                  context->a + row_block_start * context->k,
+                  context->b + col_block_start * context->k,
+                  context->c + row_block_start * context->n + col_block_start);
 }
 
 void compute_gemm(const struct gemm_context context[1],
@@ -158,6 +192,28 @@ void nnpack_gemm(const enum NNPACK_ALGORITHM algorithm,
 {
     if (!global_context.initialized) nnpack_init();
     
+    if (algorithm == nnpackGemmBaseLine) {
+        if (transB == nnpackTrans) {
+            struct baseline_gemm_context baseline_gemm_context = {
+                .trans_a = transA == nnpackTrans,
+                .alpha = alpha,
+                .beta = beta,
+                .a = A,
+                .b = B,
+                .c = C,
+                .m = M,
+                .n = N,
+                .k = K,
+            };
+            pthreadpool_compute_2d_tiled(global_context.threadpool,
+                                         (pthreadpool_function_2d_tiled_t) baseline_gemm,
+                                         &baseline_gemm_context,
+                                         M, N,
+                                         1, 1);
+        }
+        return;
+    }
+    
     const size_t output_row = M;
     const size_t output_col = N;
     const size_t reduction_size = K;
@@ -169,6 +225,7 @@ void nnpack_gemm(const enum NNPACK_ALGORITHM algorithm,
     size_t algorithm_col;
     
     switch (algorithm) {
+        case nnpackGemmBaseLine:
         case nnpackGemmAuto:
             if (transA == nnpackNoTrans && transB == nnpackNoTrans) {
                 algorithm_only = nnp_sgemm_only_4x12;
