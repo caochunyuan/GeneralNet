@@ -68,6 +68,7 @@
 		BD87B7C31EA6013000DF731C /* final8.jpg in Resources */ = {isa = PBXBuildFile; fileRef = BD87B7BB1EA6013000DF731C /* final8.jpg */; };
 		BD87B7C41EA6013000DF731C /* final5.jpg in Resources */ = {isa = PBXBuildFile; fileRef = BD87B7BC1EA6013000DF731C /* final5.jpg */; };
 		BD87B7C51EA6013000DF731C /* final6.jpg in Resources */ = {isa = PBXBuildFile; fileRef = BD87B7BD1EA6013000DF731C /* final6.jpg */; };
+		BD8FD9D61F3D88720012F1D5 /* nnpackNoTransGemm.c in Sources */ = {isa = PBXBuildFile; fileRef = BD8FD9D41F3D88720012F1D5 /* nnpackNoTransGemm.c */; };
 		BD9593901EAAE8C80095F009 /* final0.jpg in Resources */ = {isa = PBXBuildFile; fileRef = BD95938F1EAAE8C80095F009 /* final0.jpg */; };
 		BDB3DE081ECF04FF00F9B865 /* final9.jpg in Resources */ = {isa = PBXBuildFile; fileRef = BDB3DE071ECF04FF00F9B865 /* final9.jpg */; };
 		BDCE1C681ED3E928006BBD69 /* CPULayer.m in Sources */ = {isa = PBXBuildFile; fileRef = BDCE1C671ED3E928006BBD69 /* CPULayer.m */; };
@@ -442,6 +443,8 @@
 		BD87B7BB1EA6013000DF731C /* final8.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = final8.jpg; sourceTree = "<group>"; };
 		BD87B7BC1EA6013000DF731C /* final5.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = final5.jpg; sourceTree = "<group>"; };
 		BD87B7BD1EA6013000DF731C /* final6.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = final6.jpg; sourceTree = "<group>"; };
+		BD8FD9D41F3D88720012F1D5 /* nnpackNoTransGemm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nnpackNoTransGemm.c; sourceTree = "<group>"; };
+		BD8FD9D51F3D88720012F1D5 /* nnpackNoTransGemm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nnpackNoTransGemm.h; sourceTree = "<group>"; };
 		BD95938F1EAAE8C80095F009 /* final0.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = final0.jpg; sourceTree = "<group>"; };
 		BDB3DE071ECF04FF00F9B865 /* final9.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = final9.jpg; sourceTree = "<group>"; };
 		BDCE1C661ED3E928006BBD69 /* CPULayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPULayer.h; sourceTree = "<group>"; };
@@ -1242,6 +1245,8 @@
 				BDF9B2321F28599000133506 /* nnpackGemm.c */,
 				BDE005A71F2CE022004048A3 /* nnpackAlgorithm.h */,
 				BDE005A81F2CE022004048A3 /* nnpackAlgorithm.c */,
+				BD8FD9D41F3D88720012F1D5 /* nnpackNoTransGemm.c */,
+				BD8FD9D51F3D88720012F1D5 /* nnpackNoTransGemm.h */,
 				BD2391851F0209F50015EB41 /* fxdiv.h */,
 				BD5887E31EE92F8E00BD47E6 /* pthreadpool.h */,
 				BD2391831F02097F0015EB41 /* threadpool-pthreads.c */,
@@ -1446,6 +1451,7 @@
 				BD87B74D1EA6006C00DF731C /* AppDelegate.m in Sources */,
 				BDCE1C681ED3E928006BBD69 /* CPULayer.m in Sources */,
 				BD87B74A1EA6006C00DF731C /* main.m in Sources */,
+				BD8FD9D61F3D88720012F1D5 /* nnpackNoTransGemm.c in Sources */,
 				BD2391911F020AAF0015EB41 /* eigenGemmWrapper.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

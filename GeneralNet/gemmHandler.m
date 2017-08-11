@@ -9,6 +9,7 @@
 #import "gemmHandler.h"
 #if USE_NNPACK_FOR_GEMM
 #import "nnpackGemm.h"
+#import "nnpackNoTransGemm.h"
 #elif USE_EIGEN_FOR_GEMM
 #import "eigenGemmWrapper.h"
 #else
@@ -28,7 +29,8 @@
                   beta:(const float)beta
                      C:(float *)C {
 #if USE_NNPACK_FOR_GEMM
-    nnpack_gemm(nnpackGemmAuto, nnpackNoTrans, nnpackNoTrans, M, N, K, 1, A, B, 1, C);
+//    nnpack_gemm(nnpackGemmAuto, nnpackNoTrans, nnpackNoTrans, M, N, K, 1, A, B, 1, C);
+    nnpack_no_trans_gemm(M, N, K, 1, A, B, 1, C);
 #elif USE_EIGEN_FOR_GEMM
     [eigenGemmWrapper gemmWithTransA:NO transB:NO M:M N:N K:K alpha:1 A:A B:B beta:1 C:C];
 #else
