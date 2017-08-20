@@ -8,7 +8,9 @@
 
 #import <UIKit/UIKit.h>
 #import <MetalKit/MetalKit.h>
-#import "GeneralNet.h"
+#import "GeneralNetProtocol.h"
+#import "MPSNet.h"
+#import "CPUNet.h"
 
 @interface ViewController : UIViewController
 

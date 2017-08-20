@@ -9,13 +9,14 @@
 /* Begin PBXBuildFile section */
 		BD1633851EB1B2C8009A3CD5 /* metal_squeezenet.dat in Resources */ = {isa = PBXBuildFile; fileRef = BD1633841EB1B2C8009A3CD5 /* metal_squeezenet.dat */; };
 		BD1FFDC01EEFA95D00C5EB1B /* gemmHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = BD1FFDBF1EEFA95D00C5EB1B /* gemmHandler.m */; };
-		BD2190061EC1C66200DB2E29 /* GeneralNet.m in Sources */ = {isa = PBXBuildFile; fileRef = BD2190051EC1C66200DB2E29 /* GeneralNet.m */; };
 		BD2391841F02097F0015EB41 /* threadpool-pthreads.c in Sources */ = {isa = PBXBuildFile; fileRef = BD2391831F02097F0015EB41 /* threadpool-pthreads.c */; };
 		BD2391901F020AAF0015EB41 /* eigenGemm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD23918D1F020AAF0015EB41 /* eigenGemm.cpp */; };
 		BD2391911F020AAF0015EB41 /* eigenGemmWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = BD23918F1F020AAF0015EB41 /* eigenGemmWrapper.mm */; };
 		BD443BF21ED58B800039665A /* cpu_squeezenet.dat in Resources */ = {isa = PBXBuildFile; fileRef = BD443BEF1ED58B7F0039665A /* cpu_squeezenet.dat */; };
 		BD443BF31ED58B800039665A /* cpu_googlenet.dat in Resources */ = {isa = PBXBuildFile; fileRef = BD443BF01ED58B7F0039665A /* cpu_googlenet.dat */; };
 		BD443BF41ED58B800039665A /* cpu_alexnet.dat in Resources */ = {isa = PBXBuildFile; fileRef = BD443BF11ED58B800039665A /* cpu_alexnet.dat */; };
+		BD53BD1C1F4936F400DBD1F2 /* MPSNet.m in Sources */ = {isa = PBXBuildFile; fileRef = BD53BD1B1F4936F400DBD1F2 /* MPSNet.m */; };
+		BD53BD1F1F49378900DBD1F2 /* CPUNet.m in Sources */ = {isa = PBXBuildFile; fileRef = BD53BD1E1F49378900DBD1F2 /* CPUNet.m */; };
 		BD5889411EE9388600BD47E6 /* Cholesky in Resources */ = {isa = PBXBuildFile; fileRef = BD5887EC1EE9388600BD47E6 /* Cholesky */; };
 		BD5889421EE9388600BD47E6 /* CholmodSupport in Resources */ = {isa = PBXBuildFile; fileRef = BD5887ED1EE9388600BD47E6 /* CholmodSupport */; };
 		BD5889431EE9388600BD47E6 /* CMakeLists.txt in Resources */ = {isa = PBXBuildFile; fileRef = BD5887EE1EE9388600BD47E6 /* CMakeLists.txt */; };
@@ -98,8 +99,6 @@
 		BD1633841EB1B2C8009A3CD5 /* metal_squeezenet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = metal_squeezenet.dat; sourceTree = "<group>"; };
 		BD1FFDBE1EEFA95D00C5EB1B /* gemmHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gemmHandler.h; sourceTree = "<group>"; };
 		BD1FFDBF1EEFA95D00C5EB1B /* gemmHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = gemmHandler.m; sourceTree = "<group>"; };
-		BD2190041EC1C66200DB2E29 /* GeneralNet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeneralNet.h; sourceTree = "<group>"; };
-		BD2190051EC1C66200DB2E29 /* GeneralNet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneralNet.m; sourceTree = "<group>"; };
 		BD2391831F02097F0015EB41 /* threadpool-pthreads.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "threadpool-pthreads.c"; sourceTree = "<group>"; };
 		BD2391851F0209F50015EB41 /* fxdiv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fxdiv.h; sourceTree = "<group>"; };
 		BD23918C1F020AAF0015EB41 /* eigenGemm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = eigenGemm.hpp; path = ../eigenGemm.hpp; sourceTree = "<group>"; };
@@ -110,6 +109,10 @@
 		BD443BF01ED58B7F0039665A /* cpu_googlenet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = cpu_googlenet.dat; sourceTree = "<group>"; };
 		BD443BF11ED58B800039665A /* cpu_alexnet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = cpu_alexnet.dat; sourceTree = "<group>"; };
 		BD53BD161F49336B00DBD1F2 /* GeneralNetProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneralNetProtocol.h; sourceTree = "<group>"; };
+		BD53BD1A1F4936F400DBD1F2 /* MPSNet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MPSNet.h; sourceTree = "<group>"; };
+		BD53BD1B1F4936F400DBD1F2 /* MPSNet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MPSNet.m; sourceTree = "<group>"; };
+		BD53BD1D1F49378900DBD1F2 /* CPUNet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPUNet.h; sourceTree = "<group>"; };
+		BD53BD1E1F49378900DBD1F2 /* CPUNet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CPUNet.m; sourceTree = "<group>"; };
 		BD5887E31EE92F8E00BD47E6 /* pthreadpool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pthreadpool.h; sourceTree = "<group>"; };
 		BD5887EC1EE9388600BD47E6 /* Cholesky */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Cholesky; sourceTree = "<group>"; };
 		BD5887ED1EE9388600BD47E6 /* CholmodSupport */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CholmodSupport; sourceTree = "<group>"; };
@@ -519,16 +522,41 @@
 			name = headers;
 			sourceTree = "<group>";
 		};
-		BD5887E71EE9376700BD47E6 /* third_party */ = {
+		BD53BD201F4937F800DBD1F2 /* MPS */ = {
+			isa = PBXGroup;
+			children = (
+				BD87B77F1EA600A300DF731C /* SlimMPSCNN.h */,
+				BD87B7801EA600A300DF731C /* SlimMPSCNN.m */,
+				BD53BD1A1F4936F400DBD1F2 /* MPSNet.h */,
+				BD53BD1B1F4936F400DBD1F2 /* MPSNet.m */,
+				BD87B7811EA600A300DF731C /* Shaders.metal */,
+			);
+			name = MPS;
+			sourceTree = "<group>";
+		};
+		BD53BD211F49381000DBD1F2 /* CPU */ = {
+			isa = PBXGroup;
+			children = (
+				BDCE1C661ED3E928006BBD69 /* CPULayer.h */,
+				BDCE1C671ED3E928006BBD69 /* CPULayer.m */,
+				BD53BD1D1F49378900DBD1F2 /* CPUNet.h */,
+				BD53BD1E1F49378900DBD1F2 /* CPUNet.m */,
+				BD1FFDBE1EEFA95D00C5EB1B /* gemmHandler.h */,
+				BD1FFDBF1EEFA95D00C5EB1B /* gemmHandler.m */,
+			);
+			name = CPU;
+			sourceTree = "<group>";
+		};
+		BD5887E71EE9376700BD47E6 /* libs */ = {
 			isa = PBXGroup;
 			children = (
 				BD978D601EEAD8FB00303E31 /* NNPACK */,
 				BD5887EB1EE9388600BD47E6 /* Eigen */,
 			);
-			name = third_party;
+			name = libs;
 			sourceTree = "<group>";
 		};
-		BD5887E81EE9378500BD47E6 /* model */ = {
+		BD5887E81EE9378500BD47E6 /* models */ = {
 			isa = PBXGroup;
 			children = (
 				BD5F179B1EC332AE00A5578B /* alexnet.json */,
@@ -541,7 +569,7 @@
 				BD443BF01ED58B7F0039665A /* cpu_googlenet.dat */,
 				BD443BEF1ED58B7F0039665A /* cpu_squeezenet.dat */,
 			);
-			name = model;
+			name = models;
 			sourceTree = "<group>";
 		};
 		BD5887EB1EE9388600BD47E6 /* Eigen */ = {
@@ -1170,24 +1198,17 @@
 		BD87B7471EA6006C00DF731C /* GeneralNet */ = {
 			isa = PBXGroup;
 			children = (
+				BD5AE7C81EC77AFB00A2BD5F /* GlobalHeader.pch */,
 				BD87B74B1EA6006C00DF731C /* AppDelegate.h */,
 				BD87B74C1EA6006C00DF731C /* AppDelegate.m */,
 				BD87B77B1EA600A300DF731C /* ViewController.h */,
 				BD87B77C1EA600A300DF731C /* ViewController.m */,
 				BD53BD161F49336B00DBD1F2 /* GeneralNetProtocol.h */,
-				BD2190041EC1C66200DB2E29 /* GeneralNet.h */,
-				BD2190051EC1C66200DB2E29 /* GeneralNet.m */,
-				BD87B77F1EA600A300DF731C /* SlimMPSCNN.h */,
-				BD87B7801EA600A300DF731C /* SlimMPSCNN.m */,
-				BDCE1C661ED3E928006BBD69 /* CPULayer.h */,
-				BDCE1C671ED3E928006BBD69 /* CPULayer.m */,
-				BD1FFDBE1EEFA95D00C5EB1B /* gemmHandler.h */,
-				BD1FFDBF1EEFA95D00C5EB1B /* gemmHandler.m */,
-				BD87B7811EA600A300DF731C /* Shaders.metal */,
-				BD5887E71EE9376700BD47E6 /* third_party */,
-				BD5887E81EE9378500BD47E6 /* model */,
+				BD53BD201F4937F800DBD1F2 /* MPS */,
+				BD53BD211F49381000DBD1F2 /* CPU */,
+				BD5887E71EE9376700BD47E6 /* libs */,
+				BD5887E81EE9378500BD47E6 /* models */,
 				BD87B7511EA6006C00DF731C /* Main.storyboard */,
-				BD5AE7C81EC77AFB00A2BD5F /* GlobalHeader.pch */,
 				BD87B7541EA6006C00DF731C /* Assets.xcassets */,
 				BD87B7561EA6006C00DF731C /* LaunchScreen.storyboard */,
 				BD87B7591EA6006C00DF731C /* Info.plist */,
@@ -1443,14 +1464,15 @@
 			files = (
 				BD87B7851EA600A300DF731C /* Shaders.metal in Sources */,
 				BD87B7821EA600A300DF731C /* ViewController.m in Sources */,
+				BD53BD1F1F49378900DBD1F2 /* CPUNet.m in Sources */,
 				BD1FFDC01EEFA95D00C5EB1B /* gemmHandler.m in Sources */,
 				BD2391901F020AAF0015EB41 /* eigenGemm.cpp in Sources */,
 				BDE005A91F2CE022004048A3 /* nnpackAlgorithm.c in Sources */,
 				BD87B7841EA600A300DF731C /* SlimMPSCNN.m in Sources */,
-				BD2190061EC1C66200DB2E29 /* GeneralNet.m in Sources */,
 				BDF9B2351F28599000133506 /* nnpackGemm.c in Sources */,
 				BD2391841F02097F0015EB41 /* threadpool-pthreads.c in Sources */,
 				BD87B74D1EA6006C00DF731C /* AppDelegate.m in Sources */,
+				BD53BD1C1F4936F400DBD1F2 /* MPSNet.m in Sources */,
 				BDCE1C681ED3E928006BBD69 /* CPULayer.m in Sources */,
 				BD87B74A1EA6006C00DF731C /* main.m in Sources */,
 				BD8FD9D61F3D88720012F1D5 /* nnpackNoTransGemm.c in Sources */,
