@@ -20,6 +20,10 @@
     return self;
 }
 
+- (NSUInteger)hash {
+    return [_name hash];
+}
+
 - (void)forwardWithInput:(const float *)input
                   output:(float *)output {
     // subclass of CPULayer should overwrite this method

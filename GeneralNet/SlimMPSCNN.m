@@ -26,6 +26,10 @@
     return self;
 }
 
+- (NSUInteger)hash {
+    return [_name hash];
+}
+
 @end
 
 @implementation SlimMPSCNNConvolution

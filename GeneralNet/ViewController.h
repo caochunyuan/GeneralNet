@@ -15,9 +15,9 @@
 @property (weak, nonatomic) IBOutlet UILabel *predictLabel;
 @property (weak, nonatomic) IBOutlet UIImageView *predictView;
 
-@property (strong, nonatomic) GeneralNet *alexnet;
-@property (strong, nonatomic) GeneralNet *googlenet;
-@property (strong, nonatomic) GeneralNet *squeezenet;
+@property (strong, nonatomic) id <GeneralNetProtocol> alexnet;
+@property (strong, nonatomic) id <GeneralNetProtocol> googlenet;
+@property (strong, nonatomic) id <GeneralNetProtocol> squeezenet;
 
 @property (assign, nonatomic) NSInteger imageNum;
 @property (assign, nonatomic) NSInteger total;

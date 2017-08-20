@@ -25,19 +25,17 @@
     
     // Load the appropriate Network
 #if USE_METAL
-    _alexnet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"alexnet" ofType:@"json"]
-                                                  dataFile:[[NSBundle mainBundle] pathForResource:@"metal_alexnet" ofType:@"dat"]];
-    _googlenet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"googlenet" ofType:@"json"]
-                                                    dataFile:[[NSBundle mainBundle] pathForResource:@"metal_googlenet" ofType:@"dat"]];
-    _squeezenet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"squeezenet" ofType:@"json"]
-                                                     dataFile:[[NSBundle mainBundle] pathForResource:@"metal_squeezenet" ofType:@"dat"]];
+    _alexnet = [MPSNet netWithDescriptionFilename:@"alexnet" dataFilename:@"metal_alexnet"];
+
+    _googlenet = [MPSNet netWithDescriptionFilename:@"googlenet" dataFilename:@"metal_googlenet"];
+    
+    _squeezenet = [MPSNet netWithDescriptionFilename:@"squeezenet" dataFilename:@"metal_squeezenet"];
 #else
-    _alexnet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"alexnet" ofType:@"json"]
-                                                  dataFile:[[NSBundle mainBundle] pathForResource:@"cpu_alexnet" ofType:@"dat"]];
-    _googlenet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"googlenet" ofType:@"json"]
-                                                    dataFile:[[NSBundle mainBundle] pathForResource:@"cpu_googlenet" ofType:@"dat"]];
-    _squeezenet = [[GeneralNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:@"squeezenet" ofType:@"json"]
-                                                     dataFile:[[NSBundle mainBundle] pathForResource:@"cpu_squeezenet" ofType:@"dat"]];
+    _alexnet = [CPUNet netWithDescriptionFilename:@"alexnet" dataFilename:@"cpu_alexnet"];
+    
+    _googlenet = [CPUNet netWithDescriptionFilename:@"googlenet" dataFilename:@"cpu_googlenet"];
+    
+    _squeezenet = [CPUNet netWithDescriptionFilename:@"squeezenet" dataFilename:@"cpu_squeezenet"];
 #endif
     
     _predictView.image = [UIImage imageNamed:[[@"final" stringByAppendingString:@(_imageNum).stringValue] stringByAppendingString:@".jpg"]];
@@ -100,7 +98,7 @@
     [self runNet:_squeezenet];
 }
 
-- (void)runNet:(GeneralNet *)net {
+- (void)runNet:(id <GeneralNetProtocol>)net {
     NSDate *startTime = [NSDate date];
     int max_itr = 1;
     for (int i = 0; i < max_itr; i++) {

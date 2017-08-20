@@ -16,7 +16,13 @@
 
 static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
 
-@implementation GeneralNet
+@implementation MPSNet
+
++ (id <GeneralNetProtocol>)netWithDescriptionFilename:(NSString *)descriptionFilename
+                                         dataFilename:(NSString *)dataFilename {
+    return [[MPSNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:descriptionFilename ofType:@"json"]
+                                          dataFile:[[NSBundle mainBundle] pathForResource:dataFilename ofType:@"dat"]];
+}
 
 - (instancetype)initWithDescriptionFile:(NSString *)descriptionFile
                                dataFile:(NSString *)dataFile {
@@ -367,7 +373,13 @@ static const uint kTextureFormat = MPSImageFeatureChannelFormatFloat16;
 
 #import "CPULayer.h"
 
-@implementation GeneralNet
+@implementation CPUNet
+
++ (id <GeneralNetProtocol>)netWithDescriptionFilename:(NSString *)descriptionFilename
+                                         dataFilename:(NSString *)dataFilename {
+    return [[CPUNet alloc] initWithDescriptionFile:[[NSBundle mainBundle] pathForResource:descriptionFilename ofType:@"json"]
+                                          dataFile:[[NSBundle mainBundle] pathForResource:dataFilename ofType:@"dat"]];
+}
 
 - (instancetype)initWithDescriptionFile:(NSString *)descriptionFile
                                dataFile:(NSString *)dataFile {

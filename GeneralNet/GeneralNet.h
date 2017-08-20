@@ -13,8 +13,8 @@
 #pragma mark - protocol for both GPU and CPU implemention
 @protocol GeneralNetProtocol
 
-- (instancetype)initWithDescriptionFile:(NSString *)descriptionFile
-                               dataFile:(NSString *)dataFile;
++ (id <GeneralNetProtocol>)netWithDescriptionFilename:(NSString *)descriptionFilename
+                                         dataFilename:(NSString *)dataFilename;
 - (void)forwardWithImage:(UIImage *)image
               completion:(void (^)())completion;
 - (NSString *)labelsOfTopProbs;
@@ -29,7 +29,7 @@
 
 @class MPSLayer;
 
-@interface GeneralNet : NSObject <GeneralNetProtocol> {
+@interface MPSNet : NSObject <GeneralNetProtocol> {
 @protected
     
     float *m_BasePtr;
@@ -59,7 +59,7 @@
 
 @class CPULayer;
 
-@interface GeneralNet : NSObject <GeneralNetProtocol> {
+@interface CPUNet : NSObject <GeneralNetProtocol> {
 @protected
     
     float *m_BasePtr;
