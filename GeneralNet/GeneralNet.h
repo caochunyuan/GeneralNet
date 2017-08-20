@@ -8,18 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import <sys/mman.h>
-
-#pragma mark - protocol for both GPU and CPU implemention
-@protocol GeneralNetProtocol
-
-+ (id <GeneralNetProtocol>)netWithDescriptionFilename:(NSString *)descriptionFilename
-                                         dataFilename:(NSString *)dataFilename;
-- (void)forwardWithImage:(UIImage *)image
-              completion:(void (^)())completion;
-- (NSString *)labelsOfTopProbs;
-
-@end
+#import "GeneralNetProtocol.h"
 
 #pragma mark - if use Metal
 #if USE_METAL

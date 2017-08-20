@@ -109,6 +109,7 @@
 		BD443BEF1ED58B7F0039665A /* cpu_squeezenet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = cpu_squeezenet.dat; sourceTree = "<group>"; };
 		BD443BF01ED58B7F0039665A /* cpu_googlenet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = cpu_googlenet.dat; sourceTree = "<group>"; };
 		BD443BF11ED58B800039665A /* cpu_alexnet.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = cpu_alexnet.dat; sourceTree = "<group>"; };
+		BD53BD161F49336B00DBD1F2 /* GeneralNetProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneralNetProtocol.h; sourceTree = "<group>"; };
 		BD5887E31EE92F8E00BD47E6 /* pthreadpool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pthreadpool.h; sourceTree = "<group>"; };
 		BD5887EC1EE9388600BD47E6 /* Cholesky */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Cholesky; sourceTree = "<group>"; };
 		BD5887ED1EE9388600BD47E6 /* CholmodSupport */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CholmodSupport; sourceTree = "<group>"; };
@@ -1173,6 +1174,7 @@
 				BD87B74C1EA6006C00DF731C /* AppDelegate.m */,
 				BD87B77B1EA600A300DF731C /* ViewController.h */,
 				BD87B77C1EA600A300DF731C /* ViewController.m */,
+				BD53BD161F49336B00DBD1F2 /* GeneralNetProtocol.h */,
 				BD2190041EC1C66200DB2E29 /* GeneralNet.h */,
 				BD2190051EC1C66200DB2E29 /* GeneralNet.m */,
 				BD87B77F1EA600A300DF731C /* SlimMPSCNN.h */,

@@ -6,6 +6,7 @@
 //  Copyright © 2017年 Lun. All rights reserved.
 //
 
+#import <sys/mman.h>
 #import "GeneralNet.h"
 
 #pragma mark - if use Metal
