@@ -29,13 +29,15 @@
                   beta:(const float)beta
                      C:(float *)C {
 #if USE_NNPACK_FOR_GEMM
-//    nnpack_gemm(nnpackGemmAuto, nnpackNoTrans, nnpackNoTrans, M, N, K, 1, A, B, 1, C);
-    nnpack_no_trans_gemm(M, N, K, 1, A, B, 1, C);
+    if (transA == gemmNoTrans && transB == gemmNoTrans) {
+        nnpack_no_trans_gemm(M, N, K, 1, A, B, 1, C);
+    } else {
+        nnpack_gemm(nnpackGemmAuto, transA == gemmTrans? nnpackTrans : nnpackNoTrans, transB == gemmTrans? nnpackTrans : nnpackNoTrans, M, N, K, 1, A, B, 1, C);
+    }
 #elif USE_EIGEN_FOR_GEMM
-    [eigenGemmWrapper gemmWithTransA:NO transB:NO M:M N:N K:K alpha:1 A:A B:B beta:1 C:C];
+    [eigenGemmWrapper gemmWithTransA:transA == gemmTrans transB:transB == gemmTrans M:M N:N K:K alpha:1 A:A B:B beta:1 C:C];
 #else
-    cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, 1,
-                A, K, B, N, 1, C, N);
+    cblas_sgemm(CblasRowMajor, transA == gemmTrans? CblasTrans : CblasNoTrans, transB == gemmTrans? CblasTrans : CblasNoTrans, M, N, K, 1, A, K, B, N, 1, C, N);
 #endif
 }
 
